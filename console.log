@@ -1,0 +1,26 @@
+[INFO]	CCE engine (ver. 0.0.1) is starting. . .
+[INFO]	System memory usage:
+	  UNKNOWN          : 0.00 B
+	  ARRAY            : 0.00 B
+	  DYNAMIC ARRAY    : 40.00 B
+	  LINEAR ALLOCATOR : 16.00 MiB
+	  STRING           : 0.00 B
+	  ENGINE           : 136.00 B
+	  APPLICATION      : 4.00 B
+	  ------------------------------
+	  TOTAL            : 16.00 MiB
+	                    (64.00 MiB reserved)
+[DEBUG]	BITBOARD:  578712835584952320
+
+	8   00000000
+	7   00010000
+	6   00000000
+	5   00000000
+	4   01000010
+	3   00000000
+	2   00010000
+	1   00010000
+
+	    ABCDEFGH
+
+[INFO]	engine_on_event: EVENT_CODE_APPLICATION_QUIT received, shutting down.
