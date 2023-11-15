@@ -188,6 +188,7 @@ engine_run
     // Print memory usage information.
     char* stat = memory_stat ();
     LOGINFO ( stat );
+    string_free ( stat );
 
     while ( ( *state ).running )
     {

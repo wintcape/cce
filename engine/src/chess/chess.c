@@ -16,9 +16,6 @@ typedef struct
     bitboard_t  pawn_attacks[ 2 ][ 64 ];
     bitboard_t  knight_attacks[ 64 ];
     bitboard_t  king_attacks[ 64 ];
-
-    // Cache for a bitboard string representation.
-    char        bitboard_string[ BITBOARD_STRING_MAX_LENGTH ];
 }
 state_t;
 
@@ -65,6 +62,14 @@ chess_shutdown
     state = 0;
 }
 
+/*  TEMPORARY  */
+
+#define prntbb(bb)                      \
+    ({ char* s = string_bitboard (bb);  \
+       LOGTRACE ( s );                  \
+       string_free ( s );               \
+     })
+
 void
 chess_run_tests
 ( void )
@@ -80,7 +85,14 @@ chess_run_tests
     blk = bitset ( blk , D1 );
     blk = bitset ( blk , B4 );
     blk = bitset ( blk , G4 );
-    LOGINFO ( "%s\n" , string_bitboard ( blk , ( *state ).bitboard_string ) );
-    
 
+    bitboard_t attacks = bitboard_mask_rook_attack ( A1 );
+    
+    for ( u32 i = 0; i < 4097; ++i )
+    {
+        bitboard_t occupancy = bitboard_mask_attack_with_occupancy ( i , attacks );
+        LOGINFO ( "OCCUPY INDEX: %d" , i );
+        prntbb ( occupancy );
+        
+    }
 }

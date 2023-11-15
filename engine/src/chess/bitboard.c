@@ -8,6 +8,9 @@
 
 #include "core/string.h"
 
+// Defaults.
+#define BITBOARD_STRING_MAX_LENGTH 256
+
 // Defines a string representation of each board square.
 static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8" , "F8" , "G8" , "H8"
                                               , "A7" , "B7" , "C7" , "D7" , "E7" , "F7" , "G7" , "H7"
@@ -26,19 +29,15 @@ bitboard_mask_attack_with_occupancy
 )
 {
     bitboard_t occupancy = 0;
-
     for ( u8 i = 0; i < bitboard_count ( mask ); ++i )
     {
         SQUARE square = bitboard_lsb_indx ( mask );
-
-        if ( occupied & ( BITBOARD_1 << i ) )
+        if ( occupied & bitset ( 0 , i ) )
         {
-            occupancy |= ( BITBOARD_1 << square );
+            occupancy = bitset ( occupancy , square );
         }
-        
         mask = bitpop ( mask , square );
     }
-
     return occupancy;
 }
 
@@ -63,8 +62,7 @@ bitboard_mask_pawn_attack
         if ( ( bitboard >> 9 ) & BITBOARD_MASK_FILE_H )
         {
             attacks |= ( bitboard >> 9 );
-        }
-        
+        } 
     }
     else
     {
@@ -130,8 +128,42 @@ bitboard_mask_knight_attack
 
 bitboard_t
 bitboard_mask_bishop_attack
+(   const SQUARE square
+)
+{
+    bitboard_t attacks = 0; 
+
+    // Target rank and file.
+    const i8 r_target = square / 8;
+    const i8 f_target = square % 8;
+    
+    // Set attack options.
+    i8 r;
+    i8 f;
+    for ( r = r_target + 1 , f = f_target + 1; r <= 6 && f <= 6; ++r , ++f )
+    {
+        attacks = bitset ( attacks , r * 8 + f );
+    }
+    for ( r = r_target - 1 , f = f_target + 1; r >= 1 && f <= 6; --r , ++f )
+    {
+        attacks = bitset ( attacks , r * 8 + f );
+    }
+    for ( r = r_target + 1 , f = f_target - 1; r <= 6 && f >= 1; ++r , --f )
+    {
+        attacks = bitset ( attacks , r * 8 + f );
+    }
+    for ( r = r_target - 1 , f = f_target - 1; r >= 1 && f >= 1; --r , --f )
+    {
+        attacks = bitset ( attacks , r * 8 + f );
+    }
+
+    return attacks;
+}
+
+bitboard_t
+bitboard_mask_bishop_attack_with_block_mask
 (   const SQUARE        square
-,   const bitboard_t    block
+,   const bitboard_t    mask
 )
 {
     bitboard_t attacks = 0; 
@@ -145,32 +177,32 @@ bitboard_mask_bishop_attack
     i8 f;
     for ( r = r_target + 1 , f = f_target + 1; r <= 7 && f <= 7; ++r , ++f )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f );
+        if ( bitset ( 0 , r * 8 + f ) & mask )
         {
             break;
         }
     }
     for ( r = r_target - 1 , f = f_target + 1; r >= 0 && f <= 7; --r , ++f )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f );
+        if ( bitset ( 0 , r * 8 + f ) & mask )
         {
             break;
         }
     }
     for ( r = r_target + 1 , f = f_target - 1; r <= 7 && f >= 0; ++r , --f )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f );
+        if ( bitset ( 0 , r * 8 + f ) & mask )
         {
             break;
         }
     }
     for ( r = r_target - 1 , f = f_target - 1; r >= 0 && f >= 0; --r , --f )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f );
+        if ( bitset ( 0 , r * 8 + f ) & mask )
         {
             break;
         }
@@ -181,8 +213,42 @@ bitboard_mask_bishop_attack
 
 bitboard_t
 bitboard_mask_rook_attack
+(   const SQUARE square
+)
+{
+    bitboard_t attacks = 0;
+
+    // Target rank and file.
+    const i8 r_target = square / 8;
+    const i8 f_target = square % 8;
+    
+    // Set attack options.
+    i8 r;
+    i8 f;
+    for ( r = r_target + 1; r <= 6; ++r )
+    {
+        attacks = bitset ( attacks , r * 8 + f_target );
+    }
+    for ( r = r_target - 1; r >= 1; --r )
+    {
+        attacks = bitset ( attacks , r * 8 + f_target );
+    }
+    for ( f = f_target + 1; f <= 6; ++f )
+    {
+        attacks = bitset ( attacks , r_target * 8 + f );
+    }
+    for ( f = f_target - 1; f >= 1; --f )
+    {
+        attacks = bitset ( attacks , r_target * 8 + f );
+    }
+
+    return attacks;
+}
+
+bitboard_t
+bitboard_mask_rook_attack_with_block_mask
 (   const SQUARE        square
-,   const bitboard_t    block
+,   const bitboard_t    mask
 )
 {
     bitboard_t attacks = 0; 
@@ -196,32 +262,32 @@ bitboard_mask_rook_attack
     i8 f;
     for ( r = r_target + 1; r <= 7; ++r )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f_target ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f_target ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f_target );
+        if ( bitset ( 0 , r * 8 + f_target ) & mask )
         {
             break;
         }
     }
     for ( r = r_target - 1; r >= 0; --r )
     {
-        attacks |= ( BITBOARD_1 << ( r * 8 + f_target ) );
-        if ( ( BITBOARD_1 << ( r * 8 + f_target ) ) & block )
+        attacks = bitset ( attacks , r * 8 + f_target );
+        if ( bitset ( 0 , r * 8 + f_target ) & mask )
         {
             break;
         }
     }
     for ( f = f_target + 1; f <= 7; ++f )
     {
-        attacks |= ( BITBOARD_1 << ( r_target * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r_target * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r_target * 8 + f );
+        if ( bitset ( 0 , r_target * 8 + f ) & mask )
         {
             break;
         }
     }
     for ( f = f_target - 1; f >= 0; --f )
     {
-        attacks |= ( BITBOARD_1 << ( r_target * 8 + f ) );
-        if ( ( BITBOARD_1 << ( r_target * 8 + f ) ) & block )
+        attacks = bitset ( attacks , r_target * 8 + f );
+        if ( bitset ( 0 , r_target * 8 + f ) & mask )
         {
             break;
         }
@@ -279,11 +345,12 @@ bitboard_mask_king_attack
 
 char*
 string_bitboard
-(   const bitboard_t    bitboard
-,   char*               string
+(   const bitboard_t bitboard
 )
 {
-    u64 offs = string_format ( string
+    char buf[ BITBOARD_STRING_MAX_LENGTH ];
+
+    u64 offs = string_format ( buf
                              , "BITBOARD:  %llu\n"
                              , bitboard
                              );
@@ -293,7 +360,7 @@ string_bitboard
 
     while ( r < 8 )
     {
-        offs += string_format ( string + offs
+        offs += string_format ( buf + offs
                               , "\n\t"
                               );
         while ( f < 8 )
@@ -302,13 +369,13 @@ string_bitboard
             
             if ( !f )
             {
-                offs += string_format ( string + offs
+                offs += string_format ( buf + offs
                                       , "%u   "
                                       , 8 - r
                                       );
             }
 
-            offs += string_format ( string + offs
+            offs += string_format ( buf + offs
                                   , "%u"
                                   , bit ( bitboard , square )
                                   );
@@ -320,21 +387,21 @@ string_bitboard
         r += 1;
     }
     
-    offs += string_format ( string + offs
+    offs += string_format ( buf + offs
                           , "\n\n\t    "
                           );
 
     r = 0;
     while ( r < 8 )
     {
-        offs += string_format ( string + offs
+        offs += string_format ( buf + offs
                           , "%c"
                           , 'A' + r
                           );
         r += 1;
     }
 
-    return string;
+    return string_allocate_from ( buf );
 }
 
 const char*

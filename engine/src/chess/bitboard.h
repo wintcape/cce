@@ -11,14 +11,10 @@
 #include "chess/piece.h"
 #include "chess/square.h"
 
-// Defaults.
-#define BITBOARD_STRING_MAX_LENGTH 256
-
 // Type definition for a bitboard.
 typedef u64 bitboard_t;
 
 // Preprocessor bindings for typesafe bitboard literals.
-#define BITBOARD_1              ( ( bitboard_t ) 1 )
 #define BITBOARD_MASK_FILE_A    ( ( bitboard_t ) 18374403900871474942ULL )
 #define BITBOARD_MASK_FILE_H    ( ( bitboard_t ) 9187201950435737471ULL )
 #define BITBOARD_MASK_FILE_AB   ( ( bitboard_t ) 18229723555195321596ULL )
@@ -65,7 +61,7 @@ bitboard_lsb_indx
 /**
  * @brief Given an attack mask, this function generates a new attack mask which
  * takes into account an occupied square.
- * @param occupied The occupied square.
+ * @param occupied A magic number for calculating occupied square.
  * @param mask Attack bitboard mask.
  */
 bitboard_t
@@ -99,12 +95,23 @@ bitboard_mask_knight_attack
 /**
  * @brief Generates the attack options for a single bishop.
  * @param square The bishop's position.
+ * @return A bitboard with the bishop's attack options set.
+ */
+bitboard_t
+bitboard_mask_bishop_attack
+(   const SQUARE square
+);
+
+/**
+ * @brief Variation of bitboard_mask_bishop_attack which accepts a block mask
+ * parameter.
+ * @param square The bishop's position.
  * @param block A mask to optionally block the bishop in the specified
  * direction(s).
  * @return A bitboard with the bishop's attack options set.
  */
 bitboard_t
-bitboard_mask_bishop_attack
+bitboard_mask_bishop_attack_with_block_mask
 (   const SQUARE        square
 ,   const bitboard_t    block
 );
@@ -112,14 +119,25 @@ bitboard_mask_bishop_attack
 /**
  * @brief Generates the attack options for a single rook.
  * @param square The rook's position.
- * @param block A mask to optionally block the rook in the specified
- * direction(s).
  * @return A bitboard with the rook's attack options set.
  */
 bitboard_t
 bitboard_mask_rook_attack
+(   const SQUARE square
+);
+
+/**
+ * @brief Variation of bitboard_mask_rook_attack which accepts a block mask
+ * parameter.
+ * @param square The rook's position.
+ * @param mask A mask to optionally block the rook in the specified
+ * direction(s).
+ * @return A bitboard with the rook's attack options set.
+ */
+bitboard_t
+bitboard_mask_rook_attack_with_block_mask
 (   const SQUARE        square
-,   const bitboard_t    block
+,   const bitboard_t    mask
 );
 
 /**
@@ -133,16 +151,14 @@ bitboard_mask_king_attack
 );
 
 /**
- * @brief Stringify utility. Writes a string representation of a bitboard to
- * the provided buffer.
+ * @brief Stringify utility.
  * @param bitboard A bitboard.
- * @param string A buffer to write the string to.
- * @return string.
+ * @return A string representation of bitboard, or 0 if chess subsystem is
+ * uninitialized.
  */
 char*
 string_bitboard
-(   const bitboard_t    bitboard
-,   char*               string
+(   const bitboard_t bitboard
 );
 
 #endif  // CHESS_BITBOARD_H

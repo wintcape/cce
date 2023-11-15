@@ -34,9 +34,6 @@ typedef struct
 
     u64     allocated;
     u64     tagged_allocations[ MEMORY_TAG_COUNT ];
-
-    char    string[ MEMORY_STAT_STRING_MAX_LENGTH ];
-    u64     string_length;
 }
 stat_t;
 
@@ -260,23 +257,21 @@ char*
 memory_stat
 ( void )
 {
-    if ( !state )
-    {
-        return 0;
-    }
+    char buf[ MEMORY_STAT_STRING_MAX_LENGTH ];
+
+    u64 offs = string_format ( buf
+                             , "System memory usage:\n"
+                             );
 
     const char* unit;
     f32 amt;
-    u64 offs = string_format ( ( *state ).stat.string
-                             , "System memory usage:\n"
-                             );
 
     for ( u32 i = 0; i < MEMORY_TAG_COUNT; ++i )
     {
         unit = string_bytesize ( ( *state ).stat.tagged_allocations[ i ]
                                , &amt
                                );
-        offs += string_format ( ( *state ).stat.string + offs
+        offs += string_format ( buf + offs
                               , "\t  %s: %.2f %s\n"
                               , memory_tags[ i ] , amt , unit
                               );
@@ -285,7 +280,7 @@ memory_stat
     unit = string_bytesize ( ( *state ).stat.allocated
                            , &amt
                            );
-    offs += string_format ( ( *state ).stat.string + offs
+    offs += string_format ( buf + offs
                           , "\t  ------------------------------\n"
                             "\t  TOTAL            : %.2f %s\n"
                           , amt , unit
@@ -293,13 +288,12 @@ memory_stat
     unit = string_bytesize ( ( *state ).cap
                            , &amt
                            );
-    offs += string_format ( ( *state ).stat.string + offs
+    offs += string_format ( buf + offs
                           , "\t                    (%.2f %s reserved)"
                           , amt , unit
                           );
    
-    ( *state ).stat.string_length = offs;
-    return ( *state ).stat.string;
+    return string_allocate_from ( buf );
 }
 
 u64

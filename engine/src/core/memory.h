@@ -135,7 +135,7 @@ memory_copy
 );
 
 /**
- * @brief Generates a string representation of memory usage statistics.
+ * @brief Stringify utility. Uses memory allocator; call string_free to free.
  * @return A string representation of memory usage statistics.
  */
 char*
