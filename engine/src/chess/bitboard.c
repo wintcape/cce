@@ -22,6 +22,26 @@ static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8"
                                               , "A1" , "B1" , "C1" , "D1" , "E1" , "F1" , "G1" , "H1"
                                               };
 
+// Defines relevant occupancy bit count for each board square.
+static const u8 bishop_relevant_bits[ 64 ] = { 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
+                                             , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
+                                             , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
+                                             , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
+                                             , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
+                                             , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
+                                             , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
+                                             , 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
+                                             };
+static const u8 rook_relevant_bits[ 64 ] = { 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                           , 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
+                                           };
+
 bitboard_t
 bitboard_mask_attack_with_occupancy
 (   const bitboard_t    occupied
@@ -29,8 +49,8 @@ bitboard_mask_attack_with_occupancy
 )
 {
     bitboard_t occupancy = 0; 
-    const u8 bits_remaining = bitboard_count ( mask );
-    for ( u8 i = 0; i < bits_remaining; ++i )
+    const u8 n = bitboard_count ( mask );
+    for ( u8 i = 0; i < n; ++i )
     {
         SQUARE square = bitboard_lsb_indx ( mask );
         if ( occupied & bitset ( 0 , i ) )
@@ -143,19 +163,19 @@ bitboard_mask_bishop_attack
     i8 f;
     for ( r = r_target + 1 , f = f_target + 1; r <= 6 && f <= 6; ++r , ++f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target - 1 , f = f_target + 1; r >= 1 && f <= 6; --r , ++f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target + 1 , f = f_target - 1; r <= 6 && f >= 1; ++r , --f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target - 1 , f = f_target - 1; r >= 1 && f >= 1; --r , --f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
     }
 
     return attacks;
@@ -178,8 +198,8 @@ bitboard_mask_bishop_attack_with_block_mask
     i8 f;
     for ( r = r_target + 1 , f = f_target + 1; r <= 7 && f <= 7; ++r , ++f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
-        if ( bitset ( 0 , r * 8 + f ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
         {
             break;
         }
@@ -187,23 +207,23 @@ bitboard_mask_bishop_attack_with_block_mask
     for ( r = r_target - 1 , f = f_target + 1; r >= 0 && f <= 7; --r , ++f )
     {
         attacks = bitset ( attacks , r * 8 + f );
-        if ( bitset ( 0 , r * 8 + f ) & mask )
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
         {
             break;
         }
     }
     for ( r = r_target + 1 , f = f_target - 1; r <= 7 && f >= 0; ++r , --f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
-        if ( bitset ( 0 , r * 8 + f ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
         {
             break;
         }
     }
     for ( r = r_target - 1 , f = f_target - 1; r >= 0 && f >= 0; --r , --f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
-        if ( bitset ( 0 , r * 8 + f ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
         {
             break;
         }
@@ -228,19 +248,19 @@ bitboard_mask_rook_attack
     i8 f;
     for ( r = r_target + 1; r <= 6; ++r )
     {
-        attacks = bitset ( attacks , r * 8 + f_target );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
     }
     for ( r = r_target - 1; r >= 1; --r )
     {
-        attacks = bitset ( attacks , r * 8 + f_target );
+        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
     }
     for ( f = f_target + 1; f <= 6; ++f )
     {
-        attacks = bitset ( attacks , r_target * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
     }
     for ( f = f_target - 1; f >= 1; --f )
     {
-        attacks = bitset ( attacks , r_target * 8 + f );
+        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
     }
 
     return attacks;
@@ -263,32 +283,32 @@ bitboard_mask_rook_attack_with_block_mask
     i8 f;
     for ( r = r_target + 1; r <= 7; ++r )
     {
-        attacks = bitset ( attacks , r * 8 + f_target );
-        if ( bitset ( 0 , r * 8 + f_target ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & mask )
         {
             break;
         }
     }
     for ( r = r_target - 1; r >= 0; --r )
     {
-        attacks = bitset ( attacks , r * 8 + f_target );
-        if ( bitset ( 0 , r * 8 + f_target ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & mask )
         {
             break;
         }
     }
     for ( f = f_target + 1; f <= 7; ++f )
     {
-        attacks = bitset ( attacks , r_target * 8 + f );
-        if ( bitset ( 0 , r_target * 8 + f ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & mask )
         {
             break;
         }
     }
     for ( f = f_target - 1; f >= 0; --f )
     {
-        attacks = bitset ( attacks , r_target * 8 + f );
-        if ( bitset ( 0 , r_target * 8 + f ) & mask )
+        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & mask )
         {
             break;
         }
@@ -366,8 +386,6 @@ string_bitboard
                               );
         while ( f < 8 )
         {
-            u8 square = r * 8 + f;
-            
             if ( !f )
             {
                 offs += string_format ( buf + offs
@@ -378,7 +396,7 @@ string_bitboard
 
             offs += string_format ( buf + offs
                                   , "%u"
-                                  , bit ( bitboard , square )
+                                  , bit ( bitboard , SQUAREINDX ( r , f ) )
                                   );
             
             f += 1;

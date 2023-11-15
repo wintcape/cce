@@ -121,6 +121,17 @@ random2
     return ( rand () % ( max - min + 1 ) ) + min;
 }
 
+i64
+random64
+( void )
+{
+    const u64 a = _random () & 0xFFFF;
+    const u64 b = _random () & 0xFFFF;
+    const u64 c = _random () & 0xFFFF;
+    const u64 d = _random () & 0xFFFF;
+    return a | ( b << 16 ) | ( c << 32 ) | ( d << 48 );
+}
+
 f32
 randomf
 ( void )

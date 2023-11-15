@@ -9,6 +9,8 @@
 #include "core/logger.h"
 #include "core/string.h"
 
+#include "math/math.h"
+
 // Type definition for chess engine subsystem state.
 typedef struct
 {
@@ -78,16 +80,17 @@ chess_run_tests
     {
         return;
     }
-
-    bitboard_t blk = 0;
-    blk = bitset ( blk , D7 );
-    blk = bitset ( blk , D2 );
-    blk = bitset ( blk , D1 );
-    blk = bitset ( blk , B4 );
-    blk = bitset ( blk , G4 );
-
-    bitboard_t attacks = bitboard_mask_rook_attack ( A1 );
-    bitboard_t occupancy = bitboard_mask_attack_with_occupancy ( 4095 , attacks );
-    prntbb ( attacks );
-    prntbb ( occupancy );
+    
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
+    prntbb ( random64 () );
 }

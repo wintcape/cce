@@ -33,6 +33,16 @@ random2
 );
 
 /**
+ * Generates a random 64-bit integer.
+ * @param l lower bound (inclusive)
+ * @param u upper bound (inclusive)
+ * @return A random 64-bit integer.
+ */
+i64
+random64
+( void );
+
+/**
  * Generates a random floating point number.
  * @return A random floating point number.
  */

@@ -4,7 +4,7 @@ CC ?= gcc
 POST := ./post-build
 TEST := test
 
-CFLAGS := -g -O2 -W -Wvarargs -Wall -Werror -Wno-unused-parameter -Wno-missing-field-initializers -Werror=vla
+CFLAGS := -g -O2 -W -Wvarargs -Wall -Werror -Wno-unused-const-variable -Wno-unused-parameter -Wno-missing-field-initializers -Werror=vla
 OBJFLAGS := $(CFLAGS) -c
 LDFLAGS := -lvulkan -lX11 -lX11-xcb -lxcb -lm
 INCFLAGS := -Iinc -Iengine/src -Itest/src

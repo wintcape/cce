@@ -8,6 +8,9 @@
 
 #include "common.h"
 
+// Preprocessor binding for a square index given a rank and file.
+#define SQUAREINDX(r,f) ( 8 * (r) + (f) )
+
 // Type definition for board square coordinate.
 typedef enum
 {
