@@ -28,15 +28,16 @@ bitboard_mask_attack_with_occupancy
 ,   bitboard_t          mask
 )
 {
-    bitboard_t occupancy = 0;
-    for ( u8 i = 0; i < bitboard_count ( mask ); ++i )
+    bitboard_t occupancy = 0; 
+    const u8 bits_remaining = bitboard_count ( mask );
+    for ( u8 i = 0; i < bits_remaining; ++i )
     {
         SQUARE square = bitboard_lsb_indx ( mask );
         if ( occupied & bitset ( 0 , i ) )
         {
             occupancy = bitset ( occupancy , square );
         }
-        mask = bitpop ( mask , square );
+        mask = bitclr ( mask , square );
     }
     return occupancy;
 }

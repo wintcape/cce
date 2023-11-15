@@ -87,12 +87,7 @@ chess_run_tests
     blk = bitset ( blk , G4 );
 
     bitboard_t attacks = bitboard_mask_rook_attack ( A1 );
-    
-    for ( u32 i = 0; i < 4097; ++i )
-    {
-        bitboard_t occupancy = bitboard_mask_attack_with_occupancy ( i , attacks );
-        LOGINFO ( "OCCUPY INDEX: %d" , i );
-        prntbb ( occupancy );
-        
-    }
+    bitboard_t occupancy = bitboard_mask_attack_with_occupancy ( 4095 , attacks );
+    prntbb ( attacks );
+    prntbb ( occupancy );
 }
