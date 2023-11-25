@@ -13,16 +13,16 @@
 // Internal preprocessor bindings.
 // (Use inline functions instead for type safety)
 #define U64_1       ( ( u64 ) 1 )
-#define BIT(x,n)    (( (x) >> (n) ) & U64_1 )
-#define BITSET(x,n) ( (x) | ( U64_1 << (n) ) )
-#define BITCLR(x,n) ( (x) & ~( U64_1 << (n) )) 
-#define BITSWP(x,n) ( (x) ^ ( U64_1 << (n) ) )
+#define BIT(x,n)    (( ( ( u64 )(x) ) >> (n) ) & U64_1 )
+#define BITSET(x,n) ( (x) |= ( U64_1 << (n) ) )
+#define BITCLR(x,n) ( (x) &= ~( U64_1 << (n) ))
+#define BITSWP(x,n) ( (x) ^= ( U64_1 << (n) ) )
 
 /**
  * @brief Reads a bit from a bit vector.
  * @param x A bit vector.
  * @param n The bit to read.
- * @return true if bit n of x set, false otherwise.
+ * @return true if bit n of x set, false otherwise.`
  */
 INLINE
 bool
@@ -43,7 +43,7 @@ bit
 INLINE
 u64
 bitset
-(   const u64   x
+(   u64         x
 ,   const u8    n
 )
 {
@@ -59,7 +59,7 @@ bitset
 INLINE
 u64
 bitclr
-(   const u64   x
+(   u64         x
 ,   const u8    n
 )
 {
@@ -75,29 +75,11 @@ bitclr
 INLINE
 u64
 bitswp
-(   const u64   x
+(   u64         x
 ,   const u8    n
 )
 {
     return BITSWP ( x , n );
-}
-
-/**
- * @brief Pops a bit within a bit vector.
- * @param x A bit vector.
- * @param n The bit to pop.
- * @return x with bit n toggled, or 0.
- */
-INLINE
-u64
-bitpop
-(   const u64   x
-,   const u8    n
-)
-{
-    return BIT ( x , n ) ? BITSWP ( x , n )
-                         : 0
-                         ;
 }
 
 #endif  // BITOPS_H

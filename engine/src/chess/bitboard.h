@@ -8,6 +8,7 @@
 
 #include "common.h"
 
+#include "chess/castle.h"
 #include "chess/piece.h"
 #include "chess/square.h"
 
@@ -60,14 +61,17 @@ bitboard_lsb_indx
 
 /**
  * @brief Given an attack mask, this function generates a new attack mask which
- * takes into account an occupied square.
- * @param occupied A magic number for calculating occupied square.
- * @param mask Attack bitboard mask.
+ * takes into account an occupancy parameter.
+ * @param occupancy Used for calculating occupied square.
+ * @param attack Attack bitboard mask.
+ * @param attack_relevant_count Number of attack mask bits to consider.
+ * @return A bitboard with the attack options masked by the occupancy.
  */
 bitboard_t
 bitboard_mask_attack_with_occupancy
-(   const bitboard_t    occupied
-,   bitboard_t          mask
+(   const int   occupancy
+,   bitboard_t  attack
+,   const u8    attack_relevant_count
 );
 
 /**
@@ -111,7 +115,7 @@ bitboard_mask_bishop_attack
  * @return A bitboard with the bishop's attack options set.
  */
 bitboard_t
-bitboard_mask_bishop_attack_with_block_mask
+bitboard_mask_bishop_attack_with_block
 (   const SQUARE        square
 ,   const bitboard_t    block
 );
@@ -130,14 +134,14 @@ bitboard_mask_rook_attack
  * @brief Variation of bitboard_mask_rook_attack which accepts a block mask
  * parameter.
  * @param square The rook's position.
- * @param mask A mask to optionally block the rook in the specified
+ * @param block A mask to optionally block the rook in the specified
  * direction(s).
  * @return A bitboard with the rook's attack options set.
  */
 bitboard_t
-bitboard_mask_rook_attack_with_block_mask
+bitboard_mask_rook_attack_with_block
 (   const SQUARE        square
-,   const bitboard_t    mask
+,   const bitboard_t    block 
 );
 
 /**

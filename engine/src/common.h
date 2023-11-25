@@ -7,6 +7,7 @@
 #define COMMON_H
 
 #include "common/align.h"
+#include "common/ascii.h"
 #include "common/bitops.h"
 #include "common/id.h"
 #include "common/inline.h"

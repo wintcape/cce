@@ -182,8 +182,6 @@ engine_run
     clock_update ( &( *state ).clock );
     ( *state ).system_time = ( *state ).clock.elapsed;
     f64 runtime = 0;
-    u8 frame = 0;
-    f64 target_fps = 1.0f / 60.0f;
 
     // Print memory usage information.
     char* stat = memory_stat ();
@@ -217,23 +215,11 @@ engine_run
             f64 t_end = platform_get_absolute_time ();
             f64 t_elapsed = t_end - t_start;
             runtime += t_elapsed;
-            
-            // If there is time remaining (based on target_fps), hand over
-            // control to the OS.
-            f64 t_rem = target_fps - t_elapsed;
-            if ( t_rem > 0 )
-            {
-                u64 t_rem_ms = t_rem * 1000;
-                bool limit_fps = false;
-                if ( t_rem_ms && limit_fps )
-                {
-                    platform_sleep ( t_rem_ms - 1 );
-                }
-                frame += 1;
-            }
 
             // Update system time again.
             ( *state ).system_time = t;
+
+            LOGDEBUG ( "Application update complete.\n\tTook %f seconds." , t_elapsed );            
         }
     }
     ( *state ).running = false;// Failsafe.

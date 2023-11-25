@@ -6,9 +6,9 @@
 #ifndef CHESS_H
 #define CHESS_H
 
-#include "chess/bitboard.h"
-#include "chess/piece.h"
-#include "chess/square.h"
+#include "chess/board.h"
+#include "chess/fen.h"
+#include "chess/magic.h"
 
 /**
  * @brief Initializes the chess engine subsystem. Call once to read the memory
@@ -31,6 +31,15 @@ void
 chess_shutdown
 (   void* state
 );
+
+/**
+ * @brief Displays the current chess board using the logging subsystem.
+ */
+void
+chess_display
+( void );
+
+/*  TEMPORARY  */
 
 /**
  * @brief Temporary test function. 

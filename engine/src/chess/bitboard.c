@@ -1,6 +1,6 @@
 /**
  * @author Matthew Weissel (null@mattweissel.info)
- * @f bitboard.c
+ * @file bitboard.c
  * @brief Implementation of the bitboard header.
  * (see bitboard.h for additional details)
  */
@@ -11,55 +11,24 @@
 // Defaults.
 #define BITBOARD_STRING_MAX_LENGTH 256
 
-// Defines a string representation of each board square.
-static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8" , "F8" , "G8" , "H8"
-                                              , "A7" , "B7" , "C7" , "D7" , "E7" , "F7" , "G7" , "H7"
-                                              , "A6" , "B6" , "C6" , "D6" , "E6" , "F6" , "G6" , "H6"
-                                              , "A5" , "B5" , "C5" , "D5" , "E5" , "F5" , "G5" , "H5"
-                                              , "A4" , "B4" , "C4" , "D4" , "E4" , "F4" , "G4" , "H4"
-                                              , "A3" , "B3" , "C3" , "D3" , "E3" , "F3" , "G3" , "H3"
-                                              , "A2" , "B2" , "C2" , "D2" , "E2" , "F2" , "G2" , "H2"
-                                              , "A1" , "B1" , "C1" , "D1" , "E1" , "F1" , "G1" , "H1"
-                                              };
-
-// Defines relevant occupancy bit count for each board square.
-static const u8 bishop_relevant_bits[ 64 ] = { 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
-                                             , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
-                                             , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
-                                             , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
-                                             , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
-                                             , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
-                                             , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
-                                             , 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
-                                             };
-static const u8 rook_relevant_bits[ 64 ] = { 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                           , 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
-                                           };
-
 bitboard_t
 bitboard_mask_attack_with_occupancy
-(   const bitboard_t    occupied
-,   bitboard_t          mask
+(   const int   occupancy
+,   bitboard_t  attack 
+,   const u8    attack_relevant_count
 )
 {
-    bitboard_t occupancy = 0; 
-    const u8 n = bitboard_count ( mask );
-    for ( u8 i = 0; i < n; ++i )
+    bitboard_t mask = 0;
+    for ( u8 i = 0; i < attack_relevant_count; ++i )
     {
-        SQUARE square = bitboard_lsb_indx ( mask );
-        if ( occupied & bitset ( 0 , i ) )
+        SQUARE square = bitboard_lsb_indx ( attack );
+        if ( occupancy & ( 1 << i ) )
         {
-            occupancy = bitset ( occupancy , square );
+            BITSET ( mask , square );
         }
-        mask = bitclr ( mask , square );
+        BITCLR ( attack , square );
     }
-    return occupancy;
+    return mask;
 }
 
 bitboard_t
@@ -68,36 +37,36 @@ bitboard_mask_pawn_attack
 ,   const SQUARE    square
 )
 {
-    bitboard_t attacks = 0;
+    bitboard_t mask = 0;
     
     // Set the piece.
-    bitboard_t bitboard = bitset ( 0 , square );
+    bitboard_t b = bitset ( 0 , square );
 
     // Set attack options.
     if ( side == WHITE )
     {
-        if ( ( bitboard >> 7 ) & BITBOARD_MASK_FILE_A )
+        if ( ( b >> 7 ) & BITBOARD_MASK_FILE_A )
         {
-            attacks |= ( bitboard >> 7 );
+            mask |= ( b >> 7 );
         }
-        if ( ( bitboard >> 9 ) & BITBOARD_MASK_FILE_H )
+        if ( ( b >> 9 ) & BITBOARD_MASK_FILE_H )
         {
-            attacks |= ( bitboard >> 9 );
+            mask |= ( b >> 9 );
         } 
     }
     else
     {
-        if ( ( bitboard << 9 ) & BITBOARD_MASK_FILE_A )
+        if ( ( b << 9 ) & BITBOARD_MASK_FILE_A )
         {
-            attacks |= ( bitboard << 9 );
+            mask |= ( b << 9 );
         }
-        if ( ( bitboard << 7 ) & BITBOARD_MASK_FILE_H )
+        if ( ( b << 7 ) & BITBOARD_MASK_FILE_H )
         {
-            attacks |= ( bitboard << 7 );
+            mask |= ( b << 7 );
         }
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
@@ -105,46 +74,46 @@ bitboard_mask_knight_attack
 (   const SQUARE square
 )
 {
-    bitboard_t attacks = 0; 
+    bitboard_t mask = 0; 
     
     // Set the piece.
-    bitboard_t bitboard = bitset ( 0 , square );
+    bitboard_t b = bitset ( 0 , square );
 
     // Set attack options.
-    if ( ( bitboard >> 15 ) & BITBOARD_MASK_FILE_A )
+    if ( ( b >> 15 ) & BITBOARD_MASK_FILE_A )
     {
-        attacks |= ( bitboard >> 15 );
+        mask |= ( b >> 15 );
     }
-    if ( ( bitboard >> 17 ) & BITBOARD_MASK_FILE_H )
+    if ( ( b >> 17 ) & BITBOARD_MASK_FILE_H )
     {
-        attacks |= ( bitboard >> 17 );
+        mask |= ( b >> 17 );
     }
-    if ( ( bitboard >> 6 ) & BITBOARD_MASK_FILE_AB )
+    if ( ( b >> 6 ) & BITBOARD_MASK_FILE_AB )
     {
-        attacks |= ( bitboard >> 6 );
+        mask |= ( b >> 6 );
     }
-    if ( ( bitboard >> 10 ) & BITBOARD_MASK_FILE_HG )
+    if ( ( b >> 10 ) & BITBOARD_MASK_FILE_HG )
     {
-        attacks |= ( bitboard >> 10 );
+        mask |= ( b >> 10 );
     }
-    if ( ( bitboard << 17 ) & BITBOARD_MASK_FILE_A )
+    if ( ( b << 17 ) & BITBOARD_MASK_FILE_A )
     {
-        attacks |= ( bitboard << 17 );
+        mask |= ( b << 17 );
     }
-    if ( ( bitboard << 15 ) & BITBOARD_MASK_FILE_H )
+    if ( ( b << 15 ) & BITBOARD_MASK_FILE_H )
     {
-        attacks |= ( bitboard << 15 );
+        mask |= ( b << 15 );
     }
-    if ( ( bitboard << 10 ) & BITBOARD_MASK_FILE_AB )
+    if ( ( b << 10 ) & BITBOARD_MASK_FILE_AB )
     {
-        attacks |= ( bitboard << 10 );
+        mask |= ( b << 10 );
     }
-    if ( ( bitboard << 6 ) & BITBOARD_MASK_FILE_HG )
+    if ( ( b << 6 ) & BITBOARD_MASK_FILE_HG )
     {
-        attacks |= ( bitboard << 6 );
+        mask |= ( b << 6 );
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
@@ -152,7 +121,7 @@ bitboard_mask_bishop_attack
 (   const SQUARE square
 )
 {
-    bitboard_t attacks = 0; 
+    bitboard_t mask = 0; 
 
     // Target rank and file.
     const i8 r_target = square / 8;
@@ -163,31 +132,31 @@ bitboard_mask_bishop_attack
     i8 f;
     for ( r = r_target + 1 , f = f_target + 1; r <= 6 && f <= 6; ++r , ++f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        BITSET ( mask , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target - 1 , f = f_target + 1; r >= 1 && f <= 6; --r , ++f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        BITSET ( mask , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target + 1 , f = f_target - 1; r <= 6 && f >= 1; ++r , --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        BITSET ( mask , SQUAREINDX ( r , f ) );
     }
     for ( r = r_target - 1 , f = f_target - 1; r >= 1 && f >= 1; --r , --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
+        BITSET ( mask , SQUAREINDX ( r , f ) );
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
-bitboard_mask_bishop_attack_with_block_mask
+bitboard_mask_bishop_attack_with_block
 (   const SQUARE        square
-,   const bitboard_t    mask
+,   const bitboard_t    block
 )
 {
-    bitboard_t attacks = 0; 
+    bitboard_t mask = 0; 
 
     // Target rank and file.
     const i8 r_target = square / 8;
@@ -198,38 +167,38 @@ bitboard_mask_bishop_attack_with_block_mask
     i8 f;
     for ( r = r_target + 1 , f = f_target + 1; r <= 7 && f <= 7; ++r , ++f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
-        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & block )
         {
             break;
         }
     }
     for ( r = r_target - 1 , f = f_target + 1; r >= 0 && f <= 7; --r , ++f )
     {
-        attacks = bitset ( attacks , r * 8 + f );
-        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
+        BITSET ( mask , r * 8 + f );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & block )
         {
             break;
         }
     }
     for ( r = r_target + 1 , f = f_target - 1; r <= 7 && f >= 0; ++r , --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
-        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & block )
         {
             break;
         }
     }
     for ( r = r_target - 1 , f = f_target - 1; r >= 0 && f >= 0; --r , --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f ) );
-        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f ) ) & block )
         {
             break;
         }
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
@@ -237,7 +206,7 @@ bitboard_mask_rook_attack
 (   const SQUARE square
 )
 {
-    bitboard_t attacks = 0;
+    bitboard_t mask = 0;
 
     // Target rank and file.
     const i8 r_target = square / 8;
@@ -248,31 +217,31 @@ bitboard_mask_rook_attack
     i8 f;
     for ( r = r_target + 1; r <= 6; ++r )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
+        BITSET ( mask , SQUAREINDX ( r , f_target ) );
     }
     for ( r = r_target - 1; r >= 1; --r )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
+        BITSET ( mask , SQUAREINDX ( r , f_target ) );
     }
     for ( f = f_target + 1; f <= 6; ++f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
+        BITSET ( mask , SQUAREINDX ( r_target , f ) );
     }
     for ( f = f_target - 1; f >= 1; --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
+        BITSET ( mask , SQUAREINDX ( r_target , f ) );
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
-bitboard_mask_rook_attack_with_block_mask
+bitboard_mask_rook_attack_with_block
 (   const SQUARE        square
-,   const bitboard_t    mask
+,   const bitboard_t    block
 )
 {
-    bitboard_t attacks = 0; 
+    bitboard_t mask = 0; 
 
     // Target rank and file.
     const i8 r_target = square / 8;
@@ -283,38 +252,38 @@ bitboard_mask_rook_attack_with_block_mask
     i8 f;
     for ( r = r_target + 1; r <= 7; ++r )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
-        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r , f_target ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & block )
         {
             break;
         }
     }
     for ( r = r_target - 1; r >= 0; --r )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r , f_target ) );
-        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r , f_target ) );
+        if ( bitset ( 0 , SQUAREINDX ( r , f_target ) ) & block )
         {
             break;
         }
     }
     for ( f = f_target + 1; f <= 7; ++f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
-        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r_target , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & block )
         {
             break;
         }
     }
     for ( f = f_target - 1; f >= 0; --f )
     {
-        attacks = bitset ( attacks , SQUAREINDX ( r_target , f ) );
-        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & mask )
+        BITSET ( mask , SQUAREINDX ( r_target , f ) );
+        if ( bitset ( 0 , SQUAREINDX ( r_target , f ) ) & block )
         {
             break;
         }
     }
 
-    return attacks;
+    return mask;
 }
 
 bitboard_t
@@ -322,46 +291,46 @@ bitboard_mask_king_attack
 (   const SQUARE square
 )
 {
-    bitboard_t attacks = 0; 
+    bitboard_t mask = 0; 
     
     // Set the piece.
-    bitboard_t bitboard = bitset ( 0 , square );
+    bitboard_t b = bitset ( 0 , square );
 
     // Set attack options.
-    if ( bitboard >> 8 )
+    if ( b >> 8 )
     {
-        attacks |= ( bitboard >> 8 );
+        mask |= ( b >> 8 );
     }
-    if ( ( bitboard >> 7 ) & BITBOARD_MASK_FILE_A )
+    if ( ( b >> 7 ) & BITBOARD_MASK_FILE_A )
     {
-        attacks |= ( bitboard >> 7 );
+        mask |= ( b >> 7 );
     }
-    if ( ( bitboard >> 1 ) & BITBOARD_MASK_FILE_H )
+    if ( ( b >> 1 ) & BITBOARD_MASK_FILE_H )
     {
-        attacks |= ( bitboard >> 1 );
+        mask |= ( b >> 1 );
     }
-    if ( ( bitboard >> 9 ) & BITBOARD_MASK_FILE_H )
+    if ( ( b >> 9 ) & BITBOARD_MASK_FILE_H )
     {
-        attacks |= ( bitboard >> 9 );
+        mask |= ( b >> 9 );
     }
-    if ( bitboard << 8 )
+    if ( b << 8 )
     {
-        attacks |= ( bitboard << 8 );
+        mask |= ( b << 8 );
     }
-    if ( ( bitboard << 1 ) & BITBOARD_MASK_FILE_A )
+    if ( ( b << 1 ) & BITBOARD_MASK_FILE_A )
     {
-        attacks |= ( bitboard << 1 );
+        mask |= ( b << 1 );
     }
-    if ( ( bitboard << 9 ) & BITBOARD_MASK_FILE_A )
+    if ( ( b << 9 ) & BITBOARD_MASK_FILE_A )
     {
-        attacks |= ( bitboard << 9 );
+        mask |= ( b << 9 );
     }
-    if ( ( bitboard << 7 ) & BITBOARD_MASK_FILE_H )
+    if ( ( b << 7 ) & BITBOARD_MASK_FILE_H )
     {
-        attacks |= ( bitboard << 7 );
+        mask |= ( b << 7 );
     }
 
-    return attacks;
+    return mask;
 }
 
 char*
@@ -421,12 +390,4 @@ string_bitboard
     }
 
     return string_allocate_from ( buf );
-}
-
-const char*
-string_bitboard_square
-(   u8 i
-)
-{
-    return square_coordinate_tags[ i ];
 }
