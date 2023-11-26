@@ -13,7 +13,10 @@
 // Type definition for the application.
 typedef struct
 {
-    f32 dt;
+    f32     dt;
+    
+    u64     chess_engine_memory_requirement;
+    void*   chess_engine_state;
 }
 cce_t;
 
@@ -44,6 +47,17 @@ cce_shutdown
  */
 bool
 cce_update
+(   application_t*  app
+,   f32             dt
+);
+
+/**
+ * @brief Application render function.
+ * @param app The cce instance.
+ * @param dt Time elapsed since previous invocation.
+ */
+void
+cce_render
 (   application_t*  app
 ,   f32             dt
 );

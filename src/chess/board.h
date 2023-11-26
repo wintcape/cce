@@ -29,12 +29,11 @@ typedef struct
 board_t;
 
 /**
- * @brief Stringify utility.
+ * @brief Renders a chess board to the console.
  * @param board A chess board.
- * @return A string representation of board.
  */
-char*
-string_chess_board
+void
+render_chess_board
 (   const board_t* board
 );
 

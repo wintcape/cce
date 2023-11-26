@@ -171,13 +171,6 @@ chess_startup
     // Initialize game state.
     ( *state ).ply = 0;
 
-    // Print memory usage info.
-    f32 amt;
-    const char* unit = string_bytesize ( sizeof ( state_t ) , &amt );
-    LOGDEBUG ( "Chess engine subsystem initialized. Memory usage: %.2f %s"
-             , amt , unit
-             );
-
     return true;
 }
 
@@ -194,31 +187,30 @@ chess_shutdown
     state = 0;
 }
 
-
-void
-chess_display
+bool
+chess_update
 ( void )
 {
     if ( !state )
     {
-        return;
+        return false;
     }
 
-    char* s = string_chess_board ( &( *state ).board );
-    LOGINFO ( "PLY:    %d%s" , ( *state ).ply , s );
-    string_free ( s );
+    return true;
 }
 
-/*  TEMPORARY  */
-
 void
-chess_run_tests
+chess_render
 ( void )
 {
     if ( !state )
     {
         return;
     }
+    
+    char buf[ 32 ];
+    string_format ( buf , "\n PLY: %d\n" , ( *state ).ply );
+    platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
 
-    chess_display ();
+    render_chess_board ( &( *state ).board );
 }

@@ -37,14 +37,6 @@ platform_shutdown
 );
 
 /**
- * @brief Platform-independent pump messages function.
- * @param platform The platform state to mutate.
- */
-bool
-platform_pump_messages
-( void );
-
-/**
  * @brief Platform-independent block allocation function.
  * @param size The number of bytes to allocate.
  * @param aligned tbd.

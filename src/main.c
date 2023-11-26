@@ -17,6 +17,7 @@ application
     ( *app ).startup = cce_startup;
     ( *app ).shutdown = cce_shutdown;
     ( *app ).update = cce_update;
+    ( *app ).render = cce_render;
 
     ( *app ).internal = 0;
     ( *app ).app_state = 0;

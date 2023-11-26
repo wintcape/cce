@@ -9,6 +9,7 @@
 #include "chess/board.h"
 #include "chess/fen.h"
 #include "chess/magic.h"
+#include "chess/platform.h"
 
 /**
  * @brief Initializes the chess engine subsystem. Call once to read the memory
@@ -33,10 +34,19 @@ chess_shutdown
 );
 
 /**
- * @brief Displays the current chess board using the logging subsystem.
+ * @brief Updates the chess subsystem.
+ * @return false on error, true otherwise.
+ */
+bool
+chess_update
+( void );
+
+/**
+ * @brief Renders the current chess board to the terminal using the logger
+ * subsystem.
  */
 void
-chess_display
+chess_render
 ( void );
 
 /*  TEMPORARY  */

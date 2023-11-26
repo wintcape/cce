@@ -7,10 +7,10 @@ TEST := test
 CFLAGS := -g -O2 -W -Wvarargs -Wall -Werror -Wno-unused-const-variable -Wno-unused-parameter -Wno-missing-field-initializers -Werror=vla
 OBJFLAGS := $(CFLAGS) -c
 LDFLAGS := -lvulkan -lX11 -lX11-xcb -lxcb -lm
-INCFLAGS := -Iinc -Iengine/src -Itest/src
+INCFLAGS := -Isrc -Iengine/src -Itest/src
 
-ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o chess.o chess_bitboard.o chess_board.o chess_fen.o
-TARGET_OBJFILES := main.o application.o
+ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o
+TARGET_OBJFILES := main.o application.o chess.o chess_bitboard.o chess_board.o chess_fen.o
 TEST_OBJFILES := test_main.o test_memory_linear_allocator.o
 
 ################################################################################
@@ -38,6 +38,10 @@ $(TEST_OBJ):
 # Target obj
 obj/main.o: 							src/main.c
 obj/application.o: 						src/application.c
+obj/chess.o:							src/chess/chess.c
+obj/chess_bitboard.o:					src/chess/bitboard.c
+obj/chess_board.o:						src/chess/board.c
+obj/chess_fen.o:						src/chess/fen.c
 
 # Test obj
 obj/test_main.o:						test/src/main.c
@@ -60,10 +64,6 @@ obj/memory_linear_allocator.o: 			engine/src/memory/linear_allocator.c
 obj/memory_dynamic_allocator.o: 		engine/src/memory/dynamic_allocator.c
 obj/platform.o: 						engine/src/platform/linux.c
 obj/filesystem.o:						engine/src/platform/filesystem.c
-obj/chess.o:							engine/src/chess/chess.c
-obj/chess_bitboard.o:					engine/src/chess/bitboard.c
-obj/chess_board.o:						engine/src/chess/board.c
-obj/chess_fen.o:						engine/src/chess/fen.c
 
 default: makedir all
 

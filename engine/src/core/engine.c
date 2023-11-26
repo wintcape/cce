@@ -13,12 +13,10 @@
 #include "core/memory.h"
 #include "core/string.h"
 
-#include "chess/chess.h"
-
 #include "memory/linear_allocator.h"
 
 // Defaults.
-#define SUBSYSTEM_ALLOCATOR_CAP_DEFAULT ( MEBIBYTES ( 16 ) )
+#define SUBSYSTEM_ALLOCATOR_CAP_DEFAULT ( MEBIBYTES ( 1 ) )
 
 // Type definition for internal engine state.
 typedef struct
@@ -44,9 +42,6 @@ typedef struct
 
     u64                 platform_subsystem_memory_requirement;
     void*               platform_subsystem_state;
-
-    u64                 chess_subsystem_memory_requirement;
-    void*               chess_subsystem_state;
 }
 state_t;
 
@@ -148,19 +143,6 @@ engine_startup
         return false;
     }
 
-    // Chess engine.
-    chess_startup ( &( *state ).chess_subsystem_memory_requirement , 0 );
-    ( *state ).chess_subsystem_state = linear_allocator_allocate ( &( *state ).subsystem_allocator
-                                                                 , ( *state ).chess_subsystem_memory_requirement
-                                                                 );
-    if ( !chess_startup ( &( *state ).chess_subsystem_memory_requirement
-                        , ( *state ).chess_subsystem_state
-                        ))
-    {
-        LOGERROR ( "engine_startup: Failed to initialize chess engine subsystem." );
-        return false;
-    }
-
     // Initialize the user application.
     if ( !( *( ( *state ).app ) ).startup ( ( *state ).app ) )
     {
@@ -182,6 +164,11 @@ engine_run
     clock_update ( &( *state ).clock );
     ( *state ).system_time = ( *state ).clock.elapsed;
     f64 runtime = 0;
+    f64 t;
+    f64 dt;
+    f64 t_start;
+    f64 t_end;
+    f64 t_elapsed;
 
     // Print memory usage information.
     char* stat = memory_stat ();
@@ -190,19 +177,14 @@ engine_run
 
     while ( ( *state ).running )
     {
-        if ( !platform_pump_messages () )
-        {
-            ( *state ).running = false;
-        }
-
         if ( !( *state ).suspended )
         {
             // Update the clock.
             clock_update ( &( *state ).clock );
-            f64 t = ( *state ).clock.elapsed;
-            f64 dt = t - ( *state ).system_time;
-            f64 t_start = platform_get_absolute_time ();
-
+            t = ( *state ).clock.elapsed;
+            dt = t - ( *state ).system_time;
+            t_start = platform_get_absolute_time ();
+            
             // Update the user application.
             if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )
             {
@@ -211,15 +193,26 @@ engine_run
                 break;
             }
 
-            // Calculate the time the frame took to process.
-            f64 t_end = platform_get_absolute_time ();
-            f64 t_elapsed = t_end - t_start;
-            runtime += t_elapsed;
+            // Calculate the time the application took to update.
+            t_end = platform_get_absolute_time ();
+            t_elapsed = t_end - t_start;
+            
+            LOGDEBUG ( "Application update complete.\n\tTook %f seconds." , t_elapsed );
 
+            // Render the user application.
+            ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );
+            
+            // Calculate the time the application took to render.
+            t_end = platform_get_absolute_time ();
+            t_elapsed = t_end - t_start;
+            
+            LOGDEBUG ( "Application render complete.\n\tTook %f seconds." , t_elapsed );
+            
+            // Update runtime.
+            runtime += t_elapsed;
+            
             // Update system time again.
             ( *state ).system_time = t;
-
-            LOGDEBUG ( "Application update complete.\n\tTook %f seconds." , t_elapsed );            
         }
     }
     ( *state ).running = false;// Failsafe.
@@ -228,7 +221,6 @@ engine_run
     ( *( ( *state ).app ) ).shutdown ( ( *state ).app );
      
     // Shutdown subsystems.
-    chess_shutdown ( ( *state ).chess_subsystem_state );
     platform_shutdown ( ( *state ).platform_subsystem_state );
     event_shutdown ( ( *state ).event_subsystem_state );
     logger_shutdown ( ( *state ).logger_subsystem_state );    

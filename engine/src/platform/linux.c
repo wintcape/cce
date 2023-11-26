@@ -39,6 +39,13 @@
                                 \
     , "0;97"                    \
     , "0;37"                    \
+    , "0;90"                    \
+    , "0;35"                    \
+                                \
+    , "101;97"                  \
+    , "101;30"                  \
+    , "41;97"                   \
+    , "41;30"                   \
     }
 
 // Type definition for platform subsystem state.
@@ -95,13 +102,6 @@ platform_shutdown
     }
 
     state = 0;
-}
-
-bool
-platform_pump_messages
-( void )
-{
-    return true;
 }
 
 void*

@@ -35,6 +35,11 @@ typedef struct application_t
          ( struct application_t*    app
          , f32                      dt
          );
+    
+    void ( *render )
+         ( struct application_t*    app
+         , f32                      dt
+         );
 }
 application_t;
 
