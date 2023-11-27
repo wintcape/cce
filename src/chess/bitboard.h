@@ -7,6 +7,7 @@
 #define CHESS_BITBOARD_H
 
 #include "chess/common.h"
+#include "chess/magic.h"
 
 // Preprocessor bindings for typesafe bitboard literals.
 #define BITBOARD_MASK_FILE_A    ( ( bitboard_t ) 18374403900871474942ULL )

@@ -4,8 +4,8 @@
  * @brief Defines literals to assist with computing magic bitboards for
  * slider piece attacks.
  */
-#ifndef CHESS_COMMON_MAGIC_H
-#define CHESS_COMMON_MAGIC_H
+#ifndef CHESS_MAGIC_H
+#define CHESS_MAGIC_H
 
 #include "chess/common/bitboard.h"
 
@@ -161,4 +161,4 @@ static const bitboard_t bitboard_magic_rooks[ 64 ] = { 0xA8002C000108020ULL
                                                      , 0x26002114058042ULL
                                                      };
 
-#endif  // CHESS_COMMON_MAGIC_H
+#endif  // CHESS_MAGIC_H
