@@ -22,11 +22,11 @@ fen_parse
     }
 
     // Set latest FEN.
-    memory_copy ( ( *board ).fen
-                , fen
-                , min ( string_length ( fen )
-                      , ( u8 ) FEN_STRING_MAX_LENGTH
-                      ));
+    const u64 len = min ( string_length ( fen )
+                        , ( u64 ) FEN_STRING_MAX_LENGTH
+                        );
+    memory_copy ( ( *board ).fen , fen , len );
+    ( *board ).fen[ len ] = 0;
 
     // Parse board.
     memory_clear ( ( *board ).pieces

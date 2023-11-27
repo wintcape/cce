@@ -33,7 +33,7 @@ board_t;
  * @param board A chess board.
  */
 void
-render_chess_board
+chess_board_render
 (   const board_t* board
 );
 

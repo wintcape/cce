@@ -8,7 +8,7 @@
 
 INLINE
 char
-uppercase
+touppercase
 (   const char c
 )
 {
@@ -17,7 +17,7 @@ uppercase
 
 INLINE
 char
-lowercase
+tolowercase
 (   const char c
 )
 {
@@ -26,11 +26,29 @@ lowercase
 
 INLINE
 bool
+uppercase
+(   const char c
+)
+{
+    return c >= 'A' && c <= 'Z';
+}
+
+INLINE
+bool
+lowercase
+(   const char c
+)
+{
+    return c >= 'a' && c <= 'z';
+}
+
+INLINE
+bool
 alpha
 (   const char c
 )
 {
-    return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
+    return uppercase ( c ) || lowercase ( c );
 }
 
 INLINE

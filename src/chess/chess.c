@@ -101,6 +101,55 @@ bitboard_queen_attack
          ;
 
 }
+/**
+ * @brief .
+ * @param square .
+ * @param  side.
+ * @return true if square attacked, false otherwise.
+ */
+INLINE
+bool
+chess_square_attacked
+(   const SQUARE        square
+,   const SIDE          side
+)
+{
+    return (   ( side == WHITE )
+            && (  ( *state ).pawn_attacks[ BLACK ][ square ]
+                & ( *state ).board.pieces[ P ]
+           ))
+        || (   ( side == BLACK )
+            && (  ( *state ).pawn_attacks[ WHITE ][ square ]
+                & ( *state ).board.pieces[ P ]
+           ))
+        || (  ( *state ).knight_attacks[ square ]
+            & ( ( side == WHITE ) ? ( *state ).board.pieces[ N ]
+                                  : ( *state ).board.pieces[ n ]
+           ))
+        || (  bitboard_bishop_attack ( square
+                                     , ( *state ).board.occupancies[ 2 ]
+                                     )
+            & ( ( side == WHITE ) ? ( *state ).board.pieces[ B ]
+                                  : ( *state ).board.pieces[ b ]
+           ))
+        || (  bitboard_rook_attack ( square
+                                   , ( *state ).board.occupancies[ 2 ]
+                                   )
+            & ( ( side == WHITE ) ? ( *state ).board.pieces[ R ]
+                                  : ( *state ).board.pieces[ r ]
+           ))
+        || (  bitboard_queen_attack ( square
+                                    , ( *state ).board.occupancies[ 2 ]
+                                    )
+            & ( ( side == WHITE ) ? ( *state ).board.pieces[ Q ]
+                                  : ( *state ).board.pieces[ q ]
+           ))
+        || (  ( *state ).king_attacks[ square ]
+            & ( ( side == WHITE ) ? ( *state ).board.pieces[ K ]
+                                  : ( *state ).board.pieces[ k ]
+           ))
+        ;
+}
 
 bool
 chess_startup
@@ -199,6 +248,29 @@ chess_update
     return true;
 }
 
+
+void
+print_attacked
+(SIDE side)
+{
+    char buf[512];
+    u64 offs=0;
+    for (u8 r = 0; r < 8; r++)
+    {
+        for (u8 f = 0; f < 8; f++)
+        {
+            if (!f)
+            {
+                offs += string_format(buf+offs, "  %d " , 8-r);
+            }
+            offs += string_format (buf+offs," %d", chess_square_attacked(SQUAREINDX(r,f),side) ? 1: 0 );
+        }
+        offs += string_format (buf+offs,"\n");
+    }
+    offs +=string_format(buf+offs,"\n     A B C D E F G H\n\n");
+    platform_console_write(buf,PLATFORM_COLOR_CHESS_INFO);
+}
+
 void
 chess_render
 ( void )
@@ -212,5 +284,8 @@ chess_render
     string_format ( buf , "\n PLY: %d\n" , ( *state ).ply );
     platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
 
-    render_chess_board ( &( *state ).board );
+    chess_board_render ( &( *state ).board );
+
+    // Temporary.
+    print_attacked(BLACK);
 }

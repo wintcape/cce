@@ -11,19 +11,19 @@
 #include "core/string.h"
 
 // Defaults.
-#define CHESS_BOARD_BUFFER_LENGTH   512
+#define CHESS_BOARD_RENDER_BUFFER_LENGTH 512
 
 void
-render_chess_board
+chess_board_render
 (   const board_t* board
 )
 {
-    char buf[ CHESS_BOARD_BUFFER_LENGTH ];
+    char buf[ CHESS_BOARD_RENDER_BUFFER_LENGTH ];
     u64 offs = 0;
 
+    u8 i = 0;
     u8 r = 0;
     u8 f = 0;
-    u8 i = 0;
 
     while ( r < 8 )
     {
@@ -34,7 +34,6 @@ render_chess_board
             if ( !f )
             {
                 offs = string_format ( buf , "%u   " , 8 - r );
-                buf[ offs ] = 0;
                 platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
             }
 
@@ -48,59 +47,26 @@ render_chess_board
                 }
             }
 
+            buf[ 0 ] = ' ';
+            buf[ 1 ] = ( piece == EMPTY_SQ ) ? ' '
+                                             : piecechr ( piece )
+                                             ;
+            buf[ 2 ] = ' ';
+            buf[ 3 ] = 0;
+
             if ( !( i % 2 ) )
-            { 
-                if ( piece >= P && piece <= K )
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = piecechr ( piece );
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_WSWP );
-                }
-                else if ( piece >= p && piece <= k )
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = piecechr ( piece );
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_WSBP );
-                }
-                else
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = ' ';
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_WSWP );
-                }
+            {
+                platform_console_write ( buf
+                                       , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_WSBP
+                                                                      : PLATFORM_COLOR_CHESS_WSWP
+                                       );
             }
             else
             {
-                if ( piece >= P && piece <= K )
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = piecechr ( piece );
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_BSWP );
-                }
-                else if ( piece >= p && piece <= k )
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = piecechr ( piece );
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_BSBP );
-                }
-                else
-                {
-                    buf[ 0 ] = ' ';
-                    buf[ 1 ] = ' ';
-                    buf[ 2 ] = ' ';
-                    buf[ 3 ] = 0;
-                    platform_console_write ( buf , PLATFORM_COLOR_CHESS_BSWP );
-                }                
+                platform_console_write ( buf
+                                       , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_BSBP
+                                                                      : PLATFORM_COLOR_CHESS_BSWP
+                                       );
             }
             
             f += 1;
@@ -137,7 +103,6 @@ render_chess_board
                           , ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-'
                           , ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-'
                           );
-    buf[ offs ] = 0;
 
     platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
 }

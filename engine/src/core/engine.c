@@ -26,9 +26,6 @@ typedef struct
     bool                running;
     bool                suspended;
 
-    i16                 window_w;
-    i16                 window_h;
-
     clock_t             clock;
     f64                 system_time;
 
@@ -169,6 +166,12 @@ engine_run
     f64 t_start;
     f64 t_end;
     f64 t_elapsed;
+    f64 t_start_update;
+    f64 t_end_update;
+    f64 t_elapsed_update;
+    f64 t_start_render;
+    f64 t_end_render;
+    f64 t_elapsed_render;
 
     // Print memory usage information.
     char* stat = memory_stat ();
@@ -186,6 +189,7 @@ engine_run
             t_start = platform_get_absolute_time ();
             
             // Update the user application.
+            t_start_update = t_start;            
             if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )
             {
                 LOGFATAL ( "engine_run: Failed to update user application, shutting down." );
@@ -194,21 +198,26 @@ engine_run
             }
 
             // Calculate the time the application took to update.
-            t_end = platform_get_absolute_time ();
-            t_elapsed = t_end - t_start;
-            
-            LOGDEBUG ( "Application update complete.\n\tTook %f seconds." , t_elapsed );
+            t_end_update = platform_get_absolute_time ();
+            t_elapsed_update = t_end_update - t_start_update;
+            LOGDEBUG ( "Application update complete.\n\tTook %f seconds."
+                     , t_elapsed_update
+                     );
 
             // Render the user application.
+            t_start_render = platform_get_absolute_time ();
             ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );
             
             // Calculate the time the application took to render.
-            t_end = platform_get_absolute_time ();
-            t_elapsed = t_end - t_start;
-            
-            LOGDEBUG ( "Application render complete.\n\tTook %f seconds." , t_elapsed );
+            t_end_render = platform_get_absolute_time ();
+            t_elapsed_render = t_end_render - t_start_render; 
+            LOGDEBUG ( "Application render complete.\n\tTook %f seconds."
+                     , t_elapsed_render
+                     );
             
             // Update runtime.
+            t_end = platform_get_absolute_time ();
+            t_elapsed = t_end - t_start;
             runtime += t_elapsed;
             
             // Update system time again.

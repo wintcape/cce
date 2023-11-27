@@ -4,8 +4,8 @@
  * @brief Definition for a test application that runs on the chess engine.
  * (see core/application.h for additional details)
  */
-#include "main.h"   // Engine backend.
-#include "cce.h"   // Test application (CCE).
+#include "main.h"           // Engine backend.
+#include "application.h"    // Test application (CCE).
 
 bool
 application

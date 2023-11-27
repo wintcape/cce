@@ -1,10 +1,10 @@
 /**
  * @file application.c
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Implementation of the cce header.
- * (see cce.h for additional details)
+ * @brief Implementation of the application header.
+ * (see application.h for additional details)
  */
-#include "cce.h"
+#include "application.h"
 
 #include "core/event.h"
 #include "core/logger.h"
