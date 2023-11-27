@@ -1,10 +1,10 @@
 /**
  * @file castle.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Defines castling bits.
+ * @brief Defines castling rights.
  */
-#ifndef CHESS_CASTLE_H
-#define CHESS_CASTLE_H
+#ifndef CHESS_COMMON_CASTLE_H
+#define CHESS_COMMON_CASTLE_H
 
 typedef enum
 {
@@ -15,4 +15,4 @@ typedef enum
 }
 CASTLE;
 
-#endif  // CHESS_CASTLE_H
+#endif  // CHESS_COMMON_CASTLE_H

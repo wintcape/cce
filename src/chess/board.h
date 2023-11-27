@@ -6,27 +6,8 @@
 #ifndef CHESS_BOARD_H
 #define CHESS_BOARD_H
 
-#include "common.h"
-
+#include "chess/common.h"
 #include "chess/bitboard.h"
-#include "chess/castle.h"
-
-// Defaults.
-#define FEN_STRING_MAX_LENGTH 128
-
-// Type definition for a container to hold chess board state information.
-typedef struct
-{
-    bitboard_t  pieces[ 12 ];
-    bitboard_t  occupancies[ 3 ];
-
-    SIDE        side;
-    SQUARE      enpassant;
-    CASTLE      castle;
-
-    char        fen[ FEN_STRING_MAX_LENGTH ];
-}
-board_t;
 
 /**
  * @brief Renders a chess board to the console.
@@ -36,5 +17,32 @@ void
 chess_board_render
 (   const board_t* board
 );
+
+/**
+ * @brief Computes if a square on a chess board may be attacked by a given
+ * side. Requires pregenerated attack tables.
+ * @param board The chess board state.
+ * @param attacks Pregenerated attack tables.
+ * @param square The square to check.
+ * @param side The current side.
+ * @return true if square attackable, false otherwise.
+ */
+INLINE
+bool
+chess_board_square_attackable
+(   const board_t*      board
+,   const attacks_t*    attacks
+,   const SQUARE        square
+,   const SIDE          side
+)
+{
+    return ( bitboard_pawn_attack ( attacks , square , side ) & ( ( side == WHITE ) ? ( *board ).pieces[ P ] : ( *board ).pieces[ p ] ) )
+        || ( bitboard_knight_attack ( attacks , square )  & ( ( side == WHITE ) ? ( *board ).pieces[ N ] : ( *board ).pieces[ n ] ) )
+        || ( bitboard_bishop_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ B ] : ( *board ).pieces[ b ] ) )
+        || ( bitboard_rook_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ R ] : ( *board ).pieces[ r ] ) )
+        || ( bitboard_queen_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ Q ] : ( *board ).pieces[ q ] ) )
+        || ( bitboard_king_attack ( attacks , square ) & ( ( side == WHITE ) ? ( *board ).pieces[ K ] : ( *board ).pieces[ k ] ) )
+        ;
+}
 
 #endif  // CHESS_BOARD_H

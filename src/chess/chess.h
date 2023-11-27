@@ -6,10 +6,7 @@
 #ifndef CHESS_H
 #define CHESS_H
 
-#include "chess/board.h"
-#include "chess/fen.h"
-#include "chess/magic.h"
-#include "chess/platform.h"
+#include "chess/common.h"
 
 /**
  * @brief Initializes the chess engine subsystem. Call once to read the memory
@@ -47,16 +44,6 @@ chess_update
  */
 void
 chess_render
-( void );
-
-/*  TEMPORARY  */
-
-/**
- * @brief Temporary test function. 
- * TODO: Don't make this exposed.
- */
-void
-chess_run_tests
 ( void );
 
 #endif  // CHESS_H

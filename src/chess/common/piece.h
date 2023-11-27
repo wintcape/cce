@@ -3,8 +3,8 @@
  * @author Matthew Weissel (null@mattweissel.info)
  * @brief Datatypes and operations to represent a single piece on a chess board.
  */
-#ifndef CHESS_PIECE_H
-#define CHESS_PIECE_H
+#ifndef CHESS_COMMON_PIECE_H
+#define CHESS_COMMON_PIECE_H
 
 #include "common.h"
 
@@ -88,4 +88,4 @@ chrpiece
     return pieces[ max ( alias ,  0 ) ];
 }
 
-#endif  // CHESS_PIECE_H
+#endif  // CHESS_COMMON_PIECE_H

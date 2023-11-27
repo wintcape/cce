@@ -1,19 +1,12 @@
 /**
  * @file bitboard.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Datatypes and operations to represent a chess bitboard.
+ * @brief Bitboard datatypes and operations.
  */
 #ifndef CHESS_BITBOARD_H
 #define CHESS_BITBOARD_H
 
-#include "common.h"
-
-#include "chess/castle.h"
-#include "chess/piece.h"
-#include "chess/square.h"
-
-// Type definition for a bitboard.
-typedef u64 bitboard_t;
+#include "chess/common.h"
 
 // Preprocessor bindings for typesafe bitboard literals.
 #define BITBOARD_MASK_FILE_A    ( ( bitboard_t ) 18374403900871474942ULL )
@@ -50,7 +43,7 @@ bitboard_count
  */
 INLINE
 i8
-bitboard_lsb_indx
+bitboard_lsb
 (   bitboard_t bitboard
 )
 {
@@ -60,105 +53,149 @@ bitboard_lsb_indx
 }
 
 /**
- * @brief Given an attack mask, this function generates a new attack mask which
- * takes into account an occupancy parameter.
- * @param occupancy Used for calculating occupied square.
- * @param attack Attack bitboard mask.
- * @param attack_relevant_count Number of attack mask bits to consider.
- * @return A bitboard with the attack options masked by the occupancy.
+ * @brief Computes a requested pawn attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The pawn position.
+ * @param side The pawn side.
+ * @return The requested pawn attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_pawn_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+,   const SIDE          side
+)
+{
+    return ( *attacks ).pawn[ side ][ square ];
+}
+
+/**
+ * @brief Computes a requested knight attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The knight position.
+ * @return The requested knight attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_knight_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+)
+{
+    return ( *attacks ).knight[ square ];
+}
+
+/**
+ * @brief Computes a requested bishop attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The bishop position.
+ * @param occupancy An occupancy mask.
+ * @return The requested bishop attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_bishop_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+,   bitboard_t          occupancy
+)
+{
+    occupancy &= ( *attacks ).bishop_masks[ square ];
+    occupancy *= bitboard_magic_bishops[ square ];
+    occupancy >>= 64 - bishop_attack_relevant_counts[ square ];
+    return ( *attacks ).bishop[ square ][ occupancy ];
+}
+
+/**
+ * @brief Computes a requested rook attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The rook position.
+ * @param occupancy An occupancy mask.
+ * @return The requested rook attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_rook_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+,   bitboard_t          occupancy
+)
+{
+    occupancy &= ( *attacks ).rook_masks[ square ];
+    occupancy *= bitboard_magic_rooks[ square ];
+    occupancy >>= 64 - rook_attack_relevant_counts[ square ];
+    return ( *attacks ).rook[ square ][ occupancy ];
+}
+
+/**
+ * @brief Computes a requested queen attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The queen position.
+ * @param occupancy An occupancy mask.
+ * @return The requested rook attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_queen_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+,   bitboard_t          occupancy
+)
+{
+    bitboard_t bishop_occupancy = occupancy;
+    bitboard_t rook_occupancy = occupancy;
+
+    bishop_occupancy &= ( *attacks ).bishop_masks[ square ];
+    bishop_occupancy *= bitboard_magic_bishops[ square ];
+    bishop_occupancy >>= 64 - bishop_attack_relevant_counts[ square ];
+    
+    rook_occupancy &= ( *attacks ).rook_masks[ square ];
+    rook_occupancy *= bitboard_magic_rooks[ square ];
+    rook_occupancy >>= 64 - rook_attack_relevant_counts[ square ];
+
+    return ( *attacks ).bishop[ square ][ bishop_occupancy ]
+         | ( *attacks ).rook[ square ][ rook_occupancy ]
+         ;
+}
+
+/**
+ * @brief Computes a requested king attack using a pregenerated attack table.
+ * @param attacks The pregenerated attack tables.
+ * @param square The king position.
+ * @param occupancy An occupancy mask.
+ * @return The requested knight attack bitboard.
+ */
+INLINE
+bitboard_t
+bitboard_king_attack
+(   const attacks_t*    attacks
+,   const SQUARE        square
+)
+{
+    return ( *attacks ).king[ square ];
+}
+
+/**
+ * @brief Generates a bitboard whose bits are set if the corresponding square on
+ * a chess board may be attacked by a given side. Requires pregenerated attack
+ * tables.
+ * @param board The chess board state.
+ * @param attacks Pregenerated attack tables.
+ * @param side The current side.
+ * @return A bitboard with all valid attacks set.
  */
 bitboard_t
-bitboard_mask_attack_with_occupancy
-(   const int   occupancy
-,   bitboard_t  attack
-,   const u8    attack_relevant_count
+bitboard_attackable
+(   const board_t*      board
+,   const attacks_t*    attacks
+,   const SIDE          side
 );
 
 /**
- * @brief Generates the attack options for a single pawn.
- * @param square The pawn's position.
- * @param side The pawn's side.
- * @return A bitboard with the pawn's attack options set.
- */
-bitboard_t
-bitboard_mask_pawn_attack
-(   const SIDE      side
-,   const SQUARE    square
-);
-
-/**
- * @brief Generates the attack options for a single knight.
- * @param square The knight's position.
- * @return A bitboard with the knight's attack options set.
- */
-bitboard_t
-bitboard_mask_knight_attack
-(   const SQUARE square
-);
-
-/**
- * @brief Generates the attack options for a single bishop.
- * @param square The bishop's position.
- * @return A bitboard with the bishop's attack options set.
- */
-bitboard_t
-bitboard_mask_bishop_attack
-(   const SQUARE square
-);
-
-/**
- * @brief Variation of bitboard_mask_bishop_attack which accepts a block mask
- * parameter.
- * @param square The bishop's position.
- * @param block A mask to optionally block the bishop in the specified
- * direction(s).
- * @return A bitboard with the bishop's attack options set.
- */
-bitboard_t
-bitboard_mask_bishop_attack_with_block
-(   const SQUARE        square
-,   const bitboard_t    block
-);
-
-/**
- * @brief Generates the attack options for a single rook.
- * @param square The rook's position.
- * @return A bitboard with the rook's attack options set.
- */
-bitboard_t
-bitboard_mask_rook_attack
-(   const SQUARE square
-);
-
-/**
- * @brief Variation of bitboard_mask_rook_attack which accepts a block mask
- * parameter.
- * @param square The rook's position.
- * @param block A mask to optionally block the rook in the specified
- * direction(s).
- * @return A bitboard with the rook's attack options set.
- */
-bitboard_t
-bitboard_mask_rook_attack_with_block
-(   const SQUARE        square
-,   const bitboard_t    block 
-);
-
-/**
- * @brief Generates the attack options for a single king.
- * @param square The king's position.
- * @return A bitboard with the king's attack options set.
- */
-bitboard_t
-bitboard_mask_king_attack
-(   const SQUARE square
-);
-
-/**
- * @brief Stringify utility.
+ * @brief Stringify utility. Uses memory allocator; call string_free to free.
  * @param bitboard A bitboard.
- * @return A string representation of bitboard, or 0 if chess subsystem is
- * uninitialized.
+ * @return A string representation of bitboard.
  */
 char*
 string_bitboard

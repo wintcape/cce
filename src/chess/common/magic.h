@@ -1,34 +1,33 @@
 /**
  * @file magic.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Magic number bitboards.
+ * @brief Defines literals to assist with computing magic bitboards for
+ * slider piece attacks.
  */
-#ifndef CHESS_MAGIC_H
-#define CHESS_MAGIC_H
+#ifndef CHESS_COMMON_MAGIC_H
+#define CHESS_COMMON_MAGIC_H
 
-#include "common.h"
+#include "chess/common/bitboard.h"
 
-#include "chess/bitboard.h"
-
-// Defines relevant occupancy count for each board square by player.
-static const u8 bishop_relevant_counts[ 64 ] = { 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
-                                               , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
-                                               , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
-                                               , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
-                                               , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
-                                               , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
-                                               , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
-                                               , 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
-                                               };
-static const u8 rook_relevant_counts[ 64 ] = { 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
-                                             , 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
-                                             };
+// Defines relevant occupancy count for each board square for slider pieces.
+static const u8 bishop_attack_relevant_counts[ 64 ] = { 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
+                                                      , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
+                                                      , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
+                                                      , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
+                                                      , 5 , 5 , 7 , 9 , 9 , 7 , 5 , 5
+                                                      , 5 , 5 , 7 , 7 , 7 , 7 , 5 , 5
+                                                      , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5
+                                                      , 6 , 5 , 5 , 5 , 5 , 5 , 5 , 6
+                                                      };
+static const u8 rook_attack_relevant_counts[ 64 ] = { 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 11 , 10 , 10 , 10 , 10 , 10 , 10 , 11
+                                                    , 12 , 11 , 11 , 11 , 11 , 11 , 11 , 12
+                                                    };
 
 // Defines magic bitboards for slider pieces.
 static const bitboard_t bitboard_magic_bishops[ 64 ] = { 0x89A1121896040240ULL
@@ -162,60 +161,4 @@ static const bitboard_t bitboard_magic_rooks[ 64 ] = { 0xA8002C000108020ULL
                                                      , 0x26002114058042ULL
                                                      };
 
-/**
- * @brief .
- * @param square .
- * @return .
- */
-INLINE
-bitboard_t
-bitboard_magic_bishop
-(   const SQUARE square
-)
-{
-    return bitboard_magic_bishops[ square ];
-}
-
-/**
- * @brief .
- * @param square .
- * @return .
- */
-INLINE
-bitboard_t
-bitboard_magic_rook
-(   const SQUARE square
-)
-{
-    return bitboard_magic_rooks[ square ];
-}
-
-/**
- * @brief . 
- * @param square .
- * @return .
- */
-INLINE
-u8
-bishop_relevant_count
-(   const SQUARE square
-)
-{
-    return bishop_relevant_counts[ square ];
-}
-
-/**
- * @brief . 
- * @param square .
- * @return .
- */
-INLINE
-u8
-rook_relevant_count
-(   const SQUARE square
-)
-{
-    return rook_relevant_counts[ square ];
-}
-
-#endif  // CHESS_MAGIC_H
+#endif  // CHESS_COMMON_MAGIC_H

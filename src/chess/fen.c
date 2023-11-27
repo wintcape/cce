@@ -57,13 +57,14 @@ fen_parse
             if ( numeric ( *fen ) )
             {
                 PIECE piece = EMPTY_SQ;
-                for ( u8 bb = P; bb < 12; ++bb )
+                for ( u8 i = P; i < 12; ++i )
                 {
-                    if ( bit ( ( *board ).pieces[ bb ]
+                    if ( bit ( ( *board ).pieces[ i ]
                                , SQUAREINDX ( r , f )
                                ))
                     {
-                        piece = bb;
+                        piece = i;
+                        break;
                     }
                 }
 
@@ -120,8 +121,9 @@ fen_parse
     {
         ( *board ).occupancies[ BLACK ] |= ( *board ).pieces[ piece ];
     }
-    ( *board ).occupancies[ 2 ] |= ( *board ).occupancies[ WHITE ];
-    ( *board ).occupancies[ 2 ] |= ( *board ).occupancies[ BLACK ];
+    ( *board ).occupancies[ 2 ] = ( *board ).occupancies[ WHITE ]
+                                | ( *board ).occupancies[ BLACK ]
+                                ;
 
     return true;
 }
