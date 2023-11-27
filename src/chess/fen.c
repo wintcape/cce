@@ -9,18 +9,15 @@
 #include "core/logger.h"
 #include "core/string.h"
 
-bool
+// Defines FEN file separator token.
+#define FEN_FILE_SEPARATOR_TOKEN '/'
+
+void
 fen_parse
 (   const char* fen
 ,   board_t*    board
 )
 {
-    if ( !board )
-    {
-        LOGERROR ( "fen_parse: No chess board provided." );
-        return false;
-    }
-
     // Set latest FEN.
     const u64 len = min ( string_length ( fen )
                         , ( u64 ) FEN_STRING_MAX_LENGTH
@@ -77,7 +74,7 @@ fen_parse
                 fen += 1;
             }
 
-            if ( *fen == '/' )
+            if ( *fen == FEN_FILE_SEPARATOR_TOKEN )
             {
                 fen += 1;
             }
@@ -124,6 +121,4 @@ fen_parse
     ( *board ).occupancies[ 2 ] = ( *board ).occupancies[ WHITE ]
                                 | ( *board ).occupancies[ BLACK ]
                                 ;
-
-    return true;
 }

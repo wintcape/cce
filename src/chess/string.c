@@ -15,7 +15,7 @@ string_bitboard
 )
 {
     u64 offs = string_format ( dst
-                             , "  BITBOARD:  %llu\n"
+                             , " BITBOARD:  %llu\n"
                              , bitboard
                              );
 

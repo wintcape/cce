@@ -26,9 +26,9 @@ bitboard_attackable
 
     bitboard_t attackable = 0;
 
-    for ( u8 r = 0; r < 8; r++ )
+    for ( u8 r = 0; r < 8; ++r )
     {
-        for ( u8 f = 0; f < 8; f++ )
+        for ( u8 f = 0; f < 8; ++f )
         {
             if ( chess_board_square_attackable ( board
                                                , attacks
