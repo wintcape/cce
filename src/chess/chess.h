@@ -8,6 +8,9 @@
 
 #include "chess/common.h"
 
+// Defines the size of the render textbuffer.
+#define CHESS_RENDER_TEXTBUFFER_LENGTH 16384
+
 /**
  * @brief Initializes the chess engine subsystem. Call once to read the memory
  * requirement. Call again passing in a state pointer.

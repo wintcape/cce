@@ -8,10 +8,9 @@
 
 #include "chess/board.h"
 
-#include "core/string.h"
-
 // Defaults.
-#define BITBOARD_STRING_MAX_LENGTH 256
+#define BITBOARD_STRING_BUFFER_LENGTH   \
+    ( CHESS_RENDER_BUFFER_LENGTH >> 2 )
 
 bitboard_t
 bitboard_attackable
@@ -43,65 +42,4 @@ bitboard_attackable
     }
 
     return attackable;
-}
-
-char*
-string_bitboard
-(   const bitboard_t bitboard
-)
-{
-    char buf[ BITBOARD_STRING_MAX_LENGTH ];
-
-    u64 offs = string_format ( buf
-                             , "BITBOARD:  %llu\n"
-                             , bitboard
-                             );
-
-    u8 r = 0;
-    u8 f = 0;
-
-    while ( r < 8 )
-    {
-        offs += string_format ( buf + offs
-                              , "\n\t"
-                              );
-        while ( f < 8 )
-        {
-            if ( !f )
-            {
-                offs += string_format ( buf + offs
-                                      , "%u   "
-                                      , 8 - r
-                                      );
-            }
-
-            offs += string_format ( buf + offs
-                                  , "%u"
-                                  , bit ( bitboard , SQUAREINDX ( r , f ) )
-                                  );
-            
-            f += 1;
-        }
-
-        f = 0;
-        r += 1;
-    }
-    
-    offs += string_format ( buf + offs
-                          , "\n\n\t    "
-                          );
-
-    r = 0;
-    while ( r < 8 )
-    {
-        offs += string_format ( buf + offs
-                          , "%c"
-                          , 'A' + r
-                          );
-        r += 1;
-    }
-    
-    offs += string_format ( buf + offs , "\n\n" );
-    
-    return string_allocate_from ( buf );
 }

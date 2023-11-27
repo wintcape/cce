@@ -538,14 +538,4 @@ mat4_r
     return r;
 }
 
-/**
- * @brief Stringify utility. Uses memory allocator; call string_free to free.
- * @param m A 4x4 matrix.
- * @return A string representation of m.
- */
-char*
-string_mat4
-(   const mat4_t m
-);
-
 #endif  // MATH_MATRIX_H

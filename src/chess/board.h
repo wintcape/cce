@@ -11,11 +11,13 @@
 
 /**
  * @brief Renders a chess board to the console.
+ * @param dst Working string buffer.
  * @param board A chess board.
  */
 void
 chess_board_render
-(   const board_t* board
+(   char*           dst
+,   const board_t*  board
 );
 
 /**

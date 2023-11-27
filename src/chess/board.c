@@ -7,18 +7,16 @@
 #include "chess/board.h"
 
 #include "chess/platform.h"
+#include "chess/string.h"
 
 #include "core/string.h"
 
-// Defaults.
-#define CHESS_BOARD_RENDER_BUFFER_LENGTH 512
-
 void
 chess_board_render
-(   const board_t* board
+(   char*           dst
+,   const board_t*  board
 )
 {
-    char buf[ CHESS_BOARD_RENDER_BUFFER_LENGTH ];
     u64 offs = 0;
 
     u8 i = 0;
@@ -33,8 +31,8 @@ chess_board_render
         {
             if ( !f )
             {
-                offs = string_format ( buf , "%u   " , 8 - r );
-                platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
+                offs = string_format ( dst , "%u   " , 8 - r );
+                platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
             }
 
             PIECE piece = EMPTY_SQ; 
@@ -47,23 +45,23 @@ chess_board_render
                 }
             }
 
-            buf[ 0 ] = ' ';
-            buf[ 1 ] = ( piece == EMPTY_SQ ) ? ' '
+            dst[ 0 ] = ' ';
+            dst[ 1 ] = ( piece == EMPTY_SQ ) ? ' '
                                              : piecechr ( piece )
                                              ;
-            buf[ 2 ] = ' ';
-            buf[ 3 ] = 0;
+            dst[ 2 ] = ' ';
+            dst[ 3 ] = 0;
 
             if ( !( i % 2 ) )
             {
-                platform_console_write ( buf
+                platform_console_write ( dst
                                        , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_WSBP
                                                                       : PLATFORM_COLOR_CHESS_WSWP
                                        );
             }
             else
             {
-                platform_console_write ( buf
+                platform_console_write ( dst
                                        , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_BSBP
                                                                       : PLATFORM_COLOR_CHESS_BSWP
                                        );
@@ -84,15 +82,15 @@ chess_board_render
     r = 0;
     while ( r < 8 )
     {
-        offs += string_format ( buf + offs
+        offs += string_format ( dst + offs
                               , " %c "
                               , 'A' + r
                               );
         r += 1;
     }
 
-    offs += string_format ( buf + offs
-                          , "\n\n\n\tFEN:          %s\n\tSide:         %s\n\tEn passant:      %s\n\tCastling:      %c%c%c%c\n\n"
+    offs += string_format ( dst + offs
+                          , "\n\n\n\tFEN:          %s\n\tSide:         %s\n\tEn passant:      %s\n\tCastling:      %c%c%c%c\n\n\n"
                           , ( *board ).fen
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
@@ -104,5 +102,5 @@ chess_board_render
                           , ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-'
                           );
 
-    platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
+    platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
 }

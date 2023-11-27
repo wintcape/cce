@@ -10,19 +10,26 @@
 #include "chess/board.h"
 #include "chess/fen.h"
 #include "chess/platform.h"
+#include "chess/string.h"
 
 #include "core/logger.h"
 #include "core/string.h"
 
-// Defaults.
-#define CHESS_RENDER_LINE_LENGTH 1024
-
 // Type definition for chess engine subsystem state.
 typedef struct
 {
+    // Pregenerated attack table.
     attacks_t   attacks;
+
+    // Game state.
     board_t     board;
     u32         ply;
+
+    // Render textbuffer.
+    char        textbuffer[ CHESS_RENDER_TEXTBUFFER_LENGTH ];
+
+    // Temporary.
+    bitboard_t  tmps[ 64 ];
 }
 state_t;
 
@@ -44,13 +51,11 @@ chess_startup
 
     state = state_;
 
-    // Initialize attack tables.
+    // Pregenerate attack tables.
     attacks_init ( &( *state ).attacks );
 
-    // Initialize board.
-    fen_parse ( FEN_START , &( *state ).board );
-
     // Initialize game state.
+    fen_parse ( FEN_START , &( *state ).board );
     ( *state ).ply = 0;
 
     return true;
@@ -78,6 +83,11 @@ chess_update
         return false;
     }
 
+    ( *state ).tmps[ 0 ] = bitboard_attackable ( &( *state ).board
+                                               , &( *state ).attacks
+                                               , BLACK
+                                               );
+
     return true;
 }
 
@@ -90,20 +100,19 @@ chess_render
         return;
     }
     
-    char buf[ CHESS_RENDER_LINE_LENGTH ];
-    char* str;
-    
-    string_format ( buf , "\n PLY: %d\n" , ( *state ).ply );
-    platform_console_write ( buf , PLATFORM_COLOR_CHESS_INFO );
+    string_format ( ( *state ).textbuffer
+                  , "\n PLY: %d\n"
+                  , ( *state ).ply
+                  );
+    platform_console_write ( ( *state ).textbuffer
+                           , PLATFORM_COLOR_CHESS_INFO
+                           );
 
-    chess_board_render ( &( *state ).board );
+    chess_board_render ( ( *state ).textbuffer , &( *state ).board );
 
     // Temporary.
-
-    str = string_bitboard ( bitboard_attackable ( &( *state ).board
-                                                , &( *state ).attacks
-                                                , BLACK
-                                                ));
-    platform_console_write ( str , PLATFORM_COLOR_CHESS_INFO );
-    string_free ( str );
+    string_bitboard ( ( *state ).textbuffer , ( *state ).tmps[ 0 ] );
+    platform_console_write ( ( *state ).textbuffer
+                           , PLATFORM_COLOR_CHESS_INFO
+                           );
 }

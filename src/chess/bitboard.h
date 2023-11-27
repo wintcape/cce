@@ -192,14 +192,4 @@ bitboard_attackable
 ,   const SIDE          side
 );
 
-/**
- * @brief Stringify utility. Uses memory allocator; call string_free to free.
- * @param bitboard A bitboard.
- * @return A string representation of bitboard.
- */
-char*
-string_bitboard
-(   const bitboard_t bitboard
-);
-
 #endif  // CHESS_BITBOARD_H

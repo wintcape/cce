@@ -147,34 +147,3 @@ randomf2
 {
     return min + ( f32 ) _random () / ( ( f32 ) RAND_MAX / ( max - min ) );
 }
-
-char*
-string_mat4
-(   const mat4_t m
-)
-{
-    char buf[ MATRIX_STRING_MAX_LENGTH ];
-    string_format ( buf
-                  , "\n\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|"
-                    "\n\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|"
-                    "\n\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|"
-                    "\n\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|\t%.2f\t|"
-                  , m.data[ 0 ]
-                  , m.data[ 1 ]
-                  , m.data[ 2 ]
-                  , m.data[ 3 ]
-                  , m.data[ 4 ]
-                  , m.data[ 5 ]
-                  , m.data[ 6 ]
-                  , m.data[ 7 ]
-                  , m.data[ 8 ]
-                  , m.data[ 9 ]
-                  , m.data[ 10 ]
-                  , m.data[ 11 ]
-                  , m.data[ 12 ]
-                  , m.data[ 13 ]
-                  , m.data[ 14 ]
-                  , m.data[ 15 ]
-                  );
-    return string_allocate_from ( buf );
-}
