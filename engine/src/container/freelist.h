@@ -16,7 +16,7 @@ typedef struct
 freelist_t;
 
 void
-freelist_init
+freelist_create
 (   u64         cap
 ,   u64*        memory_requirement
 ,   void*       memory
@@ -24,19 +24,19 @@ freelist_init
 );
 
 void
-freelist_free
+freelist_destroy
 (   freelist_t* ls
 );
 
 bool
-freelist_allocate_block
+freelist_allocate
 (   freelist_t* ls
 ,   u64         size
 ,   u64*        offs
 );
 
 bool
-freelist_free_block
+freelist_free
 (   freelist_t* ls
 ,   u64         size
 ,   u64         offs

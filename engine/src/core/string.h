@@ -36,7 +36,7 @@ string_allocate_from
  * @param s The string to free.
  */
 void
-string_free
+string_destroy
 (   char* s
 );
 
@@ -87,6 +87,17 @@ const char*
 string_bytesize
 (   u64     size
 ,   f32*    amt
+);
+
+/**
+ * @brief Trims whitespace off front and back of string.
+ * @param s The string to copy.
+ * @param dst Output buffer.
+ */
+void
+string_trim
+(   const char* s
+,   char*       dst
 );
 
 #endif  // STRING_H

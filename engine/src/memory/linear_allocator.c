@@ -12,7 +12,7 @@
 #include "core/string.h"
 
 void
-linear_allocator_startup
+linear_allocator_create
 (   u64                 cap
 ,   void*               memory
 ,   linear_allocator_t* allocator
@@ -20,7 +20,7 @@ linear_allocator_startup
 {
     if ( !allocator )
     {
-        LOGERROR ( "linear_allocator_init: Missing argument: allocator."
+        LOGERROR ( "linear_allocator_create: Missing argument: allocator."
                  , allocator
                  );
         return;
@@ -45,7 +45,7 @@ linear_allocator_startup
 }
 
 void
-linear_allocator_shutdown
+linear_allocator_destroy
 (   linear_allocator_t* allocator
 )
 {

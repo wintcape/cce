@@ -25,7 +25,7 @@ linear_allocator_t;
  * @param allocator Output buffer.
  */
 void
-linear_allocator_startup
+linear_allocator_create
 (   u64                 cap
 ,   void*               memory
 ,   linear_allocator_t* allocator
@@ -36,7 +36,7 @@ linear_allocator_startup
  * @param allocator The allocator to terminate.
  */
 void
-linear_allocator_shutdown
+linear_allocator_destroy
 (   linear_allocator_t* allocator
 );
 

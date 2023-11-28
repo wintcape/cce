@@ -85,10 +85,10 @@ engine_startup
     
     // Initialize subsystem memory allocator.
     const u64 subsystem_allocator_cap = SUBSYSTEM_ALLOCATOR_CAP_DEFAULT;
-    linear_allocator_startup ( subsystem_allocator_cap
-                             , 0
-                             , &( *state ).subsystem_allocator
-                             );
+    linear_allocator_create ( subsystem_allocator_cap
+                            , 0
+                            , &( *state ).subsystem_allocator
+                            );
 
     // Initialize subsystems.
 
@@ -161,6 +161,7 @@ engine_run
     clock_update ( &( *state ).clock );
     ( *state ).system_time = ( *state ).clock.elapsed;
     f64 runtime = 0;
+    
     f64 t;
     f64 dt;
     f64 t_start;
@@ -176,7 +177,7 @@ engine_run
     // Print memory usage information.
     char* stat = memory_stat ();
     LOGINFO ( stat );
-    string_free ( stat );
+    string_destroy ( stat );
 
     while ( ( *state ).running )
     {
@@ -235,8 +236,7 @@ engine_run
     logger_shutdown ( ( *state ).logger_subsystem_state );    
 
     // Free memory used by subsystem memory allocator.
-    linear_allocator_free ( &( *state ).subsystem_allocator );
-    linear_allocator_shutdown ( &( *state ).subsystem_allocator );
+    linear_allocator_destroy ( &( *state ).subsystem_allocator );
 
     // Free memory used by internal engine state.
     memory_free ( state

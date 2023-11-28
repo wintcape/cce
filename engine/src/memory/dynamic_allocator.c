@@ -39,7 +39,7 @@ header_t;
 #define MAX_SINGLE_ALLOCATION_SIZE  ( GIBIBYTES ( 4 ) )
 
 bool
-dynamic_allocator_startup
+dynamic_allocator_create
 (   u64                     cap
 ,   u64*                    memory_requirement
 ,   void*                   memory
@@ -48,18 +48,18 @@ dynamic_allocator_startup
 {
     if ( cap < 1 )
     {
-        LOGERROR ( "dynamic_allocator_startup: Attempted to initialize allocator with size 0." );
+        LOGERROR ( "dynamic_allocator_create: Attempted to initialize allocator with size 0." );
         return false;
     }
 
     if ( !memory_requirement )
     {
-        LOGERROR ( "dynamic_allocator_startup: Missing argument: memory_requirement." );
+        LOGERROR ( "dynamic_allocator_create: Missing argument: memory_requirement." );
         return false;
     }
 
     u64 freelist_memory_requirement = 0;
-    freelist_init ( cap , &freelist_memory_requirement , 0 , 0 );
+    freelist_create ( cap , &freelist_memory_requirement , 0 , 0 );
     
     *memory_requirement = freelist_memory_requirement
                         + sizeof ( state_t )
@@ -79,11 +79,11 @@ dynamic_allocator_startup
                             + freelist_memory_requirement
                             ;
 
-    freelist_init ( cap
-                  , &freelist_memory_requirement
-                  , ( *state ).freelist_start
-                  , &( *state ).freelist
-                  );
+    freelist_create ( cap
+                    , &freelist_memory_requirement
+                    , ( *state ).freelist_start
+                    , &( *state ).freelist
+                    );
 
     memory_clear ( ( *state ).memory_start , cap );
 
@@ -91,20 +91,20 @@ dynamic_allocator_startup
 }
 
 bool
-dynamic_allocator_shutdown
+dynamic_allocator_destroy
 (   dynamic_allocator_t* allocator
 )
 {
     if ( !allocator )
     {
-        LOGWARN ( "dynamic_allocator_shutdown: The provided allocator is uninitialized (0x%p)."
+        LOGWARN ( "dynamic_allocator_destroy: The provided allocator is uninitialized (0x%p)."
                 , allocator
                 );
         return false;
     }
 
     state_t* state = ( *allocator ).memory;
-    freelist_free ( &( *state ).freelist );
+    freelist_destroy ( &( *state ).freelist );
     memory_clear ( ( *state ).memory_start , ( *state ).cap );
     ( *state ).cap = 0;
     ( *allocator ).memory = 0;
@@ -159,10 +159,10 @@ dynamic_allocator_allocate_aligned
             );
 
     u64 base_offs = 0;
-    if ( !freelist_allocate_block ( &( *state ).freelist
-                                  , required_size
-                                  , &base_offs
-                                  ))
+    if ( !freelist_allocate ( &( *state ).freelist
+                            , required_size
+                            , &base_offs
+                            ))
     {
         f32 req_amt;
         f32 rem_amt;
@@ -242,14 +242,24 @@ dynamic_allocator_free_aligned
                       + *size
                       ;
 
-    if ( !freelist_free_block ( &( *state ).freelist
-                              , required_size
-                              , offs
-                              ))
+    if ( !freelist_free ( &( *state ).freelist
+                        , required_size
+                        , offs
+                        ))
     {
         LOGERROR ( "dynamic_allocator_free: Failed to free memory." );
         return false;
     }
 
     return true;
+}
+
+// Expensive!
+u64
+dynamic_allocator_query_free
+(   const dynamic_allocator_t* allocator
+)
+{
+    state_t* state = ( *allocator ).memory;
+    return freelist_query_free ( &( *state ).freelist );
 }

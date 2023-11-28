@@ -73,7 +73,7 @@ event_shutdown
     {
         if ( ( *state ).registry[ i ].events )
         {
-            array_free ( ( *state ).registry[ i ].events );
+            array_destroy ( ( *state ).registry[ i ].events );
             ( *state ).registry[ i ].events = 0;
         }
     }

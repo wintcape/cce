@@ -26,7 +26,7 @@ dynamic_allocator_t;
  * @return true on success, false otherwise.
  */
 bool
-dynamic_allocator_startup
+dynamic_allocator_create
 (   u64                     cap
 ,   u64*                    memory_requirement
 ,   void*                   memory
@@ -39,7 +39,7 @@ dynamic_allocator_startup
  * @return true on success, false otherwise.
  */
 bool
-dynamic_allocator_shutdown
+dynamic_allocator_destroy
 (   dynamic_allocator_t* allocator
 );
 
@@ -94,6 +94,17 @@ bool
 dynamic_allocator_free_aligned
 (   dynamic_allocator_t*    allocator
 ,   void*                   blk
+);
+
+/**
+ * @brief Query free space remaining for an allocator. This function is
+ * expensive and should be used sparingly.
+ * @param allocator The allocator.
+ * @return The number of free bytes of space remaining.
+ */
+u64
+dynamic_allocator_query_free
+(   const dynamic_allocator_t* allocator
 );
 
 #endif  // MEMORY_DYNAMIC_ALLOCATOR_H

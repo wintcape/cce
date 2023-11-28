@@ -62,7 +62,7 @@ memory_startup
     u64 state_memory_requirement = sizeof ( state_t );
 
     u64 allocator_memory_requirement = 0;
-    dynamic_allocator_startup ( cap , &allocator_memory_requirement , 0 , 0 );
+    dynamic_allocator_create ( cap , &allocator_memory_requirement , 0 , 0 );
 
     void* memory = platform_memory_allocate (   state_memory_requirement
                                               + allocator_memory_requirement
@@ -80,11 +80,11 @@ memory_startup
     ( *state ).cap = cap;
     platform_memory_clear ( &( *state ).stat , sizeof ( stat_t ) );
 
-    if ( !dynamic_allocator_startup ( cap
-                                    , &( *state ).allocator_cap
-                                    , ( *state ).allocator_start
-                                    , &( *state ).allocator
-                                    ))
+    if ( !dynamic_allocator_create ( cap
+                                   , &( *state ).allocator_cap
+                                   , ( *state ).allocator_start
+                                   , &( *state ).allocator
+                                   ))
     {
         LOGFATAL ( "Memory subsystem failed to initialize internal allocator." );
         return false;
@@ -108,7 +108,7 @@ memory_shutdown
         return;
     }
 
-    dynamic_allocator_shutdown ( &( *state ).allocator );
+    dynamic_allocator_destroy ( &( *state ).allocator );
 
     if ( ( *state ).stat.allocation_count != ( *state ).stat.free_count )
     {

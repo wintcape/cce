@@ -22,8 +22,8 @@ typedef enum
 ARRAY_FIELD;
 
 // Global constants.
-#define ARRAY_DEFAULT_CAPACITY  1
-#define ARRAY_SCALE_FACTOR      2
+#define ARRAY_DEFAULT_CAPACITY  10
+#define ARRAY_SCALE_FACTOR      ( 1U + ( 1U >> 1 ) )
 
 /**
  * @brief Allocates memory for a resizable array.
@@ -48,12 +48,12 @@ _array_allocate
  * @param arr The array to free.
  */
 void
-_array_free
+_array_destroy
 (   void* arr
 );
 
-#define array_free(arr) \
-    _array_free ( (arr) );
+#define array_destroy(arr) \
+    _array_destroy ( (arr) );
 
 /**
  * @brief Reads the value of an array field.

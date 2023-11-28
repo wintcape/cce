@@ -33,7 +33,7 @@ string_allocate_from
 }
 
 void
-string_free
+string_destroy
 (   char* s
 )
 {
@@ -112,4 +112,26 @@ string_bytesize
     }
     *amt = ( f32 ) size;
     return "B";
+}
+
+void
+string_trim
+(   const char* s
+,   char*       dst
+)
+{
+    const u64 len = string_length ( s );
+    u64 i;
+    
+    // Calculate index of first non-whitespace character.
+    for ( i = 0; i < len && whitespace ( s[ i ] ); ++i );
+    const char* from = s + i;
+
+    // Calculate index of final non-whitespace character.
+    for ( i = len; i > 0 && whitespace ( s[ i - 1 ] ); --i );
+    const char* to = s + i;
+
+    // Copy memory range.
+    memory_copy ( dst , from , to - from );
+    dst[ to - from ] = 0;   // Append terminator.
 }

@@ -44,7 +44,7 @@ freelist_return_node
 );
 
 void
-freelist_init
+freelist_create
 (   u64         cap
 ,   u64*        memory_requirement
 ,   void*       memory
@@ -93,7 +93,7 @@ freelist_init
 }
 
 void
-freelist_free
+freelist_destroy
 (   freelist_t* ls
 )
 {
@@ -111,7 +111,7 @@ freelist_free
 }
 
 bool
-freelist_allocate_block
+freelist_allocate
 (   freelist_t* ls
 ,   u64         size
 ,   u64*        offs
@@ -167,7 +167,7 @@ freelist_allocate_block
     const char* rem_unit = string_bytesize ( freelist_query_free ( ls )
                                            , &rem_amt
                                            );
-    LOGWARN ( "freelist_allocate_block: No block with enough free space found (requested: %.2f %s, available: %.2f %s)."
+    LOGWARN ( "freelist_allocate: No block with enough free space found (requested: %.2f %s, available: %.2f %s)."
             , req_amt , req_unit
             , rem_amt , rem_unit
             );
@@ -176,7 +176,7 @@ freelist_allocate_block
 }
 
 bool
-freelist_free_block
+freelist_free
 (   freelist_t* ls
 ,   u64         size
 ,   u64         offs
@@ -219,7 +219,7 @@ freelist_free_block
         }
         else if ( ( *node ).offs == offs )
         {
-            LOGERROR ( "freelist_free_block: Double free occurred at memory offset %llu."
+            LOGERROR ( "freelist_free: Double free occurred at memory offset %llu."
                      , ( *node ).offs
                      );
             return false;
@@ -280,7 +280,7 @@ freelist_free_block
 
     }// End while.
 
-    LOGWARN ( "freelist_free_block: Did not find a block to free. Memory corruption possible." );
+    LOGWARN ( "freelist_free: Did not find a block to free. Memory corruption possible." );
     return false;
 }
 

@@ -10,6 +10,7 @@
 
 #include "core/clock.h"
 #include "core/logger.h"
+#include "core/memory.h"
 #include "core/string.h"
 
 typedef struct
@@ -19,13 +20,13 @@ typedef struct
 }
 test_entry_t;
 
-static test_entry_t* tests;
+static test_entry_t*    tests;
 
 void
 test_startup
 ( void )
 {
-    tests = array_allocate_new ( test_entry_t );
+    tests = array_allocate_new ( test_entry_t );    
 }
 
 void
@@ -91,10 +92,10 @@ test_run_all
 
     clock_stop ( &clock_master );
 
-    LOGINFO ( "Results: %d passed, %d failed, %d skipped.\n"
+    LOGINFO ( "Results: %d passed, %d failed, %d skipped.\n\t"
               "Took %.6f seconds."
             , pass , fail , skip , clock_master.elapsed
             );
 
-    array_free ( tests );
+    array_destroy ( tests );
 }
