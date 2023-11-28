@@ -151,6 +151,16 @@ platform_memory_copy
     return memcpy ( dst , src , size );
 }
 
+void*
+platform_memory_move
+(   void*       dst
+,   const void* src
+,   u64         size
+)
+{
+    return memmove ( dst , src , size );
+}
+
 void
 platform_console_write
 (   const char* mesg

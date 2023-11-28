@@ -90,14 +90,13 @@ string_bytesize
 );
 
 /**
- * @brief Trims whitespace off front and back of string.
+ * @brief Trims whitespace off front and back of string. In-place.
  * @param s The string to copy.
- * @param dst Output buffer.
+ * @return s.
  */
-void
+char*
 string_trim
-(   const char* s
-,   char*       dst
+(   char* s
 );
 
 #endif  // STRING_H

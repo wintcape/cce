@@ -121,7 +121,7 @@ memory_set
 /**
  * @brief Copies a specified number of bytes of memory from a source block to a
  * destination block. The size of both blocks should be adequate for the
- * specified size parameter.
+ * specified size parameter. The source and destination blocks may not overlap.
  * @param dst The destination block.
  * @param src The source block.
  * @param size The number of bytes to copy.
@@ -129,6 +129,22 @@ memory_set
  */
 void*
 memory_copy
+(   void*       dst
+,   const void* src
+,   u64         size
+);
+
+/**
+ * @brief Moves a specified number of bytes of memory from a source block to a
+ * destination block. The size of both blocks should be adequate for the
+ * specified size parameter. The source and destination blocks may overlap.
+ * @param dst The destination block.
+ * @param src The source block.
+ * @param size The number of bytes to move.
+ * @return dst.
+ */
+void*
+memory_move
 (   void*       dst
 ,   const void* src
 ,   u64         size

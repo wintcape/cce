@@ -114,10 +114,9 @@ string_bytesize
     return "B";
 }
 
-void
+char*
 string_trim
-(   const char* s
-,   char*       dst
+(   char* s
 )
 {
     const u64 len = string_length ( s );
@@ -131,7 +130,9 @@ string_trim
     for ( i = len; i > 0 && whitespace ( s[ i - 1 ] ); --i );
     const char* to = s + i;
 
-    // Copy memory range.
-    memory_copy ( dst , from , to - from );
-    dst[ to - from ] = 0;   // Append terminator.
+    // Copy memory range in-place.
+    memory_move ( s , from , to - from );
+    s[ to - from ] = 0; // Append terminator.
+    
+    return s;
 }

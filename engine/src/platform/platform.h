@@ -99,6 +99,20 @@ platform_memory_copy
 );
 
 /**
+ * @brief Platform-independent block move function.
+ * @param dst The destination block.
+ * @param src The source block.
+ * @param size The number of bytes to move.
+ * @return dst.
+ */
+void*
+platform_memory_move
+(   void*       dst
+,   const void* src
+,   u64         size
+);
+
+/**
  * @brief Platform-independent console write function.
  * @param mesg The message to write.
  * @param color The message color code index.

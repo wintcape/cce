@@ -104,7 +104,7 @@ fen_parse
     
     // Parse enpassant.
     ( *board ).enpassant = ( *fen != '-' ) ? SQUAREINDX ( 8 - ( fen[ 1 ] - '0' )
-                                                        ,       fen[ 0 ] - '0'
+                                                        , fen[ 0 ] - 2 * '0' - 1
                                                         )
                                            : NO_SQ
                                            ;

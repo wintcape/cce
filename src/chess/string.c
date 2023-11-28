@@ -34,7 +34,7 @@ string_bitboard
                                       );
             }
             offs += string_format ( dst + offs
-                                  , "%u"
+                                  , " %u "
                                   , bit ( bitboard , SQUAREINDX ( r , f ) )
                                   );
         }
@@ -47,7 +47,7 @@ string_bitboard
     for ( u8 r = 0; r < 8; ++r )
     {
         offs += string_format ( dst + offs
-                          , "%c"
+                          , " %c "
                           , 'A' + r
                           );
     }

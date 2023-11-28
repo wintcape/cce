@@ -253,6 +253,16 @@ memory_copy
     return platform_memory_copy ( dst , src , size );    
 }
 
+void*
+memory_move
+(   void*       dst
+,   const void* src
+,   u64         size
+)
+{
+    return platform_memory_move ( dst , src , size );    
+}
+
 char*
 memory_stat
 ( void )

@@ -9,6 +9,7 @@
 #include "chess/attack.h"
 #include "chess/board.h"
 #include "chess/fen.h"
+#include "chess/move.h"
 #include "chess/platform.h"
 #include "chess/string.h"
 
@@ -83,9 +84,10 @@ chess_update
         return false;
     }
 
+    fen_parse ( "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPpP/R3K2R b KQkq a3 0 1" , &( *state ).board );
     ( *state ).tmps[ 0 ] = bitboard_attackable ( &( *state ).board
                                                , &( *state ).attacks
-                                               , BLACK
+                                               , WHITE
                                                );
 
     return true;
@@ -111,8 +113,6 @@ chess_render
     chess_board_render ( ( *state ).textbuffer , &( *state ).board );
 
     // Temporary.
-    string_bitboard ( ( *state ).textbuffer , ( *state ).tmps[ 0 ] );
-    platform_console_write ( ( *state ).textbuffer
-                           , PLATFORM_COLOR_CHESS_INFO
-                           );
+    moves_init ( &( *state ).board , &( *state ).attacks );
 }
+
