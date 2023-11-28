@@ -10,7 +10,7 @@ LDFLAGS := -lvulkan -lX11 -lX11-xcb -lxcb -lm
 INCFLAGS := -Isrc -Iengine/src -Itest/src
 
 ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o
-TARGET_OBJFILES := main.o application.o chess.o chess_string.o chess_bitboard.o chess_attack.o chess_board.o chess_fen.o
+TARGET_OBJFILES := main.o application.o chess.o chess_string.o chess_bitboard.o chess_attack.o board.o chess_fen.o
 TEST_OBJFILES := test_main.o test_memory_linear_allocator.o
 
 ################################################################################
@@ -42,7 +42,7 @@ obj/chess.o:							src/chess/chess.c
 obj/chess_string.o:						src/chess/string.c
 obj/chess_bitboard.o:					src/chess/bitboard.c
 obj/chess_attack.o:						src/chess/attack.c
-obj/chess_board.o:						src/chess/board.c
+obj/board.o:						src/chess/board.c
 obj/chess_fen.o:						src/chess/fen.c
 
 # Test obj

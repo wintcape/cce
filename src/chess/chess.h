@@ -42,8 +42,7 @@ chess_update
 ( void );
 
 /**
- * @brief Renders the current chess board to the terminal using the logger
- * subsystem.
+ * @brief Renders the current chess board to the console.
  */
 void
 chess_render

@@ -12,7 +12,7 @@ touppercase
 (   const char c
 )
 {
-    return c + 32;
+    return c - 32;
 }
 
 INLINE
@@ -21,7 +21,7 @@ tolowercase
 (   const char c
 )
 {
-    return c - 32;
+    return c + 32;
 }
 
 INLINE

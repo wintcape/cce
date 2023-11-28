@@ -30,11 +30,11 @@ bitboard_attackable
     {
         for ( u8 f = 0; f < 8; ++f )
         {
-            if ( chess_board_square_attackable ( board
-                                               , attacks
-                                               , SQUAREINDX ( r , f )
-                                               , side
-                                               ))
+            if ( board_square_attackable ( board
+                                         , attacks
+                                         , SQUAREINDX ( r , f )
+                                         , side
+                                         ))
             {
                 BITSET ( attackable , SQUAREINDX ( r , f ) );
             }

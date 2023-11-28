@@ -15,7 +15,7 @@
  * @param board A chess board.
  */
 void
-chess_board_render
+board_render
 (   char*           dst
 ,   const board_t*  board
 );
@@ -31,7 +31,7 @@ chess_board_render
  */
 INLINE
 bool
-chess_board_square_attackable
+board_square_attackable
 (   const board_t*      board
 ,   const attacks_t*    attacks
 ,   const SQUARE        square

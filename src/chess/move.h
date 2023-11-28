@@ -11,13 +11,14 @@
 #include "chess/string.h"
 
 /**
- * @brief Generates move options using a pregenerated attack table.
+ * @brief Generates the move options for a given board state using pregenerated
+ * attack tables.
  * @param attacks The pregenerated attack tables.
  * @param board A chess board state.
  */
 INLINE
 void
-moves_init
+moves
 (   board_t*            board
 ,   const attacks_t*    attacks
 )
@@ -51,22 +52,22 @@ moves_init
                         // Promotion.
                         if ( src >= A7 && src <= H7 )
                         {
-                            LOGINFO ("pawn promotion: %s%sq",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sr",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sb",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sn",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn promotion: %s%sq",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sr",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sb",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sn",string_square(src),string_square(target));
                         }
                         else
                         {
                             // Push.
-                            LOGINFO ("pawn push: %s%s",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn push: %s%s",string_square(src),string_square(target));
 
                             // Double push.
                             if ( ( src >= A2 && src <= H2 ) && !bit ( ( *board ).occupancies[ 2 ]
                                                                     , target - 8
                                                                     ))
                             {
-                                LOGINFO ("double pawn push: %s%s",string_chess_board_square(src),string_chess_board_square(target-8));
+                                LOGINFO ("double pawn push: %s%s",string_square(src),string_square(target-8));
 
                             }
                         }
@@ -86,15 +87,15 @@ moves_init
                         // Promotion + capture.
                         if ( src >= A7 && src <= H7 )
                         {
-                            LOGINFO ("pawn promotion capture: %s%sq",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sr",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sb",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sn",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sq",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sr",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sb",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sn",string_square(src),string_square(target));
                         }
                         // Push + capture.
                         else
                         {
-                            LOGINFO ("pawn capture: %s%s",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn capture: %s%s",string_square(src),string_square(target));
                         }
 
                         BITCLR ( attack , target );
@@ -112,7 +113,7 @@ moves_init
                         if ( enpassant )
                         {
                             const SQUARE target_enpassant = bitboard_lsb ( enpassant );
-                            LOGINFO ("pawn enpassant capture: %s%s",string_chess_board_square(src),string_chess_board_square(target_enpassant));
+                            LOGINFO ("pawn enpassant capture: %s%s",string_square(src),string_square(target_enpassant));
                             
                         }
                     }
@@ -120,9 +121,41 @@ moves_init
                     BITCLR ( bitboard , src );
                 }
             }
-
-            else
-            {}
+            
+            // King.
+            else if ( piece == K )
+            {
+                // Castling moves.
+                if ( ( *board ).castle & CASTLE_WK )
+                {
+                    if (   !bit ( ( *board ).occupancies[ 2 ] , F1 )
+                        && !bit ( ( *board ).occupancies[ 2 ] , G1 )
+                       )
+                    {
+                        if (   !board_square_attackable ( board , attacks , E1 , BLACK )
+                            && !board_square_attackable ( board , attacks , F1 , BLACK )
+                           )
+                        {
+                            LOGINFO ("king castling: E1G1");
+                        }
+                    }
+                }
+                if ( ( *board ).castle & CASTLE_WQ )
+                {
+                    if (   !bit ( ( *board ).occupancies[ 2 ] , D1 )
+                        && !bit ( ( *board ).occupancies[ 2 ] , C1 )
+                        && !bit ( ( *board ).occupancies[ 2 ] , B1 )
+                       )
+                    {
+                        if (   !board_square_attackable ( board , attacks , E1 , BLACK )
+                            && !board_square_attackable ( board , attacks , C1 , BLACK )
+                           )
+                        {
+                            LOGINFO ("king castling: E1C1");
+                        }
+                    }
+                }
+            }
         }
 
         // Black.
@@ -144,22 +177,22 @@ moves_init
                         // Promotion.
                         if ( src >= A2 && src <= H2 )
                         {
-                            LOGINFO ("pawn promotion: %s%sq",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sr",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sb",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion: %s%sn",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn promotion: %s%sq",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sr",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sb",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion: %s%sn",string_square(src),string_square(target));
                         }
                         else
                         {
                             // Push.
-                            LOGINFO ("pawn push: %s%s",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn push: %s%s",string_square(src),string_square(target));
 
                             // Double push.
                             if ( ( src >= A7 && src <= H7 ) && !bit ( ( *board ).occupancies[ 2 ]
                                                                     , target + 8
                                                                     ))
                             {
-                                LOGINFO ("double pawn push: %s%s",string_chess_board_square(src),string_chess_board_square(target+8));
+                                LOGINFO ("double pawn push: %s%s",string_square(src),string_square(target+8));
 
                             }
                         }
@@ -179,15 +212,15 @@ moves_init
                         // Promotion + capture.
                         if ( src >= A2 && src <= H2 )
                         {
-                            LOGINFO ("pawn promotion capture: %s%sq",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sr",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sb",string_chess_board_square(src),string_chess_board_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sn",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sq",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sr",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sb",string_square(src),string_square(target));
+                            LOGINFO ("pawn promotion capture: %s%sn",string_square(src),string_square(target));
                         }
                         // Push + capture.
                         else
                         {
-                            LOGINFO ("pawn capture: %s%s",string_chess_board_square(src),string_chess_board_square(target));
+                            LOGINFO ("pawn capture: %s%s",string_square(src),string_square(target));
                         }
 
                         BITCLR ( attack , target );
@@ -205,7 +238,7 @@ moves_init
                         if ( enpassant )
                         {
                             const SQUARE target_enpassant = bitboard_lsb ( enpassant );
-                            LOGINFO ("pawn enpassant capture: %s%s",string_chess_board_square(src),string_chess_board_square(target_enpassant));
+                            LOGINFO ("pawn enpassant capture: %s%s",string_square(src),string_square(target_enpassant));
                             
                         }
                     }

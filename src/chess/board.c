@@ -12,7 +12,7 @@
 #include "core/string.h"
 
 void
-chess_board_render
+board_render
 (   char*           dst
 ,   const board_t*  board
 )
@@ -51,19 +51,25 @@ chess_board_render
                                              ;
             dst[ 2 ] = ' ';
             dst[ 3 ] = 0;
+            
+            const bool blackchr = piece >= p && piece <= k;            
+            if ( blackchr )
+            {
+                dst[ 1 ] = touppercase ( dst[ 1 ] );
+            }
 
             if ( !( i % 2 ) )
             {
                 platform_console_write ( dst
-                                       , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_WSBP
-                                                                      : PLATFORM_COLOR_CHESS_WSWP
+                                       , blackchr ? PLATFORM_COLOR_CHESS_WSBP
+                                                  : PLATFORM_COLOR_CHESS_WSWP
                                        );
             }
             else
             {
                 platform_console_write ( dst
-                                       , ( piece >= p && piece <= k ) ? PLATFORM_COLOR_CHESS_BSBP
-                                                                      : PLATFORM_COLOR_CHESS_BSWP
+                                       , blackchr ? PLATFORM_COLOR_CHESS_BSBP
+                                                  : PLATFORM_COLOR_CHESS_BSWP
                                        );
             }
             
@@ -94,7 +100,7 @@ chess_board_render
                           , ( *board ).fen
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
-                          , ( ( *board ).enpassant != NO_SQ ) ? string_chess_board_square ( ( *board ).enpassant )
+                          , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
                                                               : "no"
                           , ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-'
                           , ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-'
