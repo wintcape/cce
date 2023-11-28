@@ -13,17 +13,17 @@
 #include "test/test.h"
 
 u8
-test_linear_allocator_startup_and_shutdown
+test_linear_allocator_create_and_destroy
 ( void )
 {
     linear_allocator_t allocator;
 
-    linear_allocator_startup ( sizeof ( u64 ) , 0 , &allocator );
+    linear_allocator_create ( sizeof ( u64 ) , 0 , &allocator );
     EXPECT_NEQ ( 0 , allocator.memory );
     EXPECT_EQ ( sizeof ( u64 ) , allocator.cap );
     EXPECT_EQ ( 0 , allocator.allocated );
 
-    linear_allocator_shutdown ( &allocator );
+    linear_allocator_destroy ( &allocator );
     EXPECT_EQ ( 0 , allocator.memory );
     EXPECT_EQ ( 0 , allocator.cap );
     EXPECT_EQ ( 0 , allocator.allocated );
@@ -38,7 +38,7 @@ test_linear_allocator_max_allocation_count
     const u64 max_allocations = 1024;
     
     linear_allocator_t allocator;
-    linear_allocator_startup ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
+    linear_allocator_create ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
     
     void* blk;
     for ( u64 i = 0; i < max_allocations; ++i )
@@ -48,7 +48,7 @@ test_linear_allocator_max_allocation_count
         EXPECT_EQ ( sizeof ( u64 ) * ( i + 1 ) , allocator.allocated );
     }
 
-    linear_allocator_shutdown ( &allocator );
+    linear_allocator_destroy ( &allocator );
 
     return true;
 }
@@ -58,13 +58,13 @@ test_linear_allocator_max_allocation_size
 ( void )
 {
     linear_allocator_t allocator;
-    linear_allocator_startup ( sizeof ( u64 ) , 0 , &allocator );
+    linear_allocator_create ( sizeof ( u64 ) , 0 , &allocator );
     
     void* blk = linear_allocator_allocate ( &allocator , sizeof ( u64 ) );
     EXPECT_NEQ ( 0 , blk );
     EXPECT_EQ ( sizeof ( u64 ) , allocator.allocated );
 
-    linear_allocator_shutdown ( &allocator );
+    linear_allocator_destroy ( &allocator );
 
     return true;
 }
@@ -76,7 +76,7 @@ test_linear_allocator_overflow
     const u64 max_allocations = 1024;
     
     linear_allocator_t allocator;
-    linear_allocator_startup ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
+    linear_allocator_create ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
     
     void* blk;
     for ( u64 i = 0; i < max_allocations; ++i )
@@ -92,7 +92,7 @@ test_linear_allocator_overflow
     EXPECT_EQ ( 0 , blk );
     EXPECT_EQ ( sizeof ( u64 ) * max_allocations , allocator.allocated );
 
-    linear_allocator_shutdown ( &allocator );
+    linear_allocator_destroy ( &allocator );
 
     return true;
 }
@@ -104,7 +104,7 @@ test_linear_allocator_free
     const u64 max_allocations = 1024;
     
     linear_allocator_t allocator;
-    linear_allocator_startup ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
+    linear_allocator_create ( sizeof ( u64 ) * max_allocations , 0 , &allocator );
     
     void* blk;
     for ( u64 i = 0; i < max_allocations; ++i )
@@ -117,7 +117,7 @@ test_linear_allocator_free
     linear_allocator_free ( &allocator );
     EXPECT_EQ ( 0 , allocator.allocated );
 
-    linear_allocator_shutdown ( &allocator );
+    linear_allocator_destroy ( &allocator );
 
     return true;
 }
@@ -126,7 +126,7 @@ void
 test_register_linear_allocator
 ( void )
 {
-    test_register ( test_linear_allocator_startup_and_shutdown
+    test_register ( test_linear_allocator_create_and_destroy
                   , "Starting or terminating a linear allocator."
                   );
     test_register ( test_linear_allocator_max_allocation_count
