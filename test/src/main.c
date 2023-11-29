@@ -9,9 +9,10 @@
 #include "core/memory.h"
 
 #include "memory/test_linear_allocator.h"
+#include "memory/test_dynamic_allocator.h"
 
 // Max system memory usage.
-#define TEST_MEMORY_REQUIREMENTS    ( MEBIBYTES ( 128 ) )
+#define TEST_MEMORY_REQUIREMENTS    ( GIBIBYTES ( 2.5 ) )
 
 int
 main
@@ -23,12 +24,13 @@ main
 
     // Initialize tests.
     test_register_linear_allocator ();
+    test_register_dynamic_allocator ();
 
     // Run tests.
     LOGDEBUG ( "Running test suite. . ." );
-    test_run_all ();
+    const bool fail = test_run_all ();
 
     memory_shutdown ();
 
-    return 0;
+    return fail;
 }

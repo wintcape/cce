@@ -26,7 +26,7 @@ static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8"
  */
 INLINE
 const char*
-string_square
+string_board_square
 (   const SQUARE square
 )
 {

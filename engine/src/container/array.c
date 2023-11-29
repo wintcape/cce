@@ -71,7 +71,7 @@ _array_resize
     const u64 length = array_length ( arr );
     const u64 stride = array_stride ( arr );
 
-    void* new = _array_allocate ( array_capacity ( arr ) * ARRAY_SCALE_FACTOR
+    void* new = _array_allocate ( ARRAY_SCALE_FACTOR ( array_capacity ( arr ) )
                                 , stride
                                 );
     memory_copy ( new , arr , length * stride );

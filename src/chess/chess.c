@@ -113,6 +113,6 @@ chess_render
     board_render ( ( *state ).textbuffer , &( *state ).board );
 
     // Temporary.
-    moves ( &( *state ).board , &( *state ).attacks );
+    board_moves ( &( *state ).board , &( *state ).attacks );
 }
 

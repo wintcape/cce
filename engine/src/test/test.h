@@ -22,7 +22,7 @@ test_register
 ,   char*       desc
 );
 
-void
+bool
 test_run_all
 ( void );
 

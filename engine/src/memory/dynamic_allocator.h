@@ -97,8 +97,23 @@ dynamic_allocator_free_aligned
 );
 
 /**
+ * @brief Computes the size and alignment of the given block of memory. Fails if
+ * invalid data is passed.
+ * @param blk The block of memory.
+ * @param size A buffer to hold the size.
+ * @param alignment A buffer to hold the alignment.
+ * @return true on success, false otherwise.
+ */
+bool
+dynamic_allocator_size_alignment
+(   void*   blk
+,   u64*    size
+,   u16*    alignment
+);
+
+/**
  * @brief Query free space remaining for an allocator. This function is
- * expensive and should be used sparingly.
+ * expensive and should be used sparingly, but it is useful for unit testing.
  * @param allocator The allocator.
  * @return The number of free bytes of space remaining.
  */
@@ -106,5 +121,14 @@ u64
 dynamic_allocator_query_free
 (   const dynamic_allocator_t* allocator
 );
+
+/**
+ * @brief Computes the header size of the allocator data structure. This function
+ * is useful for unit testing.
+ * @return The header size of the allocator data structure (in bytes).
+ */
+u64
+dynamic_allocator_header_size
+( void );
 
 #endif  // MEMORY_DYNAMIC_ALLOCATOR_H

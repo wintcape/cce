@@ -254,6 +254,19 @@ dynamic_allocator_free_aligned
     return true;
 }
 
+bool
+dynamic_allocator_size_alignment
+(   void*   blk
+,   u64*    size
+,   u16*    alignment
+)
+{
+    *size = *( ( u32* )( ( ( u64 ) blk ) - SIZE_STORAGE ) );
+    header_t* header = ( header_t* )( ( ( u64 ) blk ) + *size );
+    *alignment = ( *header ).alignment;
+    return true;
+}
+
 // Expensive!
 u64
 dynamic_allocator_query_free
@@ -262,4 +275,11 @@ dynamic_allocator_query_free
 {
     state_t* state = ( *allocator ).memory;
     return freelist_query_free ( &( *state ).freelist );
+}
+
+u64
+dynamic_allocator_header_size
+( void ) 
+{
+    return sizeof ( header_t ) + SIZE_STORAGE;
 }

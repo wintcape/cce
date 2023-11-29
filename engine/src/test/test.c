@@ -38,10 +38,11 @@ test_register
     test_entry_t e;
     e.fn = PFN_test;
     e.desc = desc;
+
     array_push ( tests , e );
 }
 
-void
+bool
 test_run_all
 ( void )
 {
@@ -98,4 +99,6 @@ test_run_all
             );
 
     array_destroy ( tests );
+
+    return fail;
 }

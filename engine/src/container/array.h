@@ -21,9 +21,11 @@ typedef enum
 }
 ARRAY_FIELD;
 
-// Global constants.
-#define ARRAY_DEFAULT_CAPACITY  10
-#define ARRAY_SCALE_FACTOR      ( 1U + ( 1U >> 1 ) )
+// Defines array default capacity.
+#define ARRAY_DEFAULT_CAPACITY 10
+
+// Defines array scale factor.
+#define ARRAY_SCALE_FACTOR(cap) ( ( cap * 3 ) >> 1 )
 
 /**
  * @brief Allocates memory for a resizable array.

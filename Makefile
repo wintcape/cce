@@ -11,7 +11,7 @@ INCFLAGS := -Isrc -Iengine/src -Itest/src
 
 ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o
 TARGET_OBJFILES := main.o application.o chess.o chess_string.o chess_bitboard.o chess_attack.o board.o chess_fen.o
-TEST_OBJFILES := test_main.o test_memory_linear_allocator.o
+TEST_OBJFILES := test_main.o test_memory_linear_allocator.o  test_memory_dynamic_allocator.o
 
 ################################################################################
 
@@ -49,6 +49,7 @@ obj/chess_fen.o:						src/chess/fen.c
 obj/test_main.o:						test/src/main.c
 obj/test_test.o:						test/src/test.c
 obj/test_memory_linear_allocator.o:		test/src/memory/test_linear_allocator.c
+obj/test_memory_dynamic_allocator.o:	test/src/memory/test_dynamic_allocator.c
 
 # Engine obj
 obj/memory.o: 							engine/src/core/memory.c
