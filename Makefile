@@ -75,14 +75,14 @@ makedir:
 	@echo mkdir -p bin obj
 	@mkdir -p bin obj
 
-.PHONY: test
-test: bin/$(TEST)
-
 .PHONY: app
 app: bin/$(TARGET)
 
 .PHONY: all
-all: clean test app run
+all: clean app run
+
+.PHONY: test
+test: clean bin/$(TEST) app run
 
 .PHONY: clean
 clean:

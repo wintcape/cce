@@ -382,6 +382,7 @@ attack_mask_king
 
     return mask;
 }
+#include "chess/string.h"
 
 bool
 attacks_init

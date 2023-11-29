@@ -8,7 +8,158 @@
 
 #include "chess/common.h"
 
+#include "chess/board.h"
 #include "chess/string.h"
+
+// Type definition for a move.
+typedef u32 move_t;
+
+/**
+ * @brief Encodes a single move via bitpacking.
+ * @param src The source square.
+ * @param target The target square.
+ * @param piece The piece on the source square.
+ * @param promotion Promoted piece, if any.
+ * @param capture Is move capture? Y/N
+ * @param enpassant Is move en passant? Y/N
+ * @param castle Is move castle? Y/N
+ * @return A single move, encoded as a bitpacked 32-bit unsigned integer.
+ */
+INLINE
+move_t
+board_move_encode
+(   const SQUARE    src
+,   const SQUARE    target
+,   const PIECE     piece
+,   const PIECE     promotion
+,   const bool      capture
+,   const bool      double_push
+,   const bool      enpassant
+,   const bool      castle
+)
+{
+    return src
+         | ( target << 6 )
+         | ( piece << 12 )
+         | ( promotion << 16 )
+         | ( capture << 20 )
+         | ( double_push << 21 )
+         | ( enpassant << 22 )
+         | ( castle << 23 )
+         ;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_source_square
+(   const move_t move
+)
+{
+    return move & 0x3F;
+}
+
+/**
+ * @brief Retrieves target square from a bitpacked move.
+ * @param move A move.
+ * @return The target square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_target_square
+(   const move_t move
+)
+{
+    return ( move & 0xFC ) >> 6;
+}
+
+/**
+ * @brief Retrieves piece from a bitpacked move.
+ * @param move A move.
+ * @return The piece of move.
+ */
+INLINE
+SQUARE
+board_move_decode_piece
+(   const move_t move
+)
+{
+    return ( move & 0xF000 ) >> 12;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_promotion
+(   const move_t move
+)
+{
+    return ( move & 0xF0000 ) >> 16;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_capture
+(   const move_t move
+)
+{
+    return ( move & 0x100000 ) >> 20;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_double_push
+(   const move_t move
+)
+{
+    return ( move & 0x200000 ) >> 21;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_enpassant
+(   const move_t move
+)
+{
+    return ( move & 0x400000 ) >> 22;
+}
+
+/**
+ * @brief Retrieves source square from a bitpacked move.
+ * @param move A move.
+ * @return The source square of move.
+ */
+INLINE
+SQUARE
+board_move_decode_castling
+(   const move_t move
+)
+{
+    return ( move & 0x800000 ) >> 23;
+}
 
 /**
  * @brief Generates the move options for a given board state using pregenerated
@@ -33,9 +184,10 @@ board_moves
     {
         bitboard = ( *board ).pieces[ piece ];
 
+        // White pawn and castling moves.
         if ( ( *board ).side == WHITE )
         {
-            // White pawn.
+            // Pawn.
             if ( piece == P )
             {
                 while ( bitboard )
@@ -121,10 +273,9 @@ board_moves
                 }
             }
             
-            // White king.
+            // Castling moves.
             else if ( piece == K )
             {
-                // Castling moves.
                 if ( ( *board ).castle & CASTLE_WK )
                 {
                     if (   !bit ( ( *board ).occupancies[ 2 ] , F1 )
@@ -156,9 +307,11 @@ board_moves
                 }
             }
         }
+        
+        // Black pawn and castling moves.
         else
         {
-            // Black pawn.
+            // Pawn.
             if ( piece == p )
             {
                 while ( bitboard )
@@ -244,10 +397,9 @@ board_moves
                 }
             }
 
-            // Black king.
+            // Castling moves.
             else if ( piece == k )
             {
-                // Castling moves.
                 if ( ( *board ).castle & CASTLE_BK )
                 {
                     if (   !bit ( ( *board ).occupancies[ 2 ] , F8 )
@@ -286,28 +438,185 @@ board_moves
             while ( bitboard )
             {
                 src = bitboard_lsb ( bitboard );
-                
+               
                 attack = bitboard_knight_attack ( attacks , src )
-                       & ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
-                                                      : ~( *board ).occupancies[ BLACK ]
-                                                      ;
+                       & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
+                                                        : ~( *board ).occupancies[ BLACK ]
+                                                        );
                 while ( attack )
                 {
                     target = bitboard_lsb ( attack );
-                   
+ 
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
                               , target
                               ))
                     {
-                        LOGINFO ("knight piece move: %s%s",string_board_square(src),string_board_square(target));
+                        LOGINFO ("knight move: %s%s",string_board_square(src),string_board_square(target));
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("knight piece capture: %s%s",string_board_square(src),string_board_square(target));
+                        LOGINFO ("knight capture: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    BITCLR ( attack , target );
+                }
+
+                BITCLR ( bitboard , src );
+            }
+        }
+        
+        // Bishop.
+        else if ( ( ( *board ).side == WHITE ) ? piece == B : piece == b )
+        {
+            while ( bitboard )
+            {
+                src = bitboard_lsb ( bitboard );
+               
+                attack = bitboard_bishop_attack ( attacks
+                                                , src
+                                                , ( *board ).occupancies[ 2 ]
+                                                )
+                       & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
+                                                        : ~( *board ).occupancies[ BLACK ]
+                                                        );
+                while ( attack )
+                {
+                    target = bitboard_lsb ( attack );
+ 
+                    // Quiet move.
+                    if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
+                                                             : ( *board ).occupancies[ WHITE ]
+                              , target
+                              ))
+                    {
+                        LOGINFO ("bishop move: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    // Capture move.
+                    else
+                    {
+                        LOGINFO ("bishop capture: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    BITCLR ( attack , target );
+                }
+
+                BITCLR ( bitboard , src );
+            }
+        }
+        
+        // Rook.
+        else if ( ( ( *board ).side == WHITE ) ? piece == R : piece == r )
+        {
+            while ( bitboard )
+            {
+                src = bitboard_lsb ( bitboard );
+               
+                attack = bitboard_rook_attack ( attacks
+                                              , src
+                                              , ( *board ).occupancies[ 2 ]
+                                              )
+                       & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
+                                                        : ~( *board ).occupancies[ BLACK ]
+                                                        );
+                while ( attack )
+                {
+                    target = bitboard_lsb ( attack );
+ 
+                    // Quiet move.
+                    if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
+                                                             : ( *board ).occupancies[ WHITE ]
+                              , target
+                              ))
+                    {
+                        LOGINFO ("rook move: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    // Capture move.
+                    else
+                    {
+                        LOGINFO ("rook capture: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    BITCLR ( attack , target );
+                }
+
+                BITCLR ( bitboard , src );
+            }
+        }
+
+        // Queen.
+        else if ( ( ( *board ).side == WHITE ) ? piece == Q : piece == q )
+        {
+            while ( bitboard )
+            {
+                src = bitboard_lsb ( bitboard );
+               
+                attack = bitboard_queen_attack ( attacks
+                                               , src
+                                               , ( *board ).occupancies[ 2 ]
+                                               )
+                       & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
+                                                        : ~( *board ).occupancies[ BLACK ]
+                                                        );
+                while ( attack )
+                {
+                    target = bitboard_lsb ( attack );
+ 
+                    // Quiet move.
+                    if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
+                                                             : ( *board ).occupancies[ WHITE ]
+                              , target
+                              ))
+                    {
+                        LOGINFO ("queen move: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    // Capture move.
+                    else
+                    {
+                        LOGINFO ("queen capture: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    BITCLR ( attack , target );
+                }
+
+                BITCLR ( bitboard , src );
+            }
+        }
+
+        // King.
+        if ( ( ( *board ).side == WHITE ) ? piece == K : piece == k )
+        {
+            while ( bitboard )
+            {
+                src = bitboard_lsb ( bitboard );
+               
+                attack = bitboard_king_attack ( attacks , src )
+                       & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
+                                                        : ~( *board ).occupancies[ BLACK ]
+                                                        );
+                while ( attack )
+                {
+                    target = bitboard_lsb ( attack );
+ 
+                    // Quiet move.
+                    if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
+                                                             : ( *board ).occupancies[ WHITE ]
+                              , target
+                              ))
+                    {
+                        LOGINFO ("king move: %s%s",string_board_square(src),string_board_square(target));
+                    }
+
+                    // Capture move.
+                    else
+                    {
+                        LOGINFO ("king capture: %s%s",string_board_square(src),string_board_square(target));
                     }
 
                     BITCLR ( attack , target );

@@ -85,10 +85,7 @@ chess_update
     }
 //  "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
     fen_parse ( "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" , &( *state ).board );
-    ( *state ).tmps[ 0 ] = bitboard_attackable ( &( *state ).board
-                                               , &( *state ).attacks
-                                               , WHITE
-                                               );
+    board_moves ( &( *state ).board , &( *state ).attacks );
 
     return true;
 }
@@ -111,8 +108,5 @@ chess_render
                            );
 
     board_render ( ( *state ).textbuffer , &( *state ).board );
-
-    // Temporary.
-    board_moves ( &( *state ).board , &( *state ).attacks );
 }
 

@@ -56,18 +56,24 @@ static state_t* state;
 
 bool
 memory_startup
-(   u64 cap
+(   const u64 cap
 )
 {
-    u64 state_memory_requirement = sizeof ( state_t );
-
+    const u64 state_memory_requirement = sizeof ( state_t );
     u64 allocator_memory_requirement = 0;
     dynamic_allocator_create ( cap , &allocator_memory_requirement , 0 , 0 );
+    const u64 memory_requirement = state_memory_requirement + allocator_memory_requirement;
 
-    void* memory = platform_memory_allocate (   state_memory_requirement
-                                              + allocator_memory_requirement
+    f32 amt = 0.0f;
+    const char* unit = string_bytesize ( memory_requirement , &amt );
+    LOGDEBUG ( "Attempting to allocate %.2f %s of host platform memory to run the application. . ."
+             , amt , unit
+             );
+
+    void* memory = platform_memory_allocate ( memory_requirement
                                             , true
                                             );
+
     if ( !memory )
     {
         LOGFATAL ( "The host platform failed to allocate memory to run the application." );
@@ -90,11 +96,7 @@ memory_startup
         return false;
     }
 
-    f32 amt = 0.0f;
-    const char* unit = string_bytesize ( cap , &amt );
-    LOGDEBUG ( "Successfully allocated %.2f %s of host platform memory to run the application."
-             , amt , unit
-             );
+    LOGDEBUG ( "\tSuccess." );     
 
     return true;
 }

@@ -29,7 +29,7 @@ MEMORY_TAG;
  */
 bool
 memory_startup
-(   u64 cap
+(   const u64 cap
 );
 
 /**

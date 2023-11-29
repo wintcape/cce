@@ -634,11 +634,12 @@ test_dynamic_allocator_util_free
         LOGERROR( "test_dynamic_allocator_util_free:  dynamic_allocator_free_aligned failed.");
         return false;
     }
+
     ( *data ).block = 0;
-    currently_allocated -= ( *data ).size
-                         + header_size
-                         + ( *data ).alignment
-                         ;
+    *currently_allocated -= ( *data ).size
+                          + header_size
+                          + ( *data ).alignment
+                          ;
     u64 free = dynamic_allocator_query_free ( allocator );
     EXPECT_EQ ( total_allocator_size - *currently_allocated , free );
 
@@ -656,12 +657,13 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
     const u64 header_size = dynamic_allocator_header_size ();
 
     const u32 alloc_count = 65556;
+    u32 alloc;    
     alloc_t allocs[ 65556 ] = { 0 };
     u16 po2[ 8 ] = { 1 , 2 , 4 , 8 , 16 , 32 , 64 , 128 };
     for ( u32 i = 0; i < alloc_count; ++i )
     {
-        allocs[ i ].alignment = po2[ random2( 0 , 7 ) ];
-        allocs[ i ].size = ( u64 ) random2( 1 , 65536 );
+        allocs[ i ].alignment = po2[ random2 ( 0 , 7 ) ];
+        allocs[ i ].size = random2 ( 1 , 65536 );
     }
 
     u64 total_allocator_size = 0;
@@ -698,11 +700,10 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
     const char* unit = string_bytesize ( total_allocator_size , &amt );
     LOGTRACE ("Preparing to allocate %.2f %s. . ." , amt , unit ); 
 
-    u32 alloc = 0;
-    while ( alloc != alloc_count )
+    for ( alloc = 0; alloc != alloc_count; ++alloc )
     {
-        u32 i = random2 ( 0 , alloc_count );
-        if ( allocs[ i ].block == 0 )
+        u32 i = random2 ( 0 , alloc_count - 1 );
+        if ( !allocs[ i ].block )
         {
             if ( !test_dynamic_allocator_util_allocate ( &allocator
                                                        , &allocs[ i ]
@@ -716,18 +717,19 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
                         );
                 return false;
             }
-            alloc += 1;
         }
     }
 
-    LOGTRACE ("Preparing to free %u times. . ."
+    LOGTRACE ("\tDone." );    
+    
+    LOGTRACE ( "Preparing to free %u times. . ."
              , alloc
-             );   
-
-    while ( alloc != alloc_count )
+             );
+ 
+    for ( alloc = 0; alloc != alloc_count; ++alloc )
     {
-        u32 i = random2 ( 0 , alloc_count );
-        if ( allocs[ i ].block != 0 )
+        u32 i = random2 ( 0 , alloc_count - 1 );
+        if ( allocs[ i ].block )
         {
             if ( !test_dynamic_allocator_util_free ( &allocator
                                                    , &allocs[i]
@@ -741,9 +743,10 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
                          );
                 return false;
             }
-            alloc -= 1;
         }
     }
+
+    LOGTRACE ("\tDone." );    
  
     dynamic_allocator_destroy ( &allocator );
     EXPECT_EQ ( 0 , allocator.memory );
@@ -756,143 +759,150 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
     return true;
 }
 
-//u8
-//test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random
-//( void )
-//{
-//    dynamic_allocator_t allocator;
-//
-//    u64 memory_requirement = 0;
-//    u64 currently_allocated = 0;
-//    const u64 header_size = dynamic_allocator_header_size ();
-//
-//    const u32 alloc_count = 65556;
-//    alloc_t allocs[ 65556 ] = { 0 };
-//    u16 po2[ 8 ] = { 1 , 2 , 4 , 8 , 16 , 32 , 64 , 128 };
-//    for ( u32 i = 0; i < alloc_count; ++i )
-//    {
-//        allocs[ i ].alignment = po2[ random2 ( 0 , 7 ) ];
-//        allocs[ i ].size = ( u64 ) random2 ( 1 , 65536 );
-//    }
-//
-//    u64 total_allocator_size = 0;
-//    for ( u32 i = 0; i < alloc_count; ++i )
-//    {
-//        total_allocator_size += allocs[ i ].alignment
-//                              + header_size
-//                              + allocs[ i ].size
-//                              ;
-//    }
-//    
-//    EXPECT ( dynamic_allocator_create ( total_allocator_size
-//                                      , &memory_requirement
-//                                      , 0
-//                                      , 0
-//                                      ));
-//    
-//    void* memory = memory_allocate ( memory_requirement
-//                                   , MEMORY_TAG_APPLICATION
-//                                   );
-//
-//    EXPECT ( dynamic_allocator_create ( total_allocator_size
-//                                      , &memory_requirement
-//                                      , memory
-//                                      , &allocator
-//                                      ));
-//    EXPECT_NEQ ( 0 , allocator.memory );
-//    u64 free = dynamic_allocator_query_free ( &allocator );
-//    EXPECT_EQ ( total_allocator_size , free );
-//
-//    u32 op = 0;
-//    const u32 max_op = 10000000;
-//    u32 alloc = 0;
-//    while ( op < max_op )
-//    {
-//        if ( !alloc || random2( 0 , 99 ) > 50 )
-//        {
-//            for (;;)
-//            {
-//                u32 i = ( u32 ) random2 ( 0 , alloc_count - 1 );
-//                if ( !allocs[ i ].block )
-//                {
-//                    if ( !test_dynamic_allocator_util_allocate ( &allocator
-//                                                               , &allocs[ i ]
-//                                                               , &currently_allocated
-//                                                               , header_size
-//                                                               , total_allocator_size
-//                                                               ))
-//                    {
-//                        LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_allocate failed on index: %u."
-//                                 , i
-//                                 );
-//                        return false;
-//                    }
-//                     alloc += 1;
-//                    break;
-//                }
-//            }
-//            op += 1;
-//        }
-//        else
-//        {
-//            for (;;) 
-//            {
-//                u32 i = ( u32 ) random2 ( 0 , alloc_count - 1 );
-//                if ( allocs[ i ].block )
-//                {
-//                    if ( !test_dynamic_allocator_util_free ( &allocator
-//                                                           , &allocs[ i ]
-//                                                           , &currently_allocated
-//                                                           , header_size
-//                                                           , total_allocator_size
-//                                                           ))
-//                    {
-//                        LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_free failed on index: %u."
-//                                 , i
-//                                 );
-//                        return false;
-//                    }
-//                    alloc -= 1;
-//                    break;
-//                }
-//            }
-//            op += 1;
-//        }
-//    }
-//
-//    LOGTRACE ( "Max op count of %u reached. Freeing remaining allocations."
-//             , max_op
-//             );
-//
-//    for ( u32 i = 0; i < alloc_count; ++i )
-//    {
-//        if ( allocs[ i ].block )
-//        {
-//            if ( !test_dynamic_allocator_util_free ( &allocator
-//                                                   , &allocs[ i ]
-//                                                   , &currently_allocated
-//                                                   , header_size
-//                                                   , total_allocator_size
-//                                                   ))
-//            {
-//                LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_free failed on index: %u."
-//                         , i
-//                         );
-//                return false;
-//            }
-//        }
-//    }
-//
-//    dynamic_allocator_destroy ( &allocator );
-//    EXPECT_EQ ( 0 , allocator.memory );
-//    
-//    memory_free ( memory
-//                , memory_requirement
-//                , MEMORY_TAG_APPLICATION
-//                );
-//
-//    return true;
-//}
+u8
+test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random
+( void )
+{
+    dynamic_allocator_t allocator;
+
+    u64 memory_requirement = 0;
+    u64 currently_allocated = 0;
+    const u64 header_size = dynamic_allocator_header_size ();
+
+    const u32 alloc_count = 65556;
+    alloc_t allocs[ 65556 ] = { 0 };
+    u16 po2[ 8 ] = { 1 , 2 , 4 , 8 , 16 , 32 , 64 , 128 };
+    for ( u32 i = 0; i < alloc_count; ++i )
+    {
+        allocs[ i ].alignment = po2[ random2 ( 0 , 7 ) ];
+        allocs[ i ].size = random2 ( 1 , 65536 );
+    }
+
+    u64 total_allocator_size = 0;
+    for ( u32 i = 0; i < alloc_count; ++i )
+    {
+        total_allocator_size += allocs[ i ].alignment
+                              + header_size
+                              + allocs[ i ].size
+                              ;
+    }
+    
+    EXPECT ( dynamic_allocator_create ( total_allocator_size
+                                      , &memory_requirement
+                                      , 0
+                                      , 0
+                                      ));
+    
+    void* memory = memory_allocate ( memory_requirement
+                                   , MEMORY_TAG_APPLICATION
+                                   );
+
+    EXPECT ( dynamic_allocator_create ( total_allocator_size
+                                      , &memory_requirement
+                                      , memory
+                                      , &allocator
+                                      ));
+    EXPECT_NEQ ( 0 , allocator.memory );
+    u64 free = dynamic_allocator_query_free ( &allocator );
+    EXPECT_EQ ( total_allocator_size , free );
+
+    u32 op = 0;
+    const u32 max_op = 1000000;
+    u32 alloc = 0;
+    
+    LOGTRACE ( "Performing %u random allocate and free operations. . ."
+             , max_op
+             );
+
+    while ( op < max_op )
+    {
+        if ( !alloc || random2( 0 , 1 ) )
+        {
+            for (;;)
+            {
+                u32 i = random2 ( 0 , alloc_count - 1 );
+                if ( !allocs[ i ].block )
+                {
+                    if ( !test_dynamic_allocator_util_allocate ( &allocator
+                                                               , &allocs[ i ]
+                                                               , &currently_allocated
+                                                               , header_size
+                                                               , total_allocator_size
+                                                               ))
+                    {
+                        LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_allocate failed on index: %u."
+                                 , i
+                                 );
+                        return false;
+                    }
+                     alloc += 1;
+                    break;
+                }
+            }
+            op += 1;
+        }
+        else
+        {
+            for (;;) 
+            {
+                u32 i = random2 ( 0 , alloc_count - 1 );
+                if ( allocs[ i ].block )
+                {
+                    if ( !test_dynamic_allocator_util_free ( &allocator
+                                                           , &allocs[ i ]
+                                                           , &currently_allocated
+                                                           , header_size
+                                                           , total_allocator_size
+                                                           ))
+                    {
+                        LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_free failed on index: %u."
+                                 , i
+                                 );
+                        return false;
+                    }
+                    alloc -= 1;
+                    break;
+                }
+            }
+            op += 1;
+        }
+    }
+
+    LOGTRACE ( "\tDone." );
+
+    LOGTRACE ( "Freeing remaining allocations. . ." );
+
+    for ( u32 i = 0; i < alloc_count; ++i )
+    {
+        if ( allocs[ i ].block )
+        {
+            if ( !test_dynamic_allocator_util_free ( &allocator
+                                                   , &allocs[ i ]
+                                                   , &currently_allocated
+                                                   , header_size
+                                                   , total_allocator_size
+                                                   ))
+            {
+                LOGERROR ( "test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random:  test_dynamic_allocator_util_free failed on index: %u."
+                         , i
+                         );
+                return false;
+            }
+        }
+    }
+    
+    LOGTRACE ( "\tDone." );
+
+    dynamic_allocator_destroy ( &allocator );
+    EXPECT_EQ ( 0 , allocator.memory );
+    
+    memory_free ( memory
+                , memory_requirement
+                , MEMORY_TAG_APPLICATION
+                );
+
+    return true;
+}
 
 void
 test_register_dynamic_allocator
@@ -922,8 +932,8 @@ test_register_dynamic_allocator
     test_register ( test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
 				  , "Testing dynamic allocator with multiple aligned allocations, each with different alignments, in random order."
 				  );
-//    test_register ( test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random
-//				  , "Testing dynamic allocator randomization."
-//				  );
+    test_register ( test_dynamic_allocator_multiple_alloc_and_free_aligned_different_alignments_random
+				  , "Testing dynamic allocator randomization."
+				  );
 
 }
