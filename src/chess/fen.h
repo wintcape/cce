@@ -19,8 +19,9 @@
  * @brief Parses a FEN move and updates the provided board.
  * @param fen The FEN string to parse.
  * @param board The board state to mutate.
+ * @return false if FEN invalid, true otherwise.
  */
-void
+bool
 fen_parse
 (   const char* fen
 ,   board_t*    board

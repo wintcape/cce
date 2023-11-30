@@ -19,6 +19,53 @@ static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8"
                                                           , "A1" , "B1" , "C1" , "D1" , "E1" , "F1" , "G1" , "H1"
                                                           };
 
+// Defines an ASCII alias for each piece.
+static const char piecechrs[] = { 'P' , 'N' , 'B' , 'R' , 'Q' , 'K'
+                                , 'p' , 'n' , 'b' , 'r' , 'q' , 'k'
+                                };
+
+// Defines each piece and alias.
+static const PIECE pieces[] = { [ 'P' ] = P
+                              , [ 'N' ] = N
+                              , [ 'B' ] = B
+                              , [ 'R' ] = R
+                              , [ 'Q' ] = Q
+                              , [ 'K' ] = K
+                              , [ 'p' ] = p
+                              , [ 'n' ] = n
+                              , [ 'b' ] = b
+                              , [ 'r' ] = r
+                              , [ 'q' ] = q
+                              , [ 'k' ] = k
+                              };
+
+/**
+ * @brief Generates the ASCII alias for a given piece.
+ * @param piece The piece to display.
+ * @return ASCII char representing the piece.
+ */
+INLINE
+char
+piecechr
+(   const PIECE piece
+)
+{
+    return piecechrs[ piece ];
+}
+
+/**
+ * @brief Generates the piece for a given ASCII alias.
+ * @param alias ASCII alias for the piece.
+ * @return The piece.
+ */
+INLINE
+PIECE
+chrpiece
+(   const char alias
+)
+{
+    return pieces[ max ( alias ,  0 ) ];
+}
 /**
  * @brief Stringify square.
  * @param square A square.

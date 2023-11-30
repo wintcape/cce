@@ -590,7 +590,7 @@ board_moves
         }
 
         // King.
-        if ( ( ( *board ).side == WHITE ) ? piece == K : piece == k )
+        else if ( ( ( *board ).side == WHITE ) ? piece == K : piece == k )
         {
             while ( bitboard )
             {

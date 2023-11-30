@@ -160,7 +160,7 @@ test_dynamic_allocator_multi_allocation_all_space
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 256 + header_size , free );
 
-    void* blk2 = dynamic_allocator_allocate( &allocator , 256 );
+    void* blk2 = dynamic_allocator_allocate ( &allocator , 256 );
     EXPECT_NEQ ( 0 , blk2 );
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 0 , free );
@@ -230,7 +230,7 @@ test_dynamic_allocator_multi_allocation_over_allocate
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 256 + header_size , free );
 
-    void* blk2 = dynamic_allocator_allocate( &allocator , 256 );
+    void* blk2 = dynamic_allocator_allocate ( &allocator , 256 );
     EXPECT_NEQ ( 0 , blk2 );
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 0 , free );
@@ -295,7 +295,7 @@ test_dynamic_allocator_multi_allocation_most_space_request_too_big
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 256 + header_size , free );
 
-    void* blk2 = dynamic_allocator_allocate( &allocator , 128 );
+    void* blk2 = dynamic_allocator_allocate ( &allocator , 128 );
     EXPECT_NEQ ( 0 , blk2 );
     free = dynamic_allocator_query_free ( &allocator );
     EXPECT_EQ ( 128 , free );
