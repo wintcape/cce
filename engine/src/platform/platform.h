@@ -13,18 +13,29 @@
  * requirement. Call again passing in a state pointer.
  * @param memory_requirement Output buffer to read memory requirement.
  * @param state Pass 0 to read memory requirement. Otherwise, pass a buffer.
- * @param wm_title The title to assign the application window.
- * @param wm_class The class name to assign the application window.
- * @param wm_x The x coordinate to assign the application window.
- * @param wm_y The y coordinate to assign the application window.
- * @param wm_w The width to assign the application window.
- * @param wm_h The height to assign the application window.
+ * @param windowed Windowed application? Y/N.
+ * @param wm_title The title to assign the application window (if applicable).
+ * @param wm_class The class name to assign the application window
+ * (if applicable).
+ * @param window_x The x coordinate to assign the application window
+ * (if applicable).
+ * @param window_y The y coordinate to assign the application window
+ * (if applicable).
+ * @param window_w The width to assign the application window (if applicable).
+ * @param window_h The height to assign the application window (if applicable).
  * @return false on error, true otherwise.
  */
 bool
 platform_startup
 (   u64*        memory_requirement
 ,   void*       state
+,   const bool  windowed
+,   const char* wm_title
+,   const char* wm_class
+,   const i32   window_x
+,   const i32   window_y
+,   const i32   window_w
+,   const i32   window_h
 );
 
 /**
@@ -35,6 +46,14 @@ void
 platform_shutdown
 (   void* state
 );
+
+/**
+ * @brief Platform-independent pump messages function.
+ * @param platform The platform state to mutate.
+ */
+bool
+platform_pump_messages
+( void );
 
 /**
  * @brief Platform-independent block allocation function.

@@ -13,6 +13,16 @@
 typedef struct
 {
     u64     memory_requirement;
+
+    bool    window;
+    char*   wm_title;
+    char*   wm_class;
+    u16     window_x;
+    u16     window_y;
+    u16     window_w;
+    u16     window_h;
+
+    bool    user_input;
 }
 config_t;
 
@@ -40,6 +50,12 @@ typedef struct application_t
          ( struct application_t*    app
          , f32                      dt
          );
+    
+    void ( *on_resize )
+         ( struct application_t*    app
+         , u32                      w
+         , u32                      h
+         );
 }
 application_t;
 
@@ -52,6 +68,17 @@ extern
 bool
 application
 (   application_t* app
+);
+
+/**
+ * @brief Queries the application window size.
+ * @param w Output buffer for width.
+ * @param h Output buffer for height.
+ */
+void
+application_query_window_size
+(   i32* w
+,   i32* h
 );
 
 #endif  // APPLICATION_H

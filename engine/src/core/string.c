@@ -22,18 +22,27 @@ string_length
     return strlen ( s );
 }
 
+u64
+string_length_clamp
+(   const char* s
+,   const u64   lim
+)
+{
+    return strnlen ( s , lim );
+}
+
 char*
 string_allocate_from
 (   const char* s
 )
 {
-    u64 size = string_length ( s ) + 1;
+    const u64 size = string_length ( s ) + 1;
     char* cpy = memory_allocate ( size , MEMORY_TAG_STRING );
     return memory_copy ( cpy , s , size );
 }
 
 void
-string_destroy
+string_free
 (   char* s
 )
 {
@@ -115,11 +124,11 @@ string_bytesize
 }
 
 char*
-string_trim
-(   char* s
+_string_trim
+(   char*       s
+,   const u64   len
 )
 {
-    const u64 len = string_length ( s );
     u64 i;
     
     // Calculate index of first non-whitespace character.

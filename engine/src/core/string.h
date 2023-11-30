@@ -22,6 +22,19 @@ string_length
 );
 
 /**
+ * @brief Clamped variant of string_length for unsafe strings.
+ * @param s The string to read.
+ * @param lim The maximum number of characters to read from s.
+ * @return The number of characters in s, or lim if s contains more than lim
+ * characters.
+ */
+u64
+string_length_clamp
+(   const char* s
+,   const u64   lim
+);
+
+/**
  * @brief Generates a copy of a provided string.
  * @param s The string to copy.
  * @return A copy of s.
@@ -36,7 +49,7 @@ string_allocate_from
  * @param s The string to free.
  */
 void
-string_destroy
+string_free
 (   char* s
 );
 
@@ -94,9 +107,32 @@ string_bytesize
  * @param s The string to copy.
  * @return s.
  */
+#define string_trim(s)                      \
+    ( _string_trim ( s                      \
+                   , string_length ( s )    \
+                   ))
+
+/**
+ * @brief Clamped variant of string_trim for unsafe strings.
+ * @param s The string to copy.
+ * @param lim The maximum number of characters to read from s.
+ * @return s.
+ */
+#define string_trim_clamp(s,lim)                        \
+    ( _string_trim ( s                                  \
+                   , string_length_clamp ( s , lim )    \
+                   ))
+
+/**
+ * @brief Primary implementation of string_trim and string_trim_clamp.
+ * @param s The string to copy.
+ * @param len The precalculated string length of s.
+ * @return s.
+ */
 char*
-string_trim
-(   char* s
+_string_trim
+(   char*       s
+,   const u64   len
 );
 
 #endif  // STRING_H

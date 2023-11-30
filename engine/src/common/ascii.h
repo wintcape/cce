@@ -43,6 +43,24 @@ lowercase
 }
 
 INLINE
+u8
+chri
+(   const unsigned char c
+)
+{
+    return c - ( ( unsigned char ) '0' );
+}
+
+INLINE
+unsigned char
+ichr
+(   const u8 i
+)
+{
+    return i + ( ( unsigned char ) '0' );
+}
+
+INLINE
 bool
 alpha
 (   const char c

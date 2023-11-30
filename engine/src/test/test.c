@@ -98,7 +98,7 @@ test_run_all
             , pass , fail , skip , clock_master.elapsed
             );
 
-    array_destroy ( tests );
+    array_free ( tests );
 
     return fail;
 }

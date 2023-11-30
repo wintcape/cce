@@ -50,12 +50,12 @@ _array_allocate
  * @param arr The array to free.
  */
 void
-_array_destroy
+_array_free
 (   void* arr
 );
 
-#define array_destroy(arr) \
-    _array_destroy ( (arr) );
+#define array_free(arr) \
+    _array_free ( (arr) );
 
 /**
  * @brief Reads the value of an array field.

@@ -151,7 +151,7 @@ memory_move
 );
 
 /**
- * @brief Stringify utility. Uses memory allocator; call string_destroy to free.
+ * @brief Stringify utility. Uses memory allocator; call string_free to free.
  * @return A string representation of memory usage statistics.
  */
 char*

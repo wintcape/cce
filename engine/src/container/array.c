@@ -30,7 +30,7 @@ _array_allocate
 }
 
 void
-_array_destroy
+_array_free
 (   void* arr
 )
 {
@@ -77,7 +77,7 @@ _array_resize
     memory_copy ( new , arr , length * stride );
     _array_field_set ( new , ARRAY_FIELD_LENGTH , length );
 
-    _array_destroy ( arr );
+    _array_free ( arr );
     
     return new;
 }
