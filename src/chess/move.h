@@ -53,22 +53,40 @@ moves_init
                         // Promotion.
                         if ( src >= A7 && src <= H7 )
                         {
-                            LOGINFO ("pawn promotion: %s%sq",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sr",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sb",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sn",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn promotion: %s%sQ"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sR"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sB"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sN"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
                         else
                         {
                             // Push.
-                            LOGINFO ("pawn push: %s%s",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn move: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
 
                             // Double push.
                             if ( ( src >= A2 && src <= H2 ) && !bit ( ( *board ).occupancies[ 2 ]
                                                                     , target - 8
                                                                     ))
                             {
-                                LOGINFO ("double pawn push: %s%s",string_square(src),string_square(target-8));
+                                LOGINFO ( "Pawn double push: %s%s"
+                                        , string_square ( src )
+                                        , string_square ( target + 8 )
+                                        );
 
                             }
                         }
@@ -88,15 +106,30 @@ moves_init
                         // Promotion + capture.
                         if ( src >= A7 && src <= H7 )
                         {
-                            LOGINFO ("pawn promotion capture: %s%sq",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sr",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sb",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sn",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn promotion + capture: %s%sQ"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sR"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sB"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sN"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
                         // Push + capture.
                         else
                         {
-                            LOGINFO ("pawn capture: %s%s",string_square(src),string_square(target));
+                            LOGINFO ("Pawn capture: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
 
                         BITCLR ( attack , target );
@@ -114,7 +147,10 @@ moves_init
                         if ( enpassant )
                         {
                             const SQUARE target_enpassant = bitboard_lsb ( enpassant );
-                            LOGINFO ("pawn enpassant capture: %s%s",string_square(src),string_square(target_enpassant));
+                            LOGINFO ( "Pawn enpassant capture: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target_enpassant )
+                                    );
                             
                         }
                     }
@@ -136,7 +172,7 @@ moves_init
                             && !board_square_attackable ( board , attacks , F1 , BLACK )
                            )
                         {
-                            LOGINFO ("king castling: E1G1");
+                            LOGINFO ( "King castling: E1G1" );
                         }
                     }
                 }
@@ -151,7 +187,7 @@ moves_init
                             && !board_square_attackable ( board , attacks , C1 , BLACK )
                            )
                         {
-                            LOGINFO ("king castling: E1C1");
+                            LOGINFO ( "King castling: E1C1" );
                         }
                     }
                 }
@@ -177,23 +213,40 @@ moves_init
                         // Promotion.
                         if ( src >= A2 && src <= H2 )
                         {
-                            LOGINFO ("pawn promotion: %s%sq",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sr",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sb",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion: %s%sn",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn promotion: %s%sQ"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sR"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sB"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion: %s%sN"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
                         else
                         {
                             // Push.
-                            LOGINFO ("pawn push: %s%s",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn move: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
 
                             // Double push.
                             if ( ( src >= A7 && src <= H7 ) && !bit ( ( *board ).occupancies[ 2 ]
                                                                     , target + 8
                                                                     ))
                             {
-                                LOGINFO ("double pawn push: %s%s",string_square(src),string_square(target+8));
-
+                                LOGINFO ( "Pawn double push: %s%s"
+                                        , string_square ( src )
+                                        , string_square ( target + 8 )
+                                        );
                             }
                         }
                     }
@@ -212,15 +265,30 @@ moves_init
                         // Promotion + capture.
                         if ( src >= A2 && src <= H2 )
                         {
-                            LOGINFO ("pawn promotion capture: %s%sq",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sr",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sb",string_square(src),string_square(target));
-                            LOGINFO ("pawn promotion capture: %s%sn",string_square(src),string_square(target));
+                            LOGINFO ( "Pawn promotion + capture: %s%sQ"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sR"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sB"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
+                            LOGINFO ( "Pawn promotion + capture: %s%sN"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
                         // Push + capture.
                         else
                         {
-                            LOGINFO ("pawn capture: %s%s",string_square(src),string_square(target));
+                            LOGINFO ("Pawn capture: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target )
+                                    );
                         }
 
                         BITCLR ( attack , target );
@@ -238,7 +306,10 @@ moves_init
                         if ( enpassant )
                         {
                             const SQUARE target_enpassant = bitboard_lsb ( enpassant );
-                            LOGINFO ("pawn enpassant capture: %s%s",string_square(src),string_square(target_enpassant));
+                            LOGINFO ( "Pawn enpassant capture: %s%s"
+                                    , string_square ( src )
+                                    , string_square ( target_enpassant )
+                                    );
                             
                         }
                     }
@@ -260,7 +331,7 @@ moves_init
                             && !board_square_attackable ( board , attacks , F8 , WHITE )
                            )
                         {
-                            LOGINFO ("king castling: E8G8");
+                            LOGINFO ( "King castling: E8G8" );
                         }
                     }
                 }
@@ -275,7 +346,7 @@ moves_init
                             && !board_square_attackable ( board , attacks , C8 , WHITE )
                            )
                         {
-                            LOGINFO ("king castling: E8C8");
+                            LOGINFO ( "King castling: E8C8" );
                         }
                     }
                 }
@@ -303,13 +374,19 @@ moves_init
                               , target
                               ))
                     {
-                        LOGINFO ("knight move: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Knight move: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("knight capture: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Knight capture: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     BITCLR ( attack , target );
@@ -343,13 +420,19 @@ moves_init
                               , target
                               ))
                     {
-                        LOGINFO ("bishop move: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Bishop move: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("bishop capture: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Bishop capture: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     BITCLR ( attack , target );
@@ -383,13 +466,19 @@ moves_init
                               , target
                               ))
                     {
-                        LOGINFO ("rook move: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Rook move: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("rook capture: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Rook capture: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     BITCLR ( attack , target );
@@ -423,13 +512,19 @@ moves_init
                               , target
                               ))
                     {
-                        LOGINFO ("queen move: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Queen move: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("queen capture: %s%s",string_square(src),string_square(target));
+                        LOGINFO ("Queen capture: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     BITCLR ( attack , target );
@@ -460,13 +555,19 @@ moves_init
                               , target
                               ))
                     {
-                        LOGINFO ("king move: %s%s",string_square(src),string_square(target));
+                        LOGINFO ( "King move: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     // Capture move.
                     else
                     {
-                        LOGINFO ("king capture: %s%s",string_square(src),string_square(target));
+                        LOGINFO ( "King capture: %s%s"
+                                , string_square ( src )
+                                , string_square ( target )
+                                );
                     }
 
                     BITCLR ( attack , target );
