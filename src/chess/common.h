@@ -13,6 +13,7 @@
 #include "chess/common/board.h"
 #include "chess/common/castle.h"
 #include "chess/common/fen.h"
+#include "chess/common/move.h"
 #include "chess/common/piece.h"
 #include "chess/common/square.h"
 

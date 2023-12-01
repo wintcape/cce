@@ -30,7 +30,7 @@ typedef struct
     char        textbuffer[ CHESS_RENDER_TEXTBUFFER_LENGTH ];
 
     // Temporary.
-    bitboard_t  tmps[ 64 ];
+    moves_t moves;
 }
 state_t;
 
@@ -86,9 +86,16 @@ chess_update
 
     ( *state ).ply += 1;
 
-//  "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-    fen_parse ( "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" , &( *state ).board );
-    board_moves ( &( *state ).board , &( *state ).attacks );
+    moves_push ( &( *state ).moves
+               , move_encode ( D7
+                             , E8
+                             , P
+                             , Q
+                             , true
+                             , false
+                             , false
+                             , false
+                             ));
 
     return true;
 }
@@ -111,5 +118,8 @@ chess_render
                            );
 
     board_render ( ( *state ).textbuffer , &( *state ).board );
+
+    string_moves ( ( *state ).textbuffer , &( *state ).moves );
+    platform_console_write ( ( *state ).textbuffer , PLATFORM_COLOR_CHESS_INFO );
 }
 

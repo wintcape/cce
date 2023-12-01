@@ -698,7 +698,7 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
 
     f32 amt = 0.0f;
     const char* unit = string_bytesize ( total_allocator_size , &amt );
-    LOGTRACE ("Preparing to allocate %.2f %s. . ." , amt , unit ); 
+    LOGTRACE ("Allocating %.2f %s. . ." , amt , unit ); 
 
     for ( alloc = 0; alloc != alloc_count; ++alloc )
     {
@@ -722,7 +722,7 @@ test_dynamic_allocator_multiple_alloc_aligned_different_alignments_random
 
     LOGTRACE ("\tDone." );    
     
-    LOGTRACE ( "Preparing to free %u times. . ."
+    LOGTRACE ( "Freeing %u allocator nodes. . ."
              , alloc
              );
  

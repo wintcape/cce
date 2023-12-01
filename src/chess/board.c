@@ -100,7 +100,7 @@ board_render
                           , ( *board ).fen
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
-                          , ( ( *board ).enpassant != NO_SQ ) ? string_board_square ( ( *board ).enpassant )
+                          , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
                                                               : "no"
                           , ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-'
                           , ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-'
