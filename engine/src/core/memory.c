@@ -61,7 +61,7 @@ memory_startup
 {
     const u64 state_memory_requirement = sizeof ( state_t );
     u64 allocator_memory_requirement = 0;
-    dynamic_allocator_create ( cap , &allocator_memory_requirement , 0 , 0 );
+    dynamic_allocator_create ( cap - state_memory_requirement , &allocator_memory_requirement , 0 , 0 );
     const u64 memory_requirement = state_memory_requirement + allocator_memory_requirement;
 
     f32 amt = 0.0f;

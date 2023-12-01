@@ -109,7 +109,7 @@ fen_parse
         }
     }
 
-    // Validate side token.
+    // Validate.
     if (   ( fen[ 0 ] != FEN_FILE_WHITESPACE_TOKEN )
         || ( fen[ 1 ] != 'w' && fen[ 1 ] != 'b' )
         || ( fen[ 2 ] != FEN_FILE_WHITESPACE_TOKEN )
@@ -165,7 +165,8 @@ fen_parse
         castle += 1;
         fen += 1;
     }
-    
+   
+    // Validate.
     if ( fen[ 0 ] != FEN_FILE_WHITESPACE_TOKEN )
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, character '%c'."

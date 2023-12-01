@@ -53,20 +53,248 @@ state_t;
 static state_t* state;
 
 /**
- * @brief Alias for a windowed application runtime loop (see engine_run).
+ * @brief Alias for the runtime loop executed by a windowed application.
+ * (see engine_run).
  */
-INLINE
-void
-ENGINE_RUN_WINDOWED
-( void );
+#define ENGINE_RUN_WINDOWED()                                                                   \
+                                                                                                \
+    u8 frame = 0;                                                                               \
+    f64 target_fps = 1.0f / 60.0f;                                                              \
+                                                                                                \
+    while ( ( *state ).running )                                                                \
+    {                                                                                           \
+        if ( !platform_pump_messages () )                                                       \
+        {                                                                                       \
+            ( *state ).running = false;                                                         \
+        }                                                                                       \
+                                                                                                \
+        if ( ( *state ).suspended )                                                             \
+        {                                                                                       \
+            continue;                                                                           \
+        }                                                                                       \
+                                                                                                \
+        /* Update the clock.                                                                  */\
+        clock_update ( &( *state ).clock );                                                     \
+        t = ( *state ).clock.elapsed;                                                           \
+        dt = t - ( *state ).system_time;                                                        \
+        t_start = platform_get_absolute_time ();                                                \
+                                                                                                \
+        /* Update the user application.                                                       */\
+        if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )                  \
+        {                                                                                       \
+            LOGFATAL ( "engine_run: Failed to update user application, shutting down." );       \
+            ( *state ).running = false;                                                         \
+            break;                                                                              \
+        }                                                                                       \
+                                                                                                \
+        /* Render the user application.                                                       */\
+        ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );                         \
+                                                                                                \
+        /* Update runtime.                                                                    */\
+        t_end = platform_get_absolute_time ();                                                  \
+        t_elapsed = t_end - t_start;                                                            \
+        runtime += t_elapsed;                                                                   \
+                                                                                                \
+        /* If there is time remaining (based on target_fps), hand over                        */\
+        /* control to the OS.                                                                 */\
+        f64 t_rem = target_fps - t_elapsed;                                                     \
+        if ( t_rem > 0 )                                                                        \
+        {                                                                                       \
+            u64 t_rem_ms = t_rem * 1000;                                                        \
+            /*bool limit_fps = false;*/                                                         \
+            if ( t_rem_ms /*&& limit_fps*/ )                                                    \
+            {                                                                                   \
+                platform_sleep ( t_rem_ms - 1 );                                                \
+            }                                                                                   \
+            frame += 1;                                                                         \
+        }                                                                                       \
+                                                                                                \
+        /* Handle user input last (changes are applied to the next frame).                    */\
+        if ( ( *state ).input_subsystem_state )                                                 \
+        {                                                                                       \
+            input_update ( dt );                                                                \
+        }                                                                                       \
+                                                                                                \
+        /* Update system time again.                                                          */\
+        ( *state ).system_time = t;                                                             \
+    }
 
 /**
- * @brief Alias for a windowless application runtime loop (see engine_run).
+ * @brief Alias for the runtime loop executed by a windowed application
+ * (see engine_run).
  */
-INLINE
-void
-ENGINE_RUN_WINDOWLESS
-( void );
+#define ENGINE_RUN_WINDOWLESS()                                                                 \
+                                                                                                \
+    while ( ( *state ).running )                                                                \
+    {                                                                                           \
+        if ( ( *state ).suspended )                                                             \
+        {                                                                                       \
+            continue;                                                                           \
+        }                                                                                       \
+                                                                                                \
+        /* Update the clock.                                                                  */\
+        clock_update ( &( *state ).clock );                                                     \
+        t = ( *state ).clock.elapsed;                                                           \
+        dt = t - ( *state ).system_time;                                                        \
+        t_start = platform_get_absolute_time ();                                                \
+                                                                                                \
+        /* Update the user application.                                                       */\
+        if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )                  \
+        {                                                                                       \
+            LOGFATAL ( "engine_run: Failed to update user application, shutting down." );       \
+            ( *state ).running = false;                                                         \
+            break;                                                                              \
+        }                                                                                       \
+                                                                                                \
+        /* Render the user application.                                                       */\
+        ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );                         \
+                                                                                                \
+        /* Update runtime.                                                                    */\
+        t_end = platform_get_absolute_time ();                                                  \
+        t_elapsed = t_end - t_start;                                                            \
+        runtime += t_elapsed;                                                                   \
+                                                                                                \
+        /* Update system time again.                                                          */\
+        ( *state ).system_time = t;                                                             \
+    }
+
+/**
+ * @brief Alias for the runtime loop executed by a windowed application in debug
+ * mode (see engine_run).
+ */
+#define ENGINE_RUN_WINDOWED_DEBUG()                                                             \
+                                                                                                \
+    u8 frame = 0;                                                                               \
+    f64 target_fps = 1.0f / 60.0f;                                                              \
+                                                                                                \
+    while ( ( *state ).running )                                                                \
+    {                                                                                           \
+        if ( !platform_pump_messages () )                                                       \
+        {                                                                                       \
+            ( *state ).running = false;                                                         \
+        }                                                                                       \
+                                                                                                \
+        if ( ( *state ).suspended )                                                             \
+        {                                                                                       \
+            continue;                                                                           \
+        }                                                                                       \
+                                                                                                \
+        /* Update the clock.                                                                  */\
+        clock_update ( &( *state ).clock );                                                     \
+        t = ( *state ).clock.elapsed;                                                           \
+        dt = t - ( *state ).system_time;                                                        \
+        t_start = platform_get_absolute_time ();                                                \
+                                                                                                \
+        /* Update the user application.                                                       */\
+        t_start_update = t_start;                                                               \
+        if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )                  \
+        {                                                                                       \
+            LOGFATAL ( "engine_run: Failed to update user application, shutting down." );       \
+            ( *state ).running = false;                                                         \
+            break;                                                                              \
+        }                                                                                       \
+                                                                                                \
+        /* Compute the time the application took to update.                                   */\
+        t_end_update = platform_get_absolute_time ();                                           \
+        t_elapsed_update = t_end_update - t_start_update;                                       \
+        LOGDEBUG ( "Application update complete.\n\tTook %f seconds."                           \
+                 , t_elapsed_update                                                             \
+                 );                                                                             \
+                                                                                                \
+        /* Render the user application.                                                       */\
+        t_start_render = platform_get_absolute_time ();                                         \
+        ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );                         \
+                                                                                                \
+        /* Compute the time the application took to render.                                   */\
+        t_end_render = platform_get_absolute_time ();                                           \
+        t_elapsed_render = t_end_render - t_start_render;                                       \
+        LOGDEBUG ( "Application render complete.\n\tTook %f seconds."                           \
+                 , t_elapsed_render                                                             \
+                 );                                                                             \
+                                                                                                \
+        /* Update runtime.                                                                    */\
+        t_end = platform_get_absolute_time ();                                                  \
+        t_elapsed = t_end - t_start;                                                            \
+        runtime += t_elapsed;                                                                   \
+                                                                                                \
+        /* If there is time remaining (based on target_fps), hand over                        */\
+        /* control to the OS.                                                                 */\
+        f64 t_rem = target_fps - t_elapsed;                                                     \
+        if ( t_rem > 0 )                                                                        \
+        {                                                                                       \
+            u64 t_rem_ms = t_rem * 1000;                                                        \
+            /*bool limit_fps = false;*/                                                         \
+            if ( t_rem_ms /*&& limit_fps*/ )                                                    \
+            {                                                                                   \
+                platform_sleep ( t_rem_ms - 1 );                                                \
+            }                                                                                   \
+            frame += 1;                                                                         \
+        }                                                                                       \
+                                                                                                \
+        /* Handle user input last (changes are applied to the next frame).                    */\
+        if ( ( *state ).input_subsystem_state )                                                 \
+        {                                                                                       \
+            input_update ( dt );                                                                \
+        }                                                                                       \
+                                                                                                \
+        /* Update system time again.                                                          */\
+        ( *state ).system_time = t;                                                             \
+    }
+
+/**
+ * @brief Alias for the runtime loop executed by a windowless application in debug
+ * mode (see engine_run).
+ */
+#define ENGINE_RUN_WINDOWLESS_DEBUG()                                                           \
+                                                                                                \
+    while ( ( *state ).running )                                                                \
+    {                                                                                           \
+        if ( ( *state ).suspended )                                                             \
+        {                                                                                       \
+            continue;                                                                           \
+        }                                                                                       \
+                                                                                                \
+        /* Update the clock.                                                                  */\
+        clock_update ( &( *state ).clock );                                                     \
+        t = ( *state ).clock.elapsed;                                                           \
+        dt = t - ( *state ).system_time;                                                        \
+        t_start = platform_get_absolute_time ();                                                \
+                                                                                                \
+        /* Update the user application.                                                       */\
+        t_start_update = t_start;                                                               \
+        if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )                  \
+        {                                                                                       \
+            LOGFATAL ( "engine_run: Failed to update user application, shutting down." );       \
+            ( *state ).running = false;                                                         \
+            break;                                                                              \
+        }                                                                                       \
+                                                                                                \
+        /* Compute the time the application took to update.                                   */\
+        t_end_update = platform_get_absolute_time ();                                           \
+        t_elapsed_update = t_end_update - t_start_update;                                       \
+        LOGDEBUG ( "Application update complete.\n\tTook %f seconds."                           \
+                 , t_elapsed_update                                                             \
+                 );                                                                             \
+                                                                                                \
+        /* Render the user application.                                                       */\
+        t_start_render = platform_get_absolute_time ();                                         \
+        ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );                         \
+                                                                                                \
+        /* Compute the time the application took to render.                                   */\
+        t_end_render = platform_get_absolute_time ();                                           \
+        t_elapsed_render = t_end_render - t_start_render;                                       \
+        LOGDEBUG ( "Application render complete.\n\tTook %f seconds."                           \
+                 , t_elapsed_render                                                             \
+                 );                                                                             \
+                                                                                                \
+        /* Update runtime.                                                                    */\
+        t_end = platform_get_absolute_time ();                                                  \
+        t_elapsed = t_end - t_start;                                                            \
+        runtime += t_elapsed;                                                                   \
+                                                                                                \
+        /* Update system time again.                                                          */\
+        ( *state ).system_time = t;                                                             \
+    }
 
 /**
  * @brief Event handler.
@@ -247,9 +475,25 @@ engine_startup
 bool
 engine_run
 ( void )
-{    
-    
+{
     ( *state ).running = true;
+
+    f64 t;
+    f64 dt;
+    f64 t_start;
+    f64 t_end;
+    f64 t_elapsed;
+
+    #if VERSION_DEBUG == 1
+        f64 t_start_update;
+        f64 t_end_update;
+        f64 t_elapsed_update;
+        f64 t_start_render;
+        f64 t_end_render;
+        f64 t_elapsed_render;
+    #endif
+    
+    f64 runtime = 0; 
 
     // Initialize the clock and system time.
     clock_start ( &( *state ).clock );
@@ -264,11 +508,19 @@ engine_run
     // Runtime loop.
     if ( ( *state ).window )
     {
-        ENGINE_RUN_WINDOWED ();
+        #if VERSION_DEBUG == 1
+            ENGINE_RUN_WINDOWED_DEBUG ();
+        #else
+            ENGINE_RUN_WINDOWED ();
+        #endif
     }
     else
     {
-        ENGINE_RUN_WINDOWLESS ();
+        #if VERSION_DEBUG == 1
+            ENGINE_RUN_WINDOWLESS_DEBUG ();
+        #else
+            ENGINE_RUN_WINDOWLESS ();
+        #endif
     }
 
     ( *state ).running = false;
@@ -296,174 +548,6 @@ engine_run
     memory_shutdown ();
  
     return true;
-}
-
-/**
- * @brief Runtime loop for a windowed application.
- */
-INLINE
-void
-ENGINE_RUN_WINDOWED
-( void )
-{
-    f64 t;
-    f64 dt;
-    f64 t_start;
-    f64 t_end;
-    f64 t_elapsed;
-    f64 t_start_update;
-    f64 t_end_update;
-    f64 t_elapsed_update;
-    f64 t_start_render;
-    f64 t_end_render;
-    f64 t_elapsed_render;
-
-    f64 runtime = 0;  
-    
-    u8 frame = 0;
-    f64 target_fps = 1.0f / 60.0f;
-
-    while ( ( *state ).running )
-    {
-        if ( !platform_pump_messages () )
-        {
-            ( *state ).running = false;
-        }
-
-        if ( !( *state ).suspended )
-        {
-            // Update the clock.
-            clock_update ( &( *state ).clock );
-            t = ( *state ).clock.elapsed;
-            dt = t - ( *state ).system_time;
-            t_start = platform_get_absolute_time ();
-
-            // Update the user application.
-            t_start_update = t_start;
-            if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )
-            {
-                LOGFATAL ( "engine_run: Failed to update user application, shutting down." );
-                ( *state ).running = false;
-                break;
-            }
-
-            // Calculate the time the application took to update.
-            t_end_update = platform_get_absolute_time ();
-            t_elapsed_update = t_end_update - t_start_update;
-            LOGDEBUG ( "Application update complete.\n\tTook %f seconds."
-                     , t_elapsed_update
-                     );
-
-            // Render the user application.
-            t_start_render = platform_get_absolute_time ();
-            ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );
-
-            // Calculate the time the application took to render.
-            t_end_render = platform_get_absolute_time ();
-            t_elapsed_render = t_end_render - t_start_render;
-            LOGDEBUG ( "Application render complete.\n\tTook %f seconds."
-                     , t_elapsed_render
-                     );
-
-            // Update runtime.
-            t_end = platform_get_absolute_time ();
-            t_elapsed = t_end - t_start;
-            runtime += t_elapsed;
-
-            // If there is time remaining (based on target_fps), hand over
-            // control to the OS.
-            f64 t_rem = target_fps - t_elapsed; 
-            if ( t_rem > 0 )
-            {
-                u64 t_rem_ms = t_rem * 1000;
-                /*bool limit_fps = false;*/
-                if ( t_rem_ms /*&& limit_fps*/ )
-                {
-                    platform_sleep ( t_rem_ms - 1 );
-                }
-                frame += 1;
-            }
-
-            // Handle user input last (changes are applied to the next frame).
-            if ( ( *state ).input_subsystem_state )
-            {
-                input_update ( dt );
-            }
-
-            // Update system time again.
-            ( *state ).system_time = t;
-        }
-    }
-}
-
-/**
- * @brief Runtime loop for a windowless application.
- */
-INLINE
-void
-ENGINE_RUN_WINDOWLESS
-( void )
-{
-    f64 t;
-    f64 dt;
-    f64 t_start;
-    f64 t_end;
-    f64 t_elapsed;
-    f64 t_start_update;
-    f64 t_end_update;
-    f64 t_elapsed_update;
-    f64 t_start_render;
-    f64 t_end_render;
-    f64 t_elapsed_render;
-
-    f64 runtime = 0;    
-    
-    while ( ( *state ).running )
-    {
-        if ( !( *state ).suspended )
-        {
-            // Update the clock.
-            clock_update ( &( *state ).clock );
-            t = ( *state ).clock.elapsed;
-            dt = t - ( *state ).system_time;
-            t_start = platform_get_absolute_time ();
-
-            // Update the user application.
-            t_start_update = t_start;
-            if ( !( *( ( *state ).app ) ).update ( ( *state ).app , ( f32 ) dt ) )
-            {
-                LOGFATAL ( "engine_run: Failed to update user application, shutting down." );
-                ( *state ).running = false;
-                break;
-            }
-
-            // Calculate the time the application took to update.
-            t_end_update = platform_get_absolute_time ();
-            t_elapsed_update = t_end_update - t_start_update;
-            LOGDEBUG ( "Application update complete.\n\tTook %f seconds."
-                     , t_elapsed_update
-                     );
-
-            // Render the user application.
-            t_start_render = platform_get_absolute_time ();
-            ( *( ( *state ).app ) ).render ( ( *state ).app , ( f32 ) dt );
-
-            // Calculate the time the application took to render.
-            t_end_render = platform_get_absolute_time ();
-            t_elapsed_render = t_end_render - t_start_render;
-            LOGDEBUG ( "Application render complete.\n\tTook %f seconds."
-                     , t_elapsed_render
-                     );
-
-            // Update runtime.
-            t_end = platform_get_absolute_time ();
-            t_elapsed = t_end - t_start;
-            runtime += t_elapsed;
-
-            // Update system time.
-            ( *state ).system_time = t;
-        }
-    }
 }
 
 bool
