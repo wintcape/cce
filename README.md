@@ -7,14 +7,14 @@ Requires GNU make.
 
 To build and launch: 
 ```
-make all
+> make all
 ```
 To run unit tests, then build and launch:
 ```
-make test
+> make test
 ```
 To compile and launch the application separately:
 ```
-make app
-bin/chess
+> make app
+> bin/chess
 ```
