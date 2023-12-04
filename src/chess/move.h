@@ -47,7 +47,7 @@ move_parse
  * @param board A chess board state.
  */
 void
-moves_init
+moves_get
 (   moves_t*            moves
 ,   board_t*            board
 ,   const attacks_t*    attacks
