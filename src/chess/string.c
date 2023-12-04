@@ -27,7 +27,7 @@ string_move
     return dst;
 }
 
-u64
+char*
 string_moves
 (   char*           dst
 ,   const moves_t*  moves
@@ -62,10 +62,10 @@ string_moves
                           , ( *moves ).count
                           );
 
-    return offs;
+    return dst;
 }
 
-u64
+char*
 string_bitboard
 (   char*               dst
 ,   const bitboard_t    bitboard
@@ -111,5 +111,5 @@ string_bitboard
     
     offs += string_format ( dst + offs , "\n\n" );
     
-    return offs;
+    return dst;
 }

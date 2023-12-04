@@ -13,6 +13,10 @@
 // Defines the number of characters needed to represent a move in string format.
 #define MOVE_STRING_LENGTH 5
 
+// Defines the number of characters needed to represent a board square
+// coordinate in string format.
+#define SQUARE_STRING_LENGTH 2
+
 // Defines a string representation of each square coordinate on a chess board.
 static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8" , "F8" , "G8" , "H8"
                                               , "A7" , "B7" , "C7" , "D7" , "E7" , "F7" , "G7" , "H7"
@@ -113,9 +117,9 @@ string_move
  * @brief Stringify moves.
  * @param dst Output buffer.
  * @param move A container of pregenerated moves.
- * @return The number of characters written to dst.
+ * @return dst.
  */
-u64
+char*
 string_moves
 (   char*           dst
 ,   const moves_t*  moves
@@ -125,9 +129,9 @@ string_moves
  * @brief Stringify bitboard.
  * @param dst Output buffer.
  * @param bitboard A bitboard.
- * @return The number of characters written to dst.
+ * @return dst.
  */
-u64
+char*
 string_bitboard
 (   char*               dst
 ,   const bitboard_t    bitboard

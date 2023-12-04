@@ -113,28 +113,17 @@ chess_render
     platform_console_write ( ( *state ).textbuffer
                            , PLATFORM_COLOR_CHESS_INFO
                            );
+    
+    // Render the board.
+    board_render ( ( *state ).textbuffer , &( *state ).board );
 
-    // Show the board for each move.
-    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
-    {
-        string_format ( ( *state ).textbuffer
-                      , " MOVE: %s, %c captured!"
-                      , string_move ( ( *state ).textbuffer + 7, ( *state ).moves.moves[i])
-                      );
-        platform_console_write ( ( *state ).textbuffer
+    // Temporary.
+    string_format ( ( *state ).textbuffer
+                  , "%s"
+                  , string_moves ( ( *state ).textbuffer , &( *state ).moves )
+                  );
+    platform_console_write ( ( *state ).textbuffer
                            , PLATFORM_COLOR_CHESS_INFO
                            );
-        if ( move_parse ( ( *state ).moves.moves[ i ] , MOVE_FILTER_ONLY_CAPTURES , &( *state ).board ) )
-        {
-            platform_console_write ("\n", PLATFORM_COLOR_CHESS_INFO);
-            board_render ( ( *state ).textbuffer , &( *state ).board );
-            getchar ();
-        }
-        else
-        {
-            platform_console_write (" not made because it is not a capture!", PLATFORM_COLOR_CHESS_INFO);
-            getchar ();
-        }
-    }
 }
 
