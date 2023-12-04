@@ -19,7 +19,7 @@
 // Type definition for chess engine subsystem state.
 typedef struct
 {
-    // Pregenerated attack table.
+    // Pregenerated attack tables.
     attacks_t   attacks;
 
     // Game state.
@@ -87,15 +87,17 @@ chess_update
 
     ( *state ).ply += 1;
 
-    // Pregenerate move options.
-    moves_init ( &( *state ).moves
-               , &( *state ).board
-               , &( *state ).attacks
-               );
+    // Generate move options.
+    moves_get ( &( *state ).moves
+              , &( *state ).board
+              , &( *state ).attacks
+              );
 
     return true;
 }
-#include <stdio.h>
+
+#include <stdio.h> /*  Temporary  */
+
 void
 chess_render
 ( void )
