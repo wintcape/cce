@@ -18,18 +18,6 @@ typedef enum
 }
 SIDE;
 
-// Type definition for player.
-typedef enum
-{
-    PAWN
-,   KNIGHT
-,   BISHOP
-,   ROOK
-,   QUEEN
-,   KING
-}
-PLAYER;
-
 // Type definition for a piece.
 typedef enum
 {
