@@ -9,8 +9,6 @@
 #include "chess/platform.h"
 #include "chess/string.h"
 
-#include "core/string.h"
-
 void
 board_render
 (   char*           dst
