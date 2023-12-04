@@ -14,7 +14,6 @@
 #include "chess/string.h"
 
 #include "core/logger.h"
-#include "core/string.h"
 
 // Type definition for chess engine subsystem state.
 typedef struct
