@@ -16,7 +16,7 @@ move_parse
 ,   board_t*            board
 )
 {
-    //const SQUARE src = move_decode_source_square ( move );
+//    const SQUARE src = move_decode_source_square ( move );
     const SQUARE target = move_decode_source_square ( move );
     const PIECE piece = move_decode_piece ( move );
     const PIECE promotion = move_decode_promotion ( move );
@@ -25,6 +25,9 @@ move_parse
     const bool enpassant = move_decode_enpassant ( move );
     const bool castle = move_decode_castle ( move );
     
+    const bool white = ( *board ).side == WHITE;
+    
+    // Apply filter.
     switch ( filter )
     {
         case MOVE_FILTER_ONLY_PAWN:
@@ -119,17 +122,41 @@ move_parse
     // Parse capture.
     if ( capture )
     {
-        const PIECE from = ( ( *board ).side == WHITE ) ? p : P;
-        const PIECE to = ( ( *board ).side == WHITE ) ? k : K;
+        const PIECE from = ( white ) ? p : P;
+        const PIECE to = ( white ) ? k : K;
         for ( PIECE i = from; i <= to; ++i )
         {
             if ( bit ( ( *board ).pieces[ i ] , target ) )
             {
+                // Clear piece on target square.
                 BITCLR ( ( *board ).pieces[ i ] , target );
                 break;
             }
         }
     }
+
+    // Parse promotion.
+    if ( promotion )
+    {
+        // Clear pawn.
+        BITCLR ( ( *board ).pieces[ ( white ) ? P : p ] , target );
+
+        // Set promotion.
+        BITSET ( ( *board ).pieces[ promotion ] , target );
+    }
+
+
+    // Parse en passant capture.
+    if ( enpassant )
+    {
+        if ( capture )
+        {
+            ( white ) ? BITCLR ( ( *board ).pieces[ p ] , target - 8 )
+                      : BITCLR ( ( *board ).pieces[ P ] , target + 8 )
+                      ;
+        }
+    }
+
 
     return true;
 }

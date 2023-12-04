@@ -56,7 +56,7 @@ chess_startup
     attacks_init ( &( *state ).attacks );
 
     // Initialize game state.
-    fen_parse ( FEN_TRICKY , &( *state ).board );
+    fen_parse ( "r3k2r/p11pqpb1/bn2pnp1/2pPN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1" , &( *state ).board );
     ( *state ).ply = 0; 
 
     return true;
@@ -115,15 +115,34 @@ chess_render
                            );
     
     // Render the board.
-    board_render ( ( *state ).textbuffer , &( *state ).board );
+    // board_render ( ( *state ).textbuffer , &( *state ).board );
 
     // Temporary.
-    string_format ( ( *state ).textbuffer
-                  , "%s"
-                  , string_moves ( ( *state ).textbuffer , &( *state ).moves )
-                  );
-    platform_console_write ( ( *state ).textbuffer
-                           , PLATFORM_COLOR_CHESS_INFO
-                           );
+    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
+    {
+        const move_t move = ( *state ).moves.moves[ i ];
+        if ( move_parse ( move , MOVE_FILTER_NONE , &( *state ).board ) )
+        {
+            string_format ( ( *state ).textbuffer
+                          , "Move %s:"
+                          , string_move ( ( *state ).textbuffer , move )
+                          );
+            platform_console_write ( ( *state ).textbuffer
+                                   , PLATFORM_COLOR_CHESS_INFO
+                                   );
+            board_render ( ( *state ).textbuffer , &( *state ).board );
+        }
+        else
+        {
+            string_format ( ( *state ).textbuffer
+                          , "Move %s skipped."
+                          , string_move ( ( *state ).textbuffer , move )
+                          );
+            platform_console_write ( ( *state ).textbuffer
+                                   , PLATFORM_COLOR_CHESS_INFO
+                                   );
+        }
+        getchar ();
+    }
 }
 
