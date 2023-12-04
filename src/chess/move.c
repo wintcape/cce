@@ -16,24 +16,97 @@ move_parse
 ,   board_t*            board
 )
 {
-    if ( filter == MOVE_FILTER_ONLY_CAPTURES )
-    {
-        return move_decode_capture ( move ) ? move_parse ( move
-                                                         , MOVE_FILTER_NONE
-                                                         , board
-                                                         )
-                                            : false
-                                            ;
-    }
-
-    //const SQUARE src = move_decode_source_square ( move );
+    const SQUARE src = move_decode_source_square ( move );
     const SQUARE target = move_decode_source_square ( move );
     const PIECE piece = move_decode_piece ( move );
-    //const PIECE promotion = move_decode_promotion ( move );
+    const PIECE promotion = move_decode_promotion ( move );
     const bool capture = move_decode_capture ( move );
-    //const bool double_push = move_decode_double_push ( move );
-    //const bool enpassant = move_decode_enpassant ( move );
-    //const bool castle = move_decode_castle ( move );
+    const bool double_push = move_decode_double_push ( move );
+    const bool enpassant = move_decode_enpassant ( move );
+    const bool castle = move_decode_castle ( move );
+    
+    switch ( filter )
+    {
+        case MOVE_FILTER_ONLY_PAWN:
+            return ( piece == 'P' || piece == 'p' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_KNIGHT:
+            return ( piece == 'N' || piece == 'n' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_BISHOP:
+            return ( piece == 'B' || piece == 'b' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_ROOK:
+            return ( piece == 'R' || piece == 'r' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_QUEEN:
+            return ( piece == 'Q' || piece == 'q' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_KING:
+            return ( piece == 'K' || piece == 'k' ) ? move_parse ( move
+                                                                , MOVE_FILTER_NONE
+                                                                , board
+                                                                )
+                                                    : false
+                                                    ;
+        case MOVE_FILTER_ONLY_CAPTURE:
+            return ( capture ) ? move_parse ( move
+                                            , MOVE_FILTER_NONE
+                                            , board
+                                            )
+                               : false
+                               ;
+        case MOVE_FILTER_ONLY_PROMOTION:
+            return ( promotion ) ? move_parse ( move
+                                              , MOVE_FILTER_NONE
+                                              , board
+                                              )
+                               : false
+                               ;
+        case MOVE_FILTER_ONLY_DOUBLE_PUSH:
+            return ( double_push ) ? move_parse ( move
+                                                , MOVE_FILTER_NONE
+                                                , board
+                                                )
+                                   : false
+                                   ;
+        case MOVE_FILTER_ONLY_ENPASSANT:
+            return ( enpassant ) ? move_parse ( move
+                                              , MOVE_FILTER_NONE
+                                              , board
+                                              )
+                                 : false
+                                 ;
+        case MOVE_FILTER_ONLY_CASTLE:
+            return ( castle ) ? move_parse ( move
+                                           , MOVE_FILTER_NONE
+                                           , board
+                                           )
+                              : false
+                              ;
+        case default:
+            break;
+    }
     
     // Move the piece.
     BITCLR ( ( *board ).pieces[ piece ]
@@ -43,7 +116,7 @@ move_parse
            , move_decode_target_square ( move )
            );
 
-    // Capture.
+    // Parse capture.
     if ( capture )
     {
         const PIECE from = ( ( *board ).side == WHITE ) ? p : P;
@@ -62,7 +135,7 @@ move_parse
 }
 
 void
-moves_init
+moves_get
 (   moves_t*            moves
 ,   board_t*            board
 ,   const attacks_t*    attacks
