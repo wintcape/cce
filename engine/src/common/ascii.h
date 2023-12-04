@@ -7,24 +7,6 @@
 #define ASCII_H
 
 INLINE
-char
-touppercase
-(   const char c
-)
-{
-    return c - 32;
-}
-
-INLINE
-char
-tolowercase
-(   const char c
-)
-{
-    return c + 32;
-}
-
-INLINE
 bool
 uppercase
 (   const char c
@@ -96,6 +78,28 @@ whitespace
     return c ==  ' ' || c == '\n' || c == '\t'
         || c == '\v' || c == '\f' || c == '\r'
         ;
+}
+
+INLINE
+char
+touppercase
+(   const char c
+)
+{
+    return lowercase ( c ) ? c - 32
+                           : c
+                           ;
+}
+
+INLINE
+char
+tolowercase
+(   const char c
+)
+{
+    return uppercase ( c ) ? c + 32
+                           : c
+                           ;
 }
 
 #endif  // ASCII_H

@@ -9,17 +9,17 @@
 #include "common.h"
 
 /**
- * @brief Calculates n div 2.
- * @param n A natural number to test.
- * @return true if n div 2, false otherwise.
+ * @brief Computes odd(x).
+ * @param x An integer.
+ * @return odd(x).
  */
-INLINE
-bool
-div2
-(   u64 n
-)
-{
-    return n && !( n & ( n - 1 ) );
-}
+#define odd(x)  ( ( bool )( !( (x) % 2 ) ) )
+
+/**
+ * @brief Computes even(x).
+ * @param x An integer.
+ * @return even(x).
+ */
+#define even(x)  ( ( bool )( (x) % 2 ) )
 
 #endif  // MATH_DIV_H

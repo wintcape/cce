@@ -26,11 +26,12 @@ typedef struct
     board_t     board;
     u32         ply;
 
+    // Pregenerated move options.
+    moves_t     moves;
+    
     // Render textbuffer.
     char        textbuffer[ CHESS_RENDER_TEXTBUFFER_LENGTH ];
 
-    // Temporary.
-    moves_t moves;
 }
 state_t;
 
@@ -56,8 +57,8 @@ chess_startup
     attacks_init ( &( *state ).attacks );
 
     // Initialize game state.
-    fen_parse ( FEN_START , &( *state ).board );
-    ( *state ).ply = 0;
+    fen_parse ( FEN_TRICKY , &( *state ).board );
+    ( *state ).ply = 0; 
 
     return true;
 }
@@ -86,20 +87,15 @@ chess_update
 
     ( *state ).ply += 1;
 
-    moves_push ( &( *state ).moves
-               , move_encode ( D7
-                             , E8
-                             , P
-                             , Q
-                             , true
-                             , false
-                             , false
-                             , false
-                             ));
+    // Pregenerate move options.
+    moves_init ( &( *state ).moves
+               , &( *state ).board
+               , &( *state ).attacks
+               );
 
     return true;
 }
-
+#include <stdio.h>
 void
 chess_render
 ( void )
@@ -117,9 +113,27 @@ chess_render
                            , PLATFORM_COLOR_CHESS_INFO
                            );
 
-    board_render ( ( *state ).textbuffer , &( *state ).board );
-
-    string_moves ( ( *state ).textbuffer , &( *state ).moves );
-    platform_console_write ( ( *state ).textbuffer , PLATFORM_COLOR_CHESS_INFO );
+    // Show the board for each move.
+    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
+    {
+        string_format ( ( *state ).textbuffer
+                      , " MOVE: %s, %c captured!"
+                      , string_move ( ( *state ).textbuffer + 7, ( *state ).moves.moves[i])
+                      );
+        platform_console_write ( ( *state ).textbuffer
+                           , PLATFORM_COLOR_CHESS_INFO
+                           );
+        if ( move_parse ( ( *state ).moves.moves[ i ] , MOVE_FILTER_ONLY_CAPTURES , &( *state ).board ) )
+        {
+            platform_console_write ("\n", PLATFORM_COLOR_CHESS_INFO);
+            board_render ( ( *state ).textbuffer , &( *state ).board );
+            getchar ();
+        }
+        else
+        {
+            platform_console_write (" not made because it is not a capture!", PLATFORM_COLOR_CHESS_INFO);
+            getchar ();
+        }
+    }
 }
 

@@ -17,7 +17,6 @@
 #include "math/root.h"
 #include "math/trig.h"
 #include "math/vector.h"
-#include "math/vertex.h"
 
 /**
  * @brief Calculates the minimum of two values.

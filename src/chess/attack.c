@@ -16,6 +16,7 @@
  * @param attack_relevant_count Number of attack mask bits to consider.
  * @return A bitboard with the attack options masked by the occupancy.
  */
+INLINE
 bitboard_t
 attack_mask_with_occupancy
 (   const int   occupancy
@@ -42,6 +43,7 @@ attack_mask_with_occupancy
  * @param square The pawn's position.
  * @return A bitboard with the pawn's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_pawn
 (   const SIDE      side
@@ -86,6 +88,7 @@ attack_mask_pawn
  * @param square The knight's position.
  * @return A bitboard with the knight's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_knight
 (   const SQUARE square
@@ -139,6 +142,7 @@ attack_mask_knight
  * @param square The bishop's position.
  * @return A bitboard with the bishop's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_bishop
 (   const SQUARE square
@@ -180,6 +184,7 @@ attack_mask_bishop
  * direction(s).
  * @return A bitboard with the bishop's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_bishop_with_block
 (   const SQUARE        square
@@ -237,6 +242,7 @@ attack_mask_bishop_with_block
  * @param square The rook's position.
  * @return A bitboard with the rook's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_rook
 (   const SQUARE square
@@ -279,6 +285,7 @@ attack_mask_rook
  * direction(s).
  * @return A bitboard with the rook's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_rook_with_block
 (   const SQUARE        square
@@ -336,6 +343,7 @@ attack_mask_rook_with_block
  * @param square The king's position.
  * @return A bitboard with the king's attack options set.
  */
+INLINE
 bitboard_t
 attack_mask_king
 (   const SQUARE square
@@ -382,18 +390,12 @@ attack_mask_king
 
     return mask;
 }
-#include "chess/string.h"
 
-bool
+void
 attacks_init
 (   attacks_t* attacks
 )
 {
-    if ( !attacks )
-    {
-        return false;
-    }
-
     for ( u8 i = 0; i < 64; ++i )
     {
         bitboard_t attack;
@@ -440,6 +442,4 @@ attacks_init
                                                                       );
         }
     }
-
-    return true;
 }

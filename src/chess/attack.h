@@ -11,9 +11,8 @@
 /**
  * @brief Pregenerates attack tables.
  * @param attacks A buffer to write the pregenerated attack tables to.
- * @return false if no buffer provided, true otherwise.
  */
-bool
+void
 attacks_init
 (   attacks_t* attacks
 );

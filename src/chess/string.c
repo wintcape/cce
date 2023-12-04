@@ -6,8 +6,6 @@
  */
 #include "chess/string.h"
 
-#include "core/string.h"
-
 char*
 string_move
 (   char*           dst
@@ -22,7 +20,9 @@ string_move
                 , string_square ( move_decode_target_square ( move ) )
                 , 2
                 );
-    dst[ MOVE_STRING_LENGTH - 1 ] = promotion_piecechrs[ move_decode_promotion ( move ) ];
+    dst[ MOVE_STRING_LENGTH - 1 ] = move_decode_promotion ( move ) ? touppercase ( piecechr ( move_decode_promotion ( move ) ) )
+                                                                   : ' '
+                                                                   ;
     dst[ MOVE_STRING_LENGTH ] = 0;  // Append terminator.
     return dst;
 }
@@ -33,24 +33,34 @@ string_moves
 ,   const moves_t*  moves
 )
 {
+    if ( !( *moves ).count )
+    {
+        *dst = 0;   // Append terminator.
+        return 0;
+    }
+
     u64 offs = string_format ( dst
-                             , " MOVES:    move      piece    capture?  enpassant?  castle?\n\t"
+                             , " MOVES:    move      piece    capture?  double?   enpassant?  castle?\n\n\t"
                              );
 
     for ( u32 i = 0; i < ( *moves ).count; ++i )
     {
         const move_t move = ( *moves ).moves[ i ];
         offs += string_format ( dst + offs
-                              ,  "   %s      %c        %c         %c           %c\n\t"
+                              ,  "   %s      %c        %u         %u         %u           %u\n\t"
                               , string_move ( dst + offs , move )
-                              , piecechr ( move_decode_piece ( move ) )
-                              , ( move_decode_capture ( move ) ) ? 'T' : 'F'
-                              , ( move_decode_enpassant ( move ) ) ? 'T' : 'F'
-                              , ( move_decode_castle ( move ) ) ? 'T' : 'F'
+                              , touppercase ( piecechr ( move_decode_piece ( move ) ) )
+                              , move_decode_capture ( move )
+                              , move_decode_double_push ( move )
+                              , move_decode_enpassant ( move )
+                              , move_decode_castle ( move )
                               );
     }
     
-    offs += string_format ( dst + offs , "\n" );
+    offs += string_format ( dst + offs
+                          , "\n\t   Move count:  %u\n\n"
+                          , ( *moves ).count
+                          );
 
     return offs;
 }

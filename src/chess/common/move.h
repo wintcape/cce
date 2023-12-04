@@ -1,7 +1,8 @@
 /**
  * @file bitboard.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Defines datatypes to represent singular moves on a chess board.
+ * @brief Defines datatypes and operations to represent a singular move on a
+ * chess board.
  */
 #ifndef CHESS_COMMON_MOVE_H
 #define CHESS_COMMON_MOVE_H
@@ -116,7 +117,7 @@ move_decode_promotion
 /**
  * @brief Retrieves capture status from a bitpacked move.
  * @param move A move.
- * @return The capture status of move.
+ * @return true if capture move, false otherwise.
  */
 INLINE
 bool
@@ -130,7 +131,7 @@ move_decode_capture
 /**
  * @brief Retrieves double push status from a bitpacked move.
  * @param move A move.
- * @return The double push status of move.
+ * @return true if double push move, false otherwise.
  */
 INLINE
 bool
@@ -144,7 +145,7 @@ move_decode_double_push
 /**
  * @brief Retrieves en passant status from a bitpacked move.
  * @param move A move.
- * @return The en passant status of move.
+ * @return true if en passant move, false otherwise.
  */
 INLINE
 bool
@@ -158,7 +159,7 @@ move_decode_enpassant
 /**
  * @brief Retrieves castling status from a bitpacked move.
  * @param move A move.
- * @return The castling status of move.
+ * @return true if castling move, false otherwise.
  */
 INLINE
 bool

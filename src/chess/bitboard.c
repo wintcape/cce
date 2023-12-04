@@ -8,10 +8,6 @@
 
 #include "chess/board.h"
 
-// Defaults.
-#define BITBOARD_STRING_BUFFER_LENGTH   \
-    ( CHESS_RENDER_BUFFER_LENGTH >> 2 )
-
 bitboard_t
 bitboard_attackable
 (   const board_t*      board

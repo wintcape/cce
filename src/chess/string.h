@@ -8,6 +8,8 @@
 
 #include "chess/common.h"
 
+#include "core/string.h"
+
 // Defines the number of characters needed to represent a move in string format.
 #define MOVE_STRING_LENGTH 5
 
@@ -22,9 +24,19 @@ static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8"
                                               , "A1" , "B1" , "C1" , "D1" , "E1" , "F1" , "G1" , "H1"
                                               };
 
-// Defines an ASCII alias for each piece.
-static const char piecechrs[] = { 'P' , 'N' , 'B' , 'R' , 'Q' , 'K'
-                                , 'p' , 'n' , 'b' , 'r' , 'q' , 'k'
+// Defines a map for all pieces: piece -> ASCII alias.
+static const char piecechrs[] = { [ P ] = 'P'
+                                , [ N ] = 'N'
+                                , [ B ] = 'B'
+                                , [ R ] = 'R'
+                                , [ Q ] = 'Q'
+                                , [ K ] = 'K'
+                                , [ p ] = 'p'
+                                , [ n ] = 'n'
+                                , [ b ] = 'b'
+                                , [ r ] = 'r'
+                                , [ q ] = 'q'
+                                , [ k ] = 'k'
                                 };
 
 // Defines a map for all pieces: ASCII alias -> piece.
@@ -41,17 +53,6 @@ static const PIECE pieces[] = { [ 'P' ] = P
                               , [ 'q' ] = q
                               , [ 'k' ] = k
                               };
-
-// Defines a map for pieces which can receive a promotion: piece -> ASCII alias.
-static const char promotion_piecechrs[] = { [ N ] = 'N'
-                                          , [ B ] = 'B'
-                                          , [ R ] = 'R'
-                                          , [ Q ] = 'Q'
-                                          , [ n ] = 'N'
-                                          , [ b ] = 'B'
-                                          , [ r ] = 'R'
-                                          , [ q ] = 'Q'
-                                          };
 
 /**
  * @brief Generates the ASCII alias for a given piece.
@@ -131,6 +132,5 @@ string_bitboard
 (   char*               dst
 ,   const bitboard_t    bitboard
 );
-
 
 #endif  // CHESS_STRING_H

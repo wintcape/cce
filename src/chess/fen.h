@@ -1,7 +1,7 @@
 /**
  * @file fen.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief FEN notation.
+ * @brief Interface for representing Forsyth-Edwards notation.
  */
 #ifndef CHESS_FEN_H
 #define CHESS_FEN_H
@@ -16,7 +16,7 @@
 #define FEN_CMK     "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9"
 
 /**
- * @brief Parses a FEN move and updates the provided board.
+ * @brief Parses a FEN string and updates the provided board.
  * @param fen The FEN string to parse.
  * @param board The board state to mutate.
  * @return false if FEN invalid, true otherwise.

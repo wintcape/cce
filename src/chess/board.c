@@ -82,9 +82,11 @@ board_render
         i += 1;
     }
     
-    platform_console_write ( "\n\n\t    " , PLATFORM_COLOR_CHESS_INFO );
+    offs = string_format ( dst
+                         , "\n\n\t    "
+                         , PLATFORM_COLOR_CHESS_INFO
+                         );
 
-    offs = 0;
     r = 0;
     while ( r < 8 )
     {
