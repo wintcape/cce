@@ -14,11 +14,11 @@ string_move
 {
     memory_copy ( &dst[ 0 ]
                 , string_square ( move_decode_source_square ( move ) )
-                , 2
+                , SQUARE_STRING_LENGTH
                 );
-    memory_copy ( &dst[ 2 ]
+    memory_copy ( &dst[ SQUARE_STRING_LENGTH ]
                 , string_square ( move_decode_target_square ( move ) )
-                , 2
+                , SQUARE_STRING_LENGTH
                 );
     dst[ MOVE_STRING_LENGTH - 1 ] = move_decode_promotion ( move ) ? touppercase ( piecechr ( move_decode_promotion ( move ) ) )
                                                                    : ' '
