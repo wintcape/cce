@@ -17,7 +17,7 @@ move_parse
 )
 {
 //    const SQUARE src = move_decode_source_square ( move );
-    const SQUARE target = move_decode_source_square ( move );
+    const SQUARE target = move_decode_target_square ( move );
     const PIECE piece = move_decode_piece ( move );
     const PIECE promotion = move_decode_promotion ( move );
     const bool capture = move_decode_capture ( move );
