@@ -112,12 +112,8 @@ move_parse
     }
     
     // Move the piece.
-    BITCLR ( ( *board ).pieces[ piece ]
-           , move_decode_source_square ( move )
-           );
-    BITSET ( ( *board ).pieces[ piece ]
-           , move_decode_target_square ( move )
-           );
+    BITCLR ( ( *board ).pieces[ piece ] , src );
+    BITSET ( ( *board ).pieces[ piece ] ,  target );
 
     // Parse capture.
     if ( capture )
