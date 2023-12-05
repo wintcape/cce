@@ -10,12 +10,12 @@
 
 #include "core/string.h"
 
-// Defines the number of characters needed to represent a move in string format.
-#define MOVE_STRING_LENGTH 5
-
 // Defines the number of characters needed to represent a board square
 // coordinate in string format.
 #define SQUARE_STRING_LENGTH 2
+
+// Defines the number of characters needed to represent a move in string format.
+#define MOVE_STRING_LENGTH ( 2 * SQUARE_STRING_LENGTH + 1 )
 
 // Defines a string representation of each square coordinate on a chess board.
 static const char* square_coordinate_tags[] = { "A8" , "B8" , "C8" , "D8" , "E8" , "F8" , "G8" , "H8"
