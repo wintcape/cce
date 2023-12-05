@@ -96,7 +96,7 @@ board_render
     }
 
     offs += string_format ( dst + offs
-                          , "\n\n\n\tSide:         %s\n\tEn passant:      %s\n\tCastling:      %c%c%c%c\n\n\n"
+                          , "\n\n\n\tSide:         %s\n\tEn passant:      %s\n\tCastling:      %c%c%c%c\n\n"
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
                           , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )

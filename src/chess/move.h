@@ -27,9 +27,11 @@ typedef enum
 MOVE_FILTER;
 
 /**
- * @brief Parses a move and updates the provided board.
+ * @brief Parses a move and updates the provided board. Requires pregenerated
+ * attack tables.
  * @param move The move to make.
  * @param filter A move filter.
+ * @param attacks The pregenerated attack tables.
  * @param board The board state to mutate.
  * @return false if move not made, true otherwise.
  */
@@ -37,6 +39,7 @@ bool
 move_parse
 (   const move_t        move
 ,   const MOVE_FILTER   filter
+,   const attacks_t*    attacks
 ,   board_t*            board
 );
 
@@ -51,18 +54,6 @@ moves_get
 (   moves_t*            moves
 ,   board_t*            board
 ,   const attacks_t*    attacks
-);
-
-/**
- * @brief Appends a move option to a move list.
- * @param moves The list container.
- * @param move The move to append.
- * @return true on success, false if move list was full.
- */
-bool
-moves_push
-(   moves_t*        moves
-,   const move_t    move
 );
 
 #endif  // CHESS_MOVE_H

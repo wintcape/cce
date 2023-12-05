@@ -9,6 +9,7 @@
 #include "chess/string.h"
 
 #include "core/logger.h"
+#include "core/memory.h"
 #include "core/string.h"
 
 // Defines FEN parsing tokens.

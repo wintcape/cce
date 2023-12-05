@@ -7,15 +7,29 @@
 #include "chess/move.h"
 
 #include "chess/board.h"
+#include "chess/castle.h"
 #include "chess/string.h"
 
 #include "core/logger.h"
+#include "core/memory.h"
+
+INLINE
+void
+moves_push
+(   moves_t*        moves
+,   const move_t    move
+)
+{
+    ( *moves ).moves[ ( *moves ).count ] = move;
+    ( *moves ).count += 1;
+}
 
 bool
 move_parse
 (   const move_t        move
 ,   const MOVE_FILTER   filter
-,   board_t*            board
+,   const attacks_t*    attacks
+,   board_t*            board_
 )
 {
     const SQUARE src = move_decode_source_square ( move );
@@ -27,95 +41,110 @@ move_parse
     const bool enpassant = move_decode_enpassant ( move );
     const bool castle = move_decode_castle ( move );
     
-    const bool white = ( *board ).side == WHITE;
-    
     // Apply filter.
     switch ( filter )
     {
         case MOVE_FILTER_ONLY_PAWN:
             return ( piece == 'P' || piece == 'p' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_KNIGHT:
             return ( piece == 'N' || piece == 'n' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_BISHOP:
             return ( piece == 'B' || piece == 'b' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_ROOK:
             return ( piece == 'R' || piece == 'r' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_QUEEN:
             return ( piece == 'Q' || piece == 'q' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_KING:
             return ( piece == 'K' || piece == 'k' ) ? move_parse ( move
                                                                 , MOVE_FILTER_NONE
-                                                                , board
+                                                                , attacks
+                                                                , board_
                                                                 )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_CAPTURE:
             return ( capture ) ? move_parse ( move
                                             , MOVE_FILTER_NONE
-                                            , board
+                                            , attacks
+                                            , board_
                                             )
                                : false
                                ;
         case MOVE_FILTER_ONLY_PROMOTION:
             return ( promotion ) ? move_parse ( move
                                               , MOVE_FILTER_NONE
-                                              , board
+                                              , attacks
+                                              , board_
                                               )
                                : false
                                ;
         case MOVE_FILTER_ONLY_DOUBLE_PUSH:
             return ( double_push ) ? move_parse ( move
                                                 , MOVE_FILTER_NONE
-                                                , board
+                                                , attacks
+                                                , board_
                                                 )
                                    : false
                                    ;
         case MOVE_FILTER_ONLY_ENPASSANT:
             return ( enpassant ) ? move_parse ( move
                                               , MOVE_FILTER_NONE
-                                              , board
+                                              , attacks
+                                              , board_
                                               )
                                  : false
                                  ;
         case MOVE_FILTER_ONLY_CASTLE:
             return ( castle ) ? move_parse ( move
                                            , MOVE_FILTER_NONE
-                                           , board
+                                           , attacks                                           
+                                           , board_
                                            )
                               : false
                               ;
         default:
             break;
     }
+
+    // Initialize a working copy of the board.
+    board_t board;
+    memory_copy ( &board , board_ , sizeof ( board_t ) );
+    
+    const bool white = board.side == WHITE;
     
     // Move the piece.
-    BITCLR ( ( *board ).pieces[ piece ] , src );
-    BITSET ( ( *board ).pieces[ piece ] , target );
+    BITCLR ( board.pieces[ piece ] , src );
+    BITSET ( board.pieces[ piece ] , target );
 
     // Parse capture.
     if ( capture )
@@ -124,10 +153,10 @@ move_parse
         const PIECE to = ( white ) ? k : K;
         for ( PIECE i = from; i <= to; ++i )
         {
-            if ( bit ( ( *board ).pieces[ i ] , target ) )
+            if ( bit ( board.pieces[ i ] , target ) )
             {
                 // Clear piece on target square.
-                BITCLR ( ( *board ).pieces[ i ] , target );
+                BITCLR ( board.pieces[ i ] , target );
                 break;
             }
         }
@@ -137,28 +166,105 @@ move_parse
     if ( promotion )
     {
         // Clear pawn.
-        BITCLR ( ( *board ).pieces[ ( white ) ? P : p ] , target );
+        BITCLR ( board.pieces[ ( white ) ? P : p ] , target );
 
         // Set promotion.
-        BITSET ( ( *board ).pieces[ promotion ] , target );
+        BITSET ( board.pieces[ promotion ] , target );
     }
 
     // Parse en passant capture.
     if ( enpassant )
     {
-        ( white ) ? BITCLR ( ( *board ).pieces[ p ] , target + 8 )
-                  : BITCLR ( ( *board ).pieces[ P ] , target - 8 )
+        ( white ) ? BITCLR ( board.pieces[ p ] , target + 8 )
+                  : BITCLR ( board.pieces[ P ] , target - 8 )
                   ;
     }
-    ( *board ).enpassant = NO_SQ;
+
+    // Reset en passant square.
+    board.enpassant = NO_SQ;
 
     // Parse double push.
     if ( double_push )
     {
-        ( white ) ? ( ( *board ).enpassant = target + 8 )
-                  : ( ( *board ).enpassant = target - 8 )
+        ( white ) ? ( board.enpassant = target + 8 )
+                  : ( board.enpassant = target - 8 )
                   ;
     }
+
+    // Parse castling.
+    if ( castle )
+    {
+        switch ( target )
+        {
+            case C1:
+            {
+                BITCLR ( board.pieces[ R ] , A1 );
+                BITSET ( board.pieces[ R ] , D1 );
+            }
+            break;
+
+            case G1:
+            {
+                BITCLR ( board.pieces[ R ] , H1 );
+                BITSET ( board.pieces[ R ] , F1 );
+            }
+            break;
+
+            case C8:
+            {
+                BITCLR ( board.pieces[ R ] , A8 );
+                BITSET ( board.pieces[ R ] , D8 );
+            }
+            break;
+
+            case G8:
+            {
+                BITCLR ( board.pieces[ R ] , H8 );
+                BITSET ( board.pieces[ R ] , F8 );
+            }
+            break;
+
+            default:
+            {}
+            break;
+        }
+    }
+
+    // Update castling rights.
+    board.castle &= castling_rights[ src ];
+    board.castle &= castling_rights[ target ];
+
+    // Write the new occupancy maps to the board.
+    memory_clear ( board.occupancies , sizeof ( board.occupancies ) );
+    for ( PIECE piece = P; piece <= K; ++piece )
+    {
+        board.occupancies[ WHITE ] |= board.pieces[ piece ];
+    }
+    for ( PIECE piece = p; piece <= k; ++piece )
+    {
+        board.occupancies[ BLACK ] |= board.pieces[ piece ];
+    }
+    board.occupancies[ 2 ] = board.occupancies[ WHITE ]
+                           | board.occupancies[ BLACK ]
+                           ;
+
+    // Toggle side.
+    board.side ^= 1;
+
+    // If king is in check, do not perform the move.
+    if ( board_square_attackable ( &board
+                                 , attacks
+                                 , bitboard_lsb ( ( white ) ? board.pieces[ K ]
+                                                            : board.pieces[ k ]
+                                                            )
+                                 , board.side
+                                 ))
+    {
+        return false;
+    }
+
+    // Overwrite the output buffer with the updated board.
+    memory_copy ( board_ , &board , sizeof ( board_t ) );
 
     return true;
 }
@@ -198,7 +304,6 @@ moves_get
                                                   , target
                                                   ))
                     {
-                        LOGINFO ( "White pawn quiet move." );
                         // Promotion.
                         if ( src >= A7 && src <= H7 )
                         {
@@ -700,22 +805,4 @@ moves_get
         }
 
     }// END for.
-}
-
-bool
-moves_push
-(   moves_t*        moves
-,   const move_t    move
-)
-{
-    if ( ( *moves ).count == MOVES_BUFFER_LENGTH )
-    {
-        LOGERROR ( "moves_push: Attempted to append a move to a container which is full." );
-        return false;
-    }
-
-    ( *moves ).moves[ ( *moves ).count ] = move;
-    ( *moves ).count += 1;
-
-    return true;
 }

@@ -6,11 +6,11 @@ TEST := test
 
 CFLAGS := -g -O2 -W -Wvarargs -Wall -Werror -Wno-unused-const-variable -Wno-unused-parameter -Wno-missing-field-initializers -Werror=vla
 OBJFLAGS := $(CFLAGS) -c
-LDFLAGS := -lvulkan -lX11 -lX11-xcb -lxcb -lm
+LDFLAGS := -lX11 -lX11-xcb -lxcb -lm
 INCFLAGS := -Isrc -Iengine/src -Itest/src
 
 ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o
-TARGET_OBJFILES := main.o application.o chess.o chess_string.o chess_bitboard.o chess_attack.o chess_board.o chess_fen.o chess_move.o
+TARGET_OBJFILES := main.o application.o chess.o chess_string.o chess_bitboard.o chess_attack.o chess_board.o chess_fen.o chess_move.o chess_perft.o
 TEST_OBJFILES := test_main.o test_memory_linear_allocator.o  test_memory_dynamic_allocator.o
 
 ################################################################################
@@ -45,6 +45,7 @@ obj/chess_attack.o:						src/chess/attack.c
 obj/chess_board.o:						src/chess/board.c
 obj/chess_fen.o:						src/chess/fen.c
 obj/chess_move.o:						src/chess/move.c
+obj/chess_perft.o:						src/chess/perft.c
 
 # Test obj
 obj/test_main.o:						test/src/main.c

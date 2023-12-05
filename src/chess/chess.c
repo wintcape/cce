@@ -10,6 +10,7 @@
 #include "chess/board.h"
 #include "chess/fen.h"
 #include "chess/move.h"
+#include "chess/perft.h"
 #include "chess/platform.h"
 #include "chess/string.h"
 
@@ -55,7 +56,7 @@ chess_startup
     attacks_init ( &( *state ).attacks );
 
     // Initialize game state.
-    fen_parse ( "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1" , &( *state ).board );
+    fen_parse ( FEN_TRICKY , &( *state ).board );
 
     return true;
 }
@@ -81,17 +82,12 @@ chess_update
     {
         return false;
     }
-
-    // Generate move options.
-    moves_get ( &( *state ).moves
-              , &( *state ).board
-              , &( *state ).attacks
-              );
+    
+    /*  Temporary.  */
+    perft ( &( *state ).board , &( *state ).attacks , 2 );
 
     return true;
 }
-
-#include <stdio.h> /*  Temporary.  */
 
 void
 chess_render
@@ -103,54 +99,6 @@ chess_render
     }
     
     // Render the board.
-    // board_render ( ( *state ).textbuffer , &( *state ).board );
-
-    /*  Temporary.  */
-
-    board_t board;
-
-    platform_console_write ( "\n================================================================================\n"
-                           , PLATFORM_COLOR_CHESS_INFO
-                           );
-
-    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
-    {
-        const move_t move = ( *state ).moves.moves[ i ];
-        
-        platform_console_write ( " BOARD INITIAL STATE: \n"
-                               , PLATFORM_COLOR_CHESS_INFO
-                               );
-        board_render ( ( *state ).textbuffer , &( *state ).board );
-        
-        string_format ( ( *state ).textbuffer
-                      , " BOARD AFTER MOVE %s: "
-                      , string_move ( ( *state ).textbuffer , move )
-                      );
-            platform_console_write ( ( *state ).textbuffer
-                                   , PLATFORM_COLOR_CHESS_INFO
-                                   );
-
-        if ( move_parse ( move
-                        , MOVE_FILTER_NONE
-                        , memory_copy ( &board
-                                      , &( *state ).board
-                                      , sizeof ( board_t )
-                                      )))
-        {
-            platform_console_write ( "\n" , PLATFORM_COLOR_CHESS_INFO );
-            board_render ( ( *state ).textbuffer , &board );
-        }
-        else
-        {
-            platform_console_write ( "No change applied (move filtered)."
-                                   , PLATFORM_COLOR_CHESS_INFO
-                                   );
-        }
-
-        platform_console_write ( "\n================================================================================\n"
-                               , PLATFORM_COLOR_CHESS_INFO
-                               );
-        getchar ();
-    }
+    board_render ( ( *state ).textbuffer , &( *state ).board );
 }
 

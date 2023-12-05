@@ -19,10 +19,6 @@ clock_update
     }
 }
 
-/**
- * @brief Resets the elapsed time for the provided clock and starts it.
- * @param clock The clock to mutate.
- */
 void
 clock_start
 (   clock_t* clock
@@ -32,10 +28,6 @@ clock_start
     ( *clock ).elapsed = 0;
 }
 
-/**
- * @brief Stops the provided clock.
- * @param clock The clock to mutate.
- */
 void
 clock_stop
 (   clock_t* clock
