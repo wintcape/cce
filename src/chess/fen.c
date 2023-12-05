@@ -17,32 +17,27 @@
 
 bool
 fen_parse
-(   const char* fen
-,   board_t*    buf
+(   const char* fen_
+,   board_t*    board_
 )
 {
+    // Initialize a new board.
     board_t board;
-    
-    // Set latest FEN for the board.
-    const u64 len = string_length_clamp ( fen , FEN_STRING_MAX_LENGTH );
-    memory_copy ( board.fen , fen , len );
-    board.fen[ len ] = 0;
-
-    memory_clear ( board.pieces
-                 , sizeof ( board.pieces )
-                 );
-    memory_clear ( board.occupancies
-                 , sizeof ( board.occupancies )
-                 );
-
     board.side = 0;
     board.enpassant = NO_SQ;
     board.castle = 0;
+    memory_clear ( board.pieces , sizeof ( board.pieces ) );
+    memory_clear ( board.occupancies , sizeof ( board.occupancies ) );
     
-    const char* const fen_ = fen;
-
-    // Trim whitespace.
-    string_trim ( board.fen );
+    // Copy FEN into a working text buffer.
+    char buf[ FEN_STRING_MAX_LENGTH ];
+    const u64 len = string_length_clamp ( fen_ , FEN_STRING_MAX_LENGTH );    
+    memory_copy ( buf , fen_ , len );
+    buf[ len ] = 0;         // Append terminator.
+    string_trim ( buf );    // Trim whitespace.
+   
+    // Read from the working buffer.
+    char* fen = buf;
 
     // Parse piece placements.
     for ( u8 r = 0; r < 8; ++r )
@@ -77,10 +72,7 @@ fen_parse
                 if ( !i || i > 8 - f )
                 {
                     LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tIllegal use of numeral '%c' (index %u, file %u)."
-                             , board.fen
-                             , *fen
-                             , fen - fen_
-                             , f
+                             , buf , *fen , fen - buf , f
                              );
                     return false;
                 }
@@ -96,10 +88,7 @@ fen_parse
                 if ( f != 7 )
                 {
                     LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tIllegal use of file separator '%c' (index %u, file %u)."
-                             , board.fen
-                             , *fen
-                             , fen - fen_
-                             , f
+                             , buf , *fen , fen - buf , f
                              );
                     return false;
                 }
@@ -116,9 +105,7 @@ fen_parse
        )
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, illegal character '%c'."
-                 , board.fen
-                 , fen - fen_
-                 , *fen
+                 , buf , fen - buf , *fen
                  );
         return false;
     }
@@ -135,9 +122,7 @@ fen_parse
         if ( castle >= 4 )
         {
             LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, illegal character '%c'."
-                     , board.fen
-                     , fen - fen_
-                     , *fen
+                     , buf , fen - buf , *fen
                      );
             return false;
         }
@@ -154,9 +139,7 @@ fen_parse
             default:
             {
                 LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, character '%c'."
-                         , board.fen
-                         , fen - fen_
-                         , *fen
+                         , buf , fen - buf , *fen
                          );
                 return false;
             }
@@ -170,9 +153,7 @@ fen_parse
     if ( fen[ 0 ] != FEN_FILE_WHITESPACE_TOKEN )
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, character '%c'."
-                 , board.fen
-                 , fen - fen_
-                 , *fen
+                 , buf , fen - buf , *fen
                  );
         return false;
     }
@@ -199,9 +180,7 @@ fen_parse
     else
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, character '%c'."
-                 , board.fen
-                 , fen - fen_
-                 , *fen
+                 , buf , fen - buf , *fen
                  );
         return false;
     }
@@ -220,7 +199,7 @@ fen_parse
                            ;
 
     // Write the board to the output buffer.
-    memory_copy ( buf , &board , sizeof ( board_t ) );
+    memory_copy ( board_ , &board , sizeof ( board_t ) );
 
     return true;
 }

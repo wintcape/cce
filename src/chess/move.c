@@ -9,6 +9,8 @@
 #include "chess/board.h"
 #include "chess/string.h"
 
+#include "core/logger.h"
+
 bool
 move_parse
 (   const move_t        move
@@ -141,18 +143,22 @@ move_parse
         BITSET ( ( *board ).pieces[ promotion ] , target );
     }
 
-
     // Parse en passant capture.
     if ( enpassant )
     {
-        if ( capture )
-        {
-            ( white ) ? BITCLR ( ( *board ).pieces[ p ] , target - 8 )
-                      : BITCLR ( ( *board ).pieces[ P ] , target + 8 )
-                      ;
-        }
+        ( white ) ? BITCLR ( ( *board ).pieces[ p ] , target + 8 )
+                  : BITCLR ( ( *board ).pieces[ P ] , target - 8 )
+                  ;
     }
+    ( *board ).enpassant = NO_SQ;
 
+    // Parse double push.
+    if ( double_push )
+    {
+        ( white ) ? ( ( *board ).enpassant = target + 8 )
+                  : ( ( *board ).enpassant = target - 8 )
+                  ;
+    }
 
     return true;
 }
@@ -167,14 +173,14 @@ moves_get
     SQUARE src;
     SQUARE target;
 
-    bitboard_t bitboard;
+    bitboard_t pieces;
     bitboard_t attack;
 
     ( *moves ).count = 0;
 
     for ( PIECE piece = P; piece <= k; ++piece )
     {
-        bitboard = ( *board ).pieces[ piece ];
+        pieces = ( *board ).pieces[ piece ];
 
         // White pawn and castling moves.
         if ( ( *board ).side == WHITE )
@@ -182,9 +188,9 @@ moves_get
             // Pawn.
             if ( piece == P )
             {
-                while ( bitboard )
+                while ( pieces )
                 {
-                    src = bitboard_lsb ( bitboard );
+                    src = bitboard_lsb ( pieces );
                     target = src - 8;
 
                     // Quiet moves.
@@ -192,6 +198,7 @@ moves_get
                                                   , target
                                                   ))
                     {
+                        LOGINFO ( "White pawn quiet move." );
                         // Promotion.
                         if ( src >= A7 && src <= H7 )
                         {
@@ -284,7 +291,7 @@ moves_get
                         }
                     }
 
-                    BITCLR ( bitboard , src );
+                    BITCLR ( pieces , src );
                 }
             }
             
@@ -333,9 +340,9 @@ moves_get
             // Pawn.
             if ( piece == p )
             {
-                while ( bitboard )
+                while ( pieces )
                 {
-                    src = bitboard_lsb ( bitboard );
+                    src = bitboard_lsb ( pieces );
                     target = src + 8;
 
                     // Quiet moves.
@@ -435,7 +442,7 @@ moves_get
                         }
                     }
 
-                    BITCLR ( bitboard , src );
+                    BITCLR ( pieces , src );
                 }
             }
 
@@ -481,9 +488,9 @@ moves_get
         // Knight.
         if ( ( ( *board ).side == WHITE ) ? piece == N : piece == n )
         {
-            while ( bitboard )
+            while ( pieces )
             {
-                src = bitboard_lsb ( bitboard );
+                src = bitboard_lsb ( pieces );
                
                 attack = bitboard_knight_attack ( attacks , src )
                        & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
@@ -515,16 +522,16 @@ moves_get
                     BITCLR ( attack , target );
                 }
 
-                BITCLR ( bitboard , src );
+                BITCLR ( pieces , src );
             }
         }
         
         // Bishop.
         else if ( ( ( *board ).side == WHITE ) ? piece == B : piece == b )
         {
-            while ( bitboard )
+            while ( pieces )
             {
-                src = bitboard_lsb ( bitboard );
+                src = bitboard_lsb ( pieces );
                
                 attack = bitboard_bishop_attack ( attacks
                                                 , src
@@ -559,16 +566,16 @@ moves_get
                     BITCLR ( attack , target );
                 }
 
-                BITCLR ( bitboard , src );
+                BITCLR ( pieces , src );
             }
         }
         
         // Rook.
         else if ( ( ( *board ).side == WHITE ) ? piece == R : piece == r )
         {
-            while ( bitboard )
+            while ( pieces )
             {
-                src = bitboard_lsb ( bitboard );
+                src = bitboard_lsb ( pieces );
                
                 attack = bitboard_rook_attack ( attacks
                                               , src
@@ -603,16 +610,16 @@ moves_get
                     BITCLR ( attack , target );
                 }
 
-                BITCLR ( bitboard , src );
+                BITCLR ( pieces , src );
             }
         }
 
         // Queen.
         else if ( ( ( *board ).side == WHITE ) ? piece == Q : piece == q )
         {
-            while ( bitboard )
+            while ( pieces )
             {
-                src = bitboard_lsb ( bitboard );
+                src = bitboard_lsb ( pieces );
                
                 attack = bitboard_queen_attack ( attacks
                                                , src
@@ -647,16 +654,16 @@ moves_get
                     BITCLR ( attack , target );
                 }
 
-                BITCLR ( bitboard , src );
+                BITCLR ( pieces , src );
             }
         }
 
         // King.
         else if ( ( ( *board ).side == WHITE ) ? piece == K : piece == k )
         {
-            while ( bitboard )
+            while ( pieces )
             {
-                src = bitboard_lsb ( bitboard );
+                src = bitboard_lsb ( pieces );
                
                 attack = bitboard_king_attack ( attacks , src )
                        & ( ( ( *board ).side == WHITE ) ? ~( *board ).occupancies[ WHITE ]
@@ -688,7 +695,7 @@ moves_get
                     BITCLR ( attack , target );
                 }
 
-                BITCLR ( bitboard , src );
+                BITCLR ( pieces , src );
             }
         }
 
@@ -703,6 +710,7 @@ moves_push
 {
     if ( ( *moves ).count == MOVES_BUFFER_LENGTH )
     {
+        LOGERROR ( "moves_push: Attempted to append a move to a container which is full." );
         return false;
     }
 

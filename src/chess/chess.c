@@ -23,7 +23,6 @@ typedef struct
 
     // Game state.
     board_t     board;
-    u32         ply;
 
     // Pregenerated move options.
     moves_t     moves;
@@ -56,8 +55,7 @@ chess_startup
     attacks_init ( &( *state ).attacks );
 
     // Initialize game state.
-    fen_parse ( "r3k2r/p11pqpb1/bn2pnp1/2pPN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1" , &( *state ).board );
-    ( *state ).ply = 0; 
+    fen_parse ( "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1" , &( *state ).board );
 
     return true;
 }
@@ -84,8 +82,6 @@ chess_update
         return false;
     }
 
-    ( *state ).ply += 1;
-
     // Generate move options.
     moves_get ( &( *state ).moves
               , &( *state ).board
@@ -95,7 +91,7 @@ chess_update
     return true;
 }
 
-#include <stdio.h> /*  Temporary  */
+#include <stdio.h> /*  Temporary.  */
 
 void
 chess_render
@@ -106,42 +102,54 @@ chess_render
         return;
     }
     
-    string_format ( ( *state ).textbuffer
-                  , "\n PLY: %d\n"
-                  , ( *state ).ply
-                  );
-    platform_console_write ( ( *state ).textbuffer
-                           , PLATFORM_COLOR_CHESS_INFO
-                           );
-    
     // Render the board.
     // board_render ( ( *state ).textbuffer , &( *state ).board );
 
-    // Temporary.
+    /*  Temporary.  */
+
+    board_t board;
+
+    platform_console_write ( "\n================================================================================\n"
+                           , PLATFORM_COLOR_CHESS_INFO
+                           );
+
     for ( u32 i = 0; i < ( *state ).moves.count; ++i )
     {
         const move_t move = ( *state ).moves.moves[ i ];
-        if ( move_parse ( move , MOVE_FILTER_NONE , &( *state ).board ) )
-        {
-            string_format ( ( *state ).textbuffer
-                          , "Move %s:"
-                          , string_move ( ( *state ).textbuffer , move )
-                          );
+        
+        platform_console_write ( " BOARD INITIAL STATE: \n"
+                               , PLATFORM_COLOR_CHESS_INFO
+                               );
+        board_render ( ( *state ).textbuffer , &( *state ).board );
+        
+        string_format ( ( *state ).textbuffer
+                      , " BOARD AFTER MOVE %s: "
+                      , string_move ( ( *state ).textbuffer , move )
+                      );
             platform_console_write ( ( *state ).textbuffer
                                    , PLATFORM_COLOR_CHESS_INFO
                                    );
-            board_render ( ( *state ).textbuffer , &( *state ).board );
+
+        if ( move_parse ( move
+                        , MOVE_FILTER_NONE
+                        , memory_copy ( &board
+                                      , &( *state ).board
+                                      , sizeof ( board_t )
+                                      )))
+        {
+            platform_console_write ( "\n" , PLATFORM_COLOR_CHESS_INFO );
+            board_render ( ( *state ).textbuffer , &board );
         }
         else
         {
-            string_format ( ( *state ).textbuffer
-                          , "Move %s skipped."
-                          , string_move ( ( *state ).textbuffer , move )
-                          );
-            platform_console_write ( ( *state ).textbuffer
+            platform_console_write ( "No change applied (move filtered)."
                                    , PLATFORM_COLOR_CHESS_INFO
                                    );
         }
+
+        platform_console_write ( "\n================================================================================\n"
+                               , PLATFORM_COLOR_CHESS_INFO
+                               );
         getchar ();
     }
 }

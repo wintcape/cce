@@ -21,8 +21,6 @@ typedef struct
     SIDE        side;
     SQUARE      enpassant;
     CASTLE      castle;
-
-    char        fen[ FEN_STRING_MAX_LENGTH ];
 }
 board_t;
 
