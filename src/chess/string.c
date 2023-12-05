@@ -36,7 +36,7 @@ string_moves
     if ( !( *moves ).count )
     {
         *dst = 0;   // Append terminator.
-        return 0;
+        return dst;
     }
 
     u64 offs = string_format ( dst
