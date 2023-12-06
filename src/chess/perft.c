@@ -14,23 +14,26 @@
 
 /**
  * @brief Primary implementation of perft (see perft).
- * @param board A chess board.
+ * @param board A chess board state.
+ * @param depth The current recursion depth.
+ * @param filter A move filter.
  * @param attacks The pregenerated attack tables.
- * @param depth Current recursion depth.
- * @return Current leaf node count.
+ * @return The current leaf node count.
  */
 u64
 _perft
 (   board_t*            board
-,   const attacks_t*    attacks
 ,   u32                 depth
+,   const MOVE_FILTER   filter
+,   const attacks_t*    attacks
 );
 
 void
 perft
 (   const board_t*      board_
-,   const attacks_t*    attacks
 ,   const u32           depth
+,   const MOVE_FILTER   filter
+,   const attacks_t*    attacks
 )
 {
     // Initialize a working copy of the board.
@@ -42,7 +45,7 @@ perft
     clock_start ( &clock );
 
     // Perform the test.
-    const u64 count = _perft ( &board , attacks , depth );
+    const u64 count = _perft ( &board , depth , filter , attacks );
 
     // Update the clock.
     clock_update ( &clock );
@@ -56,8 +59,9 @@ perft
 u64
 _perft
 (   board_t*            board
-,   const attacks_t*    attacks
 ,   u32                 depth
+,   const MOVE_FILTER   filter
+,   const attacks_t*    attacks
 )
 {
     // Base case.
@@ -79,12 +83,12 @@ _perft
 
         // Perform the move. If it succeeds, recurse.
         if ( move_parse ( moves.moves[ i ]
-                        , MOVE_FILTER_NONE
+                        , filter
                         , attacks
                         , board
                         ))
         {
-            leaf_count += _perft ( board , attacks , depth - 1 );
+            leaf_count += _perft ( board , depth - 1 , filter , attacks );
         }
 
         // Restore board state.

@@ -191,6 +191,7 @@ fen_parse
         board.enpassant = SQUAREINDX ( 8 - chri ( fen[ 1 ] )
                                      , fen[ 0 ] - 2 * '0' - 1
                                      );
+        LOGINFO ( string_square (board.enpassant));
         fen += 3;
     }
 
@@ -319,12 +320,6 @@ fen_from_board
         dst[ 0 ] = '-';
         dst += 1;
     }
-
-    dst[ 0 ] = FEN_WHITESPACE_TOKEN;
-    dst[ 1 ] = '-';
-    dst[ 2 ] = FEN_WHITESPACE_TOKEN;
-    dst[ 3 ] = '-';
-    dst += 4;
     
     *dst = 0;   // Append terminator.
     
