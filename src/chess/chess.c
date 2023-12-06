@@ -24,13 +24,10 @@ typedef struct
 
     // Game state.
     board_t     board;
-
-    // Pregenerated move options.
     moves_t     moves;
     
     // Render textbuffer.
     char        textbuffer[ CHESS_RENDER_TEXTBUFFER_LENGTH ];
-
 }
 state_t;
 
@@ -56,7 +53,7 @@ chess_startup
     attacks_init ( &( *state ).attacks );
 
     // Initialize game state.
-    fen_parse ( FEN_TRICKY , &( *state ).board );
+    fen_parse ( FEN_START , &( *state ).board );
 
     return true;
 }
@@ -84,7 +81,8 @@ chess_update
     }
     
     /*  Temporary.  */
-    perft ( &( *state ).board , &( *state ).attacks , 2 );
+   // fen_parse ( FEN_TRICKY , &( *state ).board );
+    perft ( &( *state ).board , &( *state ).attacks , 4 );
 
     return true;
 }
@@ -101,4 +99,3 @@ chess_render
     // Render the board.
     board_render ( ( *state ).textbuffer , &( *state ).board );
 }
-

@@ -6,6 +6,7 @@
  */
 #include "chess/board.h"
 
+#include "chess/fen.h"
 #include "chess/platform.h"
 #include "chess/string.h"
 
@@ -15,7 +16,11 @@ board_render
 ,   const board_t*  board
 )
 {
-    u64 offs = 0;
+    u64 offs = string_format ( dst
+                             , "\n BOARD: %s\n"
+                             , fen_from_board ( dst , board )
+                             );
+    platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
 
     u8 i = 0;
     u8 r = 0;

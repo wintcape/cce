@@ -1,7 +1,8 @@
 /**
  * @file perft.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Interface for a Perft driver for testing moves.
+ * @brief Interface for a Perft driver for testing move generation.
+ * (see also, move.h).
  */
 #ifndef CHESS_PERFT_H
 #define CHESS_PERFT_H
@@ -10,7 +11,7 @@
 
 /**
  * @brief Runs the Perft driver. Requires pregenerated attack tables.
- * @param board A chess board.
+ * @param board A chess board state.
  * @param attacks The pregenerated attack tables.
  * @param depth The maximum recursion depth.
  */

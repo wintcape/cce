@@ -13,17 +13,6 @@
 #include "core/logger.h"
 #include "core/memory.h"
 
-INLINE
-void
-moves_push
-(   moves_t*        moves
-,   const move_t    move
-)
-{
-    ( *moves ).moves[ ( *moves ).count ] = move;
-    ( *moves ).count += 1;
-}
-
 bool
 move_parse
 (   const move_t        move
@@ -251,12 +240,12 @@ move_parse
     // Toggle side.
     board.side ^= 1;
 
-    // If king is in check, do not perform the move.
+    // If new side's king is in check, discard the working board.
     if ( board_square_attackable ( &board
                                  , attacks
-                                 , bitboard_lsb ( ( white ) ? board.pieces[ K ]
-                                                            : board.pieces[ k ]
-                                                            )
+                                 , bitboard_lsb ( ( !white ) ? board.pieces[ k ]
+                                                             : board.pieces[ K ]
+                                                             )
                                  , board.side
                                  ))
     {
@@ -267,6 +256,17 @@ move_parse
     memory_copy ( board_ , &board , sizeof ( board_t ) );
 
     return true;
+}
+
+INLINE
+void
+moves_push
+(   moves_t*        moves
+,   const move_t    move
+)
+{
+    ( *moves ).moves[ ( *moves ).count ] = move;
+    ( *moves ).count += 1;
 }
 
 void
@@ -570,7 +570,7 @@ moves_get
                         }
                     }
                 }
-                if ( ( *board ).castle & CASTLE_WQ )
+                if ( ( *board ).castle & CASTLE_BQ )
                 {
                     if (   !bit ( ( *board ).occupancies[ 2 ] , D8 )
                         && !bit ( ( *board ).occupancies[ 2 ] , C8 )

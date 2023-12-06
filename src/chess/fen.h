@@ -27,4 +27,16 @@ fen_parse
 ,   board_t*    board
 );
 
+/**
+ * @brief Generates a FEN string from a provided board state.
+ * @param dst Output buffer.
+ * @param board A chess board state.
+ * @return dst.
+ */
+char*
+fen_from_board
+(   char*           dst
+,   const board_t*  board
+);
+
 #endif  // CHESS_FEN_H

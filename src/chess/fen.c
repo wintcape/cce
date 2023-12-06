@@ -10,11 +10,10 @@
 
 #include "core/logger.h"
 #include "core/memory.h"
-#include "core/string.h"
 
 // Defines FEN parsing tokens.
 #define FEN_FILE_SEPARATOR_TOKEN    '/'
-#define FEN_FILE_WHITESPACE_TOKEN   ' '
+#define FEN_WHITESPACE_TOKEN        ' '
 
 bool
 fen_parse
@@ -41,12 +40,14 @@ fen_parse
     char* fen = buf;
 
     // Parse piece placements.
-    for ( u8 r = 0; r < 8; ++r )
+    u8 r = 0;
+    u8 f = 0;
+    while ( r < 8 )
     {
-        for ( u8 f = 0; f < 8; ++f )
+        while ( f < 8 )
         {
-            // Piece token. 
             PIECE piece = EMPTY_SQ;
+
             for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
             {
                 if ( *fen == piecechr ( piece_ ) )
@@ -55,6 +56,8 @@ fen_parse
                     break;
                 }
             }
+            
+            // Piece token. 
             if ( piece != EMPTY_SQ )
             {
                 BITSET ( board.pieces[ piece ]
@@ -62,10 +65,13 @@ fen_parse
                        );
 
                 fen += 1;
+
+                f += 1;
+                continue;
             }
 
             // Empty square token.
-            else if ( numeric ( *fen ) )
+            if ( numeric ( *fen ) )
             {
                 const u8 i = chri ( *fen );
                 
@@ -78,31 +84,42 @@ fen_parse
                     return false;
                 }
 
-                f += i - 1;
                 fen += 1;
+                
+                f += i;
+                continue;
             }
 
-            // File separator token.
-            if ( r < 7 && *fen == FEN_FILE_SEPARATOR_TOKEN )
-            {
-                // Validate.
-                if ( f != 7 )
-                {
-                    LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tIllegal use of file separator '%c' (index %u, file %u)."
-                             , buf , *fen , fen - buf , f
-                             );
-                    return false;
-                }
-
-                fen += 1;
-            }
+            // Validate.
+            LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tIllegal character '%c' (index %u, file %u)."
+                     , buf , *fen , fen - buf , f
+                     );
+            return false;
         }
+
+        // File separator token.
+        if ( r < 7 )
+        {
+            // Validate.
+            if ( *fen != FEN_FILE_SEPARATOR_TOKEN )
+            {
+                LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, illegal character '%c' (expected file separator '%c')."
+                         , buf , fen - buf , *fen , FEN_FILE_SEPARATOR_TOKEN
+                         );
+                return false;
+            }
+        
+            fen += 1;
+        }
+
+        f = 0;
+        r += 1;
     }
 
     // Validate.
-    if (   ( fen[ 0 ] != FEN_FILE_WHITESPACE_TOKEN )
+    if (   ( fen[ 0 ] != FEN_WHITESPACE_TOKEN )
         || ( fen[ 1 ] != 'w' && fen[ 1 ] != 'b' )
-        || ( fen[ 2 ] != FEN_FILE_WHITESPACE_TOKEN )
+        || ( fen[ 2 ] != FEN_WHITESPACE_TOKEN )
        )
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, illegal character '%c'."
@@ -151,7 +168,7 @@ fen_parse
     }
    
     // Validate.
-    if ( fen[ 0 ] != FEN_FILE_WHITESPACE_TOKEN )
+    if ( fen[ 0 ] != FEN_WHITESPACE_TOKEN )
     {
         LOGERROR ( "fen_parse: Failed to parse move in invalid FEN format:\n\t    %s\n\tFailed on index %u, character '%c'."
                  , buf , fen - buf , *fen
@@ -161,14 +178,14 @@ fen_parse
     fen += 1;
 
     // Parse enpassant token.
-    if ( fen[ 0 ] == '-' && fen[ 1 ] == FEN_FILE_WHITESPACE_TOKEN )
+    if ( fen[ 0 ] == '-' && fen[ 1 ] == FEN_WHITESPACE_TOKEN )
     {
         board.enpassant = NO_SQ;
         fen += 2;
     }
     else if (   fen[ 0 ] >= 'a' && fen[ 0 ] <= 'h'
              && fen[ 1 ] >= '1' && fen[ 1 ] <= '8'
-             && fen[ 2 ] == FEN_FILE_WHITESPACE_TOKEN
+             && fen[ 2 ] == FEN_WHITESPACE_TOKEN
             )
     {
         board.enpassant = SQUAREINDX ( 8 - chri ( fen[ 1 ] )
@@ -203,4 +220,113 @@ fen_parse
     memory_copy ( board_ , &board , sizeof ( board_t ) );
 
     return true;
+}
+
+char*
+fen_from_board
+(   char*           dst
+,   const board_t*  board
+)
+{
+    char* const dst_ = dst;
+
+    // Stringify piece placements.
+    i8 nonempty = -1;
+    u8 r = 0;
+    u8 f = 0;
+    while ( r < 8 )
+    {
+        while ( f < 8 )
+        {
+            PIECE piece = EMPTY_SQ;
+            for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
+            {
+                if ( bit ( ( *board ).pieces[ piece_ ]
+                         , SQUAREINDX ( r , f )
+                         ))
+                {
+                    piece = piece_;
+                    break;
+                }
+            }
+
+            if ( piece != EMPTY_SQ )
+            {
+                // Append empty square count token, if necessary.
+                const u8 i = f - nonempty - 1;
+                if ( i )
+                {
+                    *dst = ichr ( i );
+                    dst += 1;
+                }
+
+                // Append occupied square token.
+                nonempty = f;
+                *dst = piecechr ( piece );
+                dst += 1;
+            }
+
+            f += 1;
+        }
+
+        // Append empty square count token, if necessary.
+        const u8 i = f - nonempty - 1;
+        if ( i )
+        {
+            *dst = ichr ( i );
+            dst += 1;
+        }
+        
+        // Append file separator token, if necessary.
+        if ( r < 7 )
+        {
+            *dst = FEN_FILE_SEPARATOR_TOKEN;
+            dst += 1;
+        }
+
+        nonempty = -1;
+        f = 0;
+        r += 1;
+    }
+    
+    dst[ 0 ] = FEN_WHITESPACE_TOKEN;
+
+    // Append side token.
+    dst[ 1 ] = ( ( *board ).side == WHITE ) ? 'w' : 'b';
+    
+    dst[ 2 ] = FEN_WHITESPACE_TOKEN;
+    
+    // Append castle token.
+    dst[ 3 ] = ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-';
+    dst[ 4 ] = ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-';
+    dst[ 5 ] = ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-';
+    dst[ 6 ] = ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-';
+
+    dst[ 7 ] = FEN_WHITESPACE_TOKEN;
+    dst += 8;
+
+    // Append enpassant token.
+    if ( ( *board ).enpassant != NO_SQ )
+    {
+        memory_copy ( dst
+                    , string_square ( ( *board ).enpassant )
+                    , SQUARE_STRING_LENGTH
+                    );
+        dst += SQUARE_STRING_LENGTH;
+    }
+    else
+    {
+        dst[ 0 ] = '-';
+        dst += 1;
+    }
+
+    dst[ 0 ] = FEN_WHITESPACE_TOKEN;
+    dst[ 1 ] = '-';
+    dst[ 2 ] = FEN_WHITESPACE_TOKEN;
+    dst[ 3 ] = '-';
+    dst += 4;
+    
+    *dst = 0;   // Append terminator.
+    
+    return dst_;
 }

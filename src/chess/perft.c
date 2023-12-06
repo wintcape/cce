@@ -12,16 +12,14 @@
 #include "core/logger.h"
 #include "core/memory.h"
 
-// Defines a global node count.
-static u64 node_count = 0;
-
 /**
  * @brief Primary implementation of perft (see perft).
  * @param board A chess board.
  * @param attacks The pregenerated attack tables.
  * @param depth Current recursion depth.
+ * @return Current leaf node count.
  */
-void
+u64
 _perft
 (   board_t*            board
 ,   const attacks_t*    attacks
@@ -44,18 +42,18 @@ perft
     clock_start ( &clock );
 
     // Perform the test.
-    _perft ( &board , attacks , depth );
+    const u64 count = _perft ( &board , attacks , depth );
 
     // Update the clock.
     clock_update ( &clock );
 
-    LOGINFO ( "perft: Successfully generated %llu nodes. Took %f seconds."
-            , node_count
+    LOGINFO ( "perft: Successfully generated %llu leaf nodes. Took %f seconds."
+            , count
             , clock.elapsed
             );
 }
 
-void
+u64
 _perft
 (   board_t*            board
 ,   const attacks_t*    attacks
@@ -65,34 +63,33 @@ _perft
     // Base case.
     if ( !depth )
     {
-        node_count += 1;
-        return;
+        return 1;
     }
 
     // Generate move options.
     moves_t moves;
     moves_get ( &moves , board , attacks );
 
+    u64 leaf_count = 0;
     for ( u32 i = 0; i < moves.count; ++i )
     {
         // Preserve board state.
         board_t board_prev;
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
 
-        // Perform the move. If it fails, do nothing.
-        if ( !move_parse ( moves.moves[ i ]
-                         , MOVE_FILTER_NONE
-                         , attacks
-                         , board
-                         ))
+        // Perform the move. If it succeeds, recurse.
+        if ( move_parse ( moves.moves[ i ]
+                        , MOVE_FILTER_NONE
+                        , attacks
+                        , board
+                        ))
         {
-            continue;
+            leaf_count += _perft ( board , attacks , depth - 1 );
         }
-
-        // Recursive case.
-        _perft ( board , attacks , depth - 1 );
 
         // Restore board state.
         memory_copy ( board , &board_prev , sizeof ( board_t ) );
     }
+    
+    return leaf_count;
 }
