@@ -21,8 +21,8 @@ move_parse
 ,   board_t*            board_
 )
 {
-    const SQUARE src = move_decode_source_square ( move );
-    const SQUARE target = move_decode_target_square ( move );
+    const SQUARE src = move_decode_src ( move );
+    const SQUARE dst = move_decode_dst ( move );
     const PIECE piece = move_decode_piece ( move );
     const PIECE promotion = move_decode_promotion ( move );
     const bool capture = move_decode_capture ( move );
@@ -133,7 +133,7 @@ move_parse
     
     // Move the piece.
     BITCLR ( board.pieces[ piece ] , src );
-    BITSET ( board.pieces[ piece ] , target );
+    BITSET ( board.pieces[ piece ] , dst );
 
     // Parse capture.
     if ( capture )
@@ -142,10 +142,10 @@ move_parse
         const PIECE to = ( white ) ? k : K;
         for ( PIECE i = from; i <= to; ++i )
         {
-            if ( bit ( board.pieces[ i ] , target ) )
+            if ( bit ( board.pieces[ i ] , dst ) )
             {
                 // Clear piece on target square.
-                BITCLR ( board.pieces[ i ] , target );
+                BITCLR ( board.pieces[ i ] , dst );
                 break;
             }
         }
@@ -155,17 +155,17 @@ move_parse
     if ( promotion )
     {
         // Clear pawn.
-        BITCLR ( board.pieces[ ( white ) ? P : p ] , target );
+        BITCLR ( board.pieces[ ( white ) ? P : p ] , dst );
 
         // Set promotion.
-        BITSET ( board.pieces[ promotion ] , target );
+        BITSET ( board.pieces[ promotion ] , dst );
     }
 
     // Parse en passant capture.
     if ( enpassant )
     {
-        ( white ) ? BITCLR ( board.pieces[ p ] , target + 8 )
-                  : BITCLR ( board.pieces[ P ] , target - 8 )
+        ( white ) ? BITCLR ( board.pieces[ p ] , dst + 8 )
+                  : BITCLR ( board.pieces[ P ] , dst - 8 )
                   ;
     }
 
@@ -175,15 +175,15 @@ move_parse
     // Parse double push.
     if ( double_push )
     {
-        ( white ) ? ( board.enpassant = target + 8 )
-                  : ( board.enpassant = target - 8 )
+        ( white ) ? ( board.enpassant = dst + 8 )
+                  : ( board.enpassant = dst - 8 )
                   ;
     }
 
     // Parse castling.
     if ( castle )
     {
-        switch ( target )
+        switch ( dst )
         {
             case C1:
             {
@@ -201,15 +201,15 @@ move_parse
 
             case C8:
             {
-                BITCLR ( board.pieces[ R ] , A8 );
-                BITSET ( board.pieces[ R ] , D8 );
+                BITCLR ( board.pieces[ r ] , A8 );
+                BITSET ( board.pieces[ r ] , D8 );
             }
             break;
 
             case G8:
             {
-                BITCLR ( board.pieces[ R ] , H8 );
-                BITSET ( board.pieces[ R ] , F8 );
+                BITCLR ( board.pieces[ r ] , H8 );
+                BITSET ( board.pieces[ r ] , F8 );
             }
             break;
 
@@ -221,7 +221,7 @@ move_parse
 
     // Update castling rights.
     board.castle &= castling_rights[ src ];
-    board.castle &= castling_rights[ target ];
+    board.castle &= castling_rights[ dst ];
 
     // Write the new occupancy maps to the board.
     memory_clear ( board.occupancies , sizeof ( board.occupancies ) );
@@ -277,7 +277,7 @@ moves_get
 )
 {
     SQUARE src;
-    SQUARE target;
+    SQUARE dst;
 
     bitboard_t pieces;
     bitboard_t attack;
@@ -297,43 +297,43 @@ moves_get
                 while ( pieces )
                 {
                     src = bitboard_lsb ( pieces );
-                    target = src - 8;
+                    dst = src - 8;
 
                     // Quiet moves.
-                    if ( !( target < A8 ) && !bit ( ( *board ).occupancies[ 2 ]
-                                                  , target
+                    if ( !( dst < A8 ) && !bit ( ( *board ).occupancies[ 2 ]
+                                                  , dst
                                                   ))
                     {
                         // Promotion.
                         if ( src >= A7 && src <= H7 )
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , Q , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , Q , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , R , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , R , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , B , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , B , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , N , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , N , 0 , 0 , 0 , 0 )
                                        );
                         }
                         else
                         {
                             // Push.
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                        );
 
                             // Double push.
                             if ( ( src >= A2 && src <= H2 ) && !bit ( ( *board ).occupancies[ 2 ]
-                                                                    , target - 8
+                                                                    , dst - 8
                                                                     ))
                             {
                                 moves_push ( moves
-                                           , move_encode ( src , target - 8 , piece , 0 , 0 , 1 , 0 , 0 )
+                                           , move_encode ( src , dst - 8 , piece , 0 , 0 , 1 , 0 , 0 )
                                            );
                             }
                         }
@@ -348,33 +348,33 @@ moves_get
                            ;
                     while ( attack )
                     {
-                        target = bitboard_lsb ( attack );
+                        dst = bitboard_lsb ( attack );
 
                         // Promotion + capture.
                         if ( src >= A7 && src <= H7 )
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , Q , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , Q , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , R , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , R , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , B , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , B , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , N , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , N , 1 , 0 , 0 , 0 )
                                        );
                         }
                         // Push + capture.
                         else
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                        );
                         }
 
-                        BITCLR ( attack , target );
+                        BITCLR ( attack , dst );
                     }
 
                     // En passant captures.
@@ -388,9 +388,9 @@ moves_get
                                              ;
                         if ( enpassant )
                         {
-                            const SQUARE target_enpassant = bitboard_lsb ( enpassant );
+                            const SQUARE dst_enpassant = bitboard_lsb ( enpassant );
                             moves_push ( moves
-                                       , move_encode ( src , target_enpassant , piece , 0 , 1 , 0 , 1 , 0 )
+                                       , move_encode ( src , dst_enpassant , piece , 0 , 1 , 0 , 1 , 0 )
                                        );
                             
                         }
@@ -448,43 +448,43 @@ moves_get
                 while ( pieces )
                 {
                     src = bitboard_lsb ( pieces );
-                    target = src + 8;
+                    dst = src + 8;
 
                     // Quiet moves.
-                    if ( !( target > H1 ) && !bit ( ( *board ).occupancies[ 2 ]
-                                                  , target
+                    if ( !( dst > H1 ) && !bit ( ( *board ).occupancies[ 2 ]
+                                                  , dst
                                                   ))
                     {
                         // Promotion.
                         if ( src >= A2 && src <= H2 )
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , q , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , q , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , r , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , r , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , b , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , b , 0 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , n , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , n , 0 , 0 , 0 , 0 )
                                        );
                         }
                         else
                         {
                             // Push.
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                        );
 
                             // Double push.
                             if ( ( src >= A7 && src <= H7 ) && !bit ( ( *board ).occupancies[ 2 ]
-                                                                    , target + 8
+                                                                    , dst + 8
                                                                     ))
                             {
                                 moves_push ( moves
-                                           , move_encode ( src , target + 8 , piece , 0 , 0 , 1 , 0 , 0 )
+                                           , move_encode ( src , dst + 8 , piece , 0 , 0 , 1 , 0 , 0 )
                                            );
                             }
                         }
@@ -499,33 +499,33 @@ moves_get
                            ;
                     while ( attack )
                     {
-                        target = bitboard_lsb ( attack );
+                        dst = bitboard_lsb ( attack );
 
                         // Promotion + capture.
                         if ( src >= A7 && src <= H7 )
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , q , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , q , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , r , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , r , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , b , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , b , 1 , 0 , 0 , 0 )
                                        );
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , n , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , n , 1 , 0 , 0 , 0 )
                                        );
                         }
                         // Push + capture.
                         else
                         {
                             moves_push ( moves
-                                       , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                       , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                        );
                         }
 
-                        BITCLR ( attack , target );
+                        BITCLR ( attack , dst );
                     }
 
                     // En passant captures.
@@ -539,9 +539,9 @@ moves_get
                                              ;
                         if ( enpassant )
                         {
-                            const SQUARE target_enpassant = bitboard_lsb ( enpassant );
+                            const SQUARE dst_enpassant = bitboard_lsb ( enpassant );
                             moves_push ( moves
-                                       , move_encode ( src , target_enpassant , piece , 0 , 1 , 0 , 1 , 0 )
+                                       , move_encode ( src , dst_enpassant , piece , 0 , 1 , 0 , 1 , 0 )
                                        );
                             
                         }
@@ -603,16 +603,16 @@ moves_get
                                                         );
                 while ( attack )
                 {
-                    target = bitboard_lsb ( attack );
+                    dst = bitboard_lsb ( attack );
  
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
-                              , target
+                              , dst
                               ))
                     {
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                    );
                     }
 
@@ -620,11 +620,11 @@ moves_get
                     else
                     { 
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                    );
                     }
 
-                    BITCLR ( attack , target );
+                    BITCLR ( attack , dst );
                 }
 
                 BITCLR ( pieces , src );
@@ -647,16 +647,16 @@ moves_get
                                                         );
                 while ( attack )
                 {
-                    target = bitboard_lsb ( attack );
+                    dst = bitboard_lsb ( attack );
  
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
-                              , target
+                              , dst
                               ))
                     {
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                    );
                     }
 
@@ -664,11 +664,11 @@ moves_get
                     else
                     { 
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                    );
                     }
 
-                    BITCLR ( attack , target );
+                    BITCLR ( attack , dst );
                 }
 
                 BITCLR ( pieces , src );
@@ -691,16 +691,16 @@ moves_get
                                                         );
                 while ( attack )
                 {
-                    target = bitboard_lsb ( attack );
+                    dst = bitboard_lsb ( attack );
  
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
-                              , target
+                              , dst
                               ))
                     {
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                    );
                     }
 
@@ -708,11 +708,11 @@ moves_get
                     else
                     { 
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                    );
                     }
 
-                    BITCLR ( attack , target );
+                    BITCLR ( attack , dst );
                 }
 
                 BITCLR ( pieces , src );
@@ -735,16 +735,16 @@ moves_get
                                                         );
                 while ( attack )
                 {
-                    target = bitboard_lsb ( attack );
+                    dst = bitboard_lsb ( attack );
  
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
-                              , target
+                              , dst
                               ))
                     {
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                    );
                     }
 
@@ -752,11 +752,11 @@ moves_get
                     else
                     { 
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                    );
                     }
 
-                    BITCLR ( attack , target );
+                    BITCLR ( attack , dst );
                 }
 
                 BITCLR ( pieces , src );
@@ -776,16 +776,16 @@ moves_get
                                                         );
                 while ( attack )
                 {
-                    target = bitboard_lsb ( attack );
+                    dst = bitboard_lsb ( attack );
  
                     // Quiet move.
                     if ( !bit ( ( ( *board ).side == WHITE ) ? ( *board ).occupancies[ BLACK ]
                                                              : ( *board ).occupancies[ WHITE ]
-                              , target
+                              , dst
                               ))
                     {
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 0 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 0 , 0 , 0 , 0 )
                                    );
                     }
 
@@ -793,11 +793,11 @@ moves_get
                     else
                     { 
                         moves_push ( moves
-                                   , move_encode ( src , target , piece , 0 , 1 , 0 , 0 , 0 )
+                                   , move_encode ( src , dst , piece , 0 , 1 , 0 , 0 , 0 )
                                    );
                     }
 
-                    BITCLR ( attack , target );
+                    BITCLR ( attack , dst );
                 }
 
                 BITCLR ( pieces , src );

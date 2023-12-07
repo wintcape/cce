@@ -26,7 +26,7 @@ moves_t;
 /**
  * @brief Encodes a single move via bitpacking.
  * @param src The source square.
- * @param target The target square.
+ * @param dst The destination square.
  * @param piece The piece on the source square.
  * @param promotion Promoted piece, if any.
  * @param capture Is move capture? Y/N
@@ -38,7 +38,7 @@ INLINE
 move_t
 move_encode
 (   const SQUARE    src
-,   const SQUARE    target
+,   const SQUARE    dst
 ,   const PIECE     piece
 ,   const PIECE     promotion
 ,   const bool      capture
@@ -47,8 +47,8 @@ move_encode
 ,   const bool      castle
 )
 {
-    return src
-         | ( target << 6 )
+    return ( src )
+         | ( dst << 6 )
          | ( piece << 12 )
          | ( promotion << 16 )
          | ( capture << 20 )
@@ -65,7 +65,7 @@ move_encode
  */
 INLINE
 SQUARE
-move_decode_source_square
+move_decode_src
 (   const move_t move
 )
 {
@@ -73,13 +73,13 @@ move_decode_source_square
 }
 
 /**
- * @brief Retrieves target square from a bitpacked move.
+ * @brief Retrieves destination square from a bitpacked move.
  * @param move A move.
- * @return The target square of move.
+ * @return The destination square of move.
  */
 INLINE
 SQUARE
-move_decode_target_square
+move_decode_dst
 (   const move_t move
 )
 {

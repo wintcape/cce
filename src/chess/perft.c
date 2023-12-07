@@ -32,26 +32,61 @@ void
 perft
 (   const board_t*      board_
 ,   const u32           depth
-,   const MOVE_FILTER   filter
 ,   const attacks_t*    attacks
 )
 {
-    // Initialize a working copy of the board.
     board_t board;
-    memory_copy ( &board , board_ , sizeof ( board_t ) );
 
     // Initialize the clock.
     clock_t clock;
     clock_start ( &clock );
 
     // Perform the test.
-    const u64 count = _perft ( &board , depth , filter , attacks );
-
+    const u64 result = _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+                              , depth
+                              , MOVE_FILTER_NONE
+                              , attacks
+                              );
+    
     // Update the clock.
     clock_update ( &clock );
 
     LOGINFO ( "perft: Successfully generated %llu leaf nodes. Took %f seconds."
-            , count
+            , result
+            , clock.elapsed
+            );
+
+    // Perform additional filtered tests to generate move statistics.
+    LOGINFO ( "\tCAPTURES:             %llu"
+            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+                     , depth
+                     , MOVE_FILTER_ONLY_CAPTURE
+                     , attacks
+                     )
+            , clock.elapsed
+            );
+    LOGINFO ( "\tEN PASSANT CAPTURES:  %llu"
+            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+                     , depth
+                     , MOVE_FILTER_ONLY_ENPASSANT
+                     , attacks
+                     )
+            , clock.elapsed
+            );
+    LOGINFO ( "\tCASTLES:              %llu"
+            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+                     , depth
+                     , MOVE_FILTER_ONLY_CASTLE
+                     , attacks
+                     )
+            , clock.elapsed
+            );
+    LOGINFO ( "\tPROMOTIONS:           %llu"
+            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+                     , depth
+                     , MOVE_FILTER_ONLY_PROMOTION
+                     , attacks
+                     )
             , clock.elapsed
             );
 }

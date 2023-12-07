@@ -82,7 +82,7 @@ whitespace
 
 INLINE
 char
-touppercase
+to_uppercase
 (   const char c
 )
 {
@@ -93,7 +93,7 @@ touppercase
 
 INLINE
 char
-tolowercase
+to_lowercase
 (   const char c
 )
 {

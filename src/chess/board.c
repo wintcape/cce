@@ -58,7 +58,7 @@ board_render
             const bool blackchr = piece >= p && piece <= k;            
             if ( blackchr )
             {
-                dst[ 1 ] = touppercase ( dst[ 1 ] );
+                dst[ 1 ] = to_uppercase ( dst[ 1 ] );
             }
 
             if ( !( i % 2 ) )

@@ -15,14 +15,12 @@
  * @brief Runs the Perft driver. Requires pregenerated attack tables.
  * @param board A chess board state.
  * @param depth The maximum recursion depth.
- * @param filter A move filter.
  * @param attacks The pregenerated attack tables.
  */
 void
 perft
 (   const board_t*      board
 ,   const u32           depth
-,   const MOVE_FILTER   filter
 ,   const attacks_t*    attacks
 );
 

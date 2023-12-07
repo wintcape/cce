@@ -82,7 +82,7 @@ chess_update
     
     /*  Temporary.  */
     fen_parse ( FEN_TRICKY , &( *state ).board );
-    perft ( &( *state ).board , 2 , MOVE_FILTER_ONLY_CAPTURE , &( *state ).attacks );
+    perft ( &( *state ).board , 2 , &( *state ).attacks );
 
     moves_get ( &( *state ).moves
               , &( *state ).board
@@ -101,6 +101,7 @@ chess_render
     {
         return;
     }
+    return;
     
     // Render the board.
     //board_render ( ( *state ).textbuffer , &( *state ).board );

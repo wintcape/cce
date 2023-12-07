@@ -13,14 +13,14 @@ string_move
 )
 {
     memory_copy ( &dst[ 0 ]
-                , string_square ( move_decode_source_square ( move ) )
+                , string_square ( move_decode_src ( move ) )
                 , SQUARE_STRING_LENGTH
                 );
     memory_copy ( &dst[ SQUARE_STRING_LENGTH ]
-                , string_square ( move_decode_target_square ( move ) )
+                , string_square ( move_decode_dst ( move ) )
                 , SQUARE_STRING_LENGTH
                 );
-    dst[ MOVE_STRING_LENGTH - 1 ] = move_decode_promotion ( move ) ? touppercase ( piecechr ( move_decode_promotion ( move ) ) )
+    dst[ MOVE_STRING_LENGTH - 1 ] = move_decode_promotion ( move ) ? to_uppercase ( piecechr ( move_decode_promotion ( move ) ) )
                                                                    : ' '
                                                                    ;
     dst[ MOVE_STRING_LENGTH ] = 0;  // Append terminator.
@@ -49,7 +49,7 @@ string_moves
         offs += string_format ( dst + offs
                               ,  "   %s      %c        %u         %u         %u           %u\n\t"
                               , string_move ( dst + offs , move )
-                              , touppercase ( piecechr ( move_decode_piece ( move ) ) )
+                              , to_uppercase ( piecechr ( move_decode_piece ( move ) ) )
                               , move_decode_capture ( move )
                               , move_decode_double_push ( move )
                               , move_decode_enpassant ( move )

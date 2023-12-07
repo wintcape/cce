@@ -144,19 +144,8 @@ bitboard_queen_attack
 ,   bitboard_t          occupancy
 )
 {
-    bitboard_t bishop_occupancy = occupancy;
-    bitboard_t rook_occupancy = occupancy;
-
-    bishop_occupancy &= ( *attacks ).bishop_masks[ square ];
-    bishop_occupancy *= bitboard_magic_bishops[ square ];
-    bishop_occupancy >>= 64 - bishop_attack_relevant_counts[ square ];
-    
-    rook_occupancy &= ( *attacks ).rook_masks[ square ];
-    rook_occupancy *= bitboard_magic_rooks[ square ];
-    rook_occupancy >>= 64 - rook_attack_relevant_counts[ square ];
-
-    return ( *attacks ).bishop[ square ][ bishop_occupancy ]
-         | ( *attacks ).rook[ square ][ rook_occupancy ]
+    return bitboard_bishop_attack ( attacks , square , occupancy )
+         | bitboard_rook_attack ( attacks , square , occupancy )
          ;
 }
 
