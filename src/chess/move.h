@@ -52,7 +52,7 @@ move_parse
 void
 moves_get
 (   moves_t*            moves
-,   board_t*            board
+,   const board_t*      board
 ,   const attacks_t*    attacks
 );
 

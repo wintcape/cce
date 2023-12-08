@@ -7,6 +7,7 @@
 #include "chess/perft.h"
 
 #include "chess/move.h"
+#include "chess/string.h"
 
 #include "core/clock.h"
 #include "core/logger.h"
@@ -37,22 +38,56 @@ perft
 {
     board_t board;
 
+    LOGINFO ( "perft: Started performance test." );
+
+    // Generate moves.
+    moves_t moves;
+    moves_get ( &moves , board_ , attacks );
+
     // Initialize the clock.
     clock_t clock;
     clock_start ( &clock );
 
     // Perform the test.
-    const u64 result = _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-                              , depth
-                              , MOVE_FILTER_NONE
-                              , attacks
-                              );
+    u64 leaf_count = 0;
+    for ( u32 i = 0; i < moves.count; ++i )
+    {
+        // Initialize a working board state.
+        memory_copy ( &board , board_ , sizeof ( board_t ) );        
+        
+        // Perform a move.
+        if ( !move_parse ( moves.moves[ i ]
+                         , MOVE_FILTER_NONE
+                         , attacks
+                         , &board
+                         ))
+        {
+            continue;
+        }
+        
+        // Recurse.
+        const u64 result = _perft ( &board
+                                  , depth - 1
+                                  , MOVE_FILTER_NONE
+                                  , attacks
+                                  );
+        leaf_count += result;
+
+        // Statistics.
+        char s_move[ MOVE_STRING_LENGTH + 1 ];
+        LOGINFO ( "perft:\tMOVE:  %s    LEAF NODES: %llu"
+                , string_move ( s_move , moves.moves[ i ] )
+                , result
+                );
+    }
+    
     
     // Update the clock.
     clock_update ( &clock );
 
-    LOGINFO ( "perft: Successfully generated %llu leaf nodes. Took %f seconds."
-            , result
+    LOGINFO ( "perft: Successfully generated %llu leaf nodes at depth %u. Took %f seconds."
+            , leaf_count
+            , depth
             , clock.elapsed
             );
 
@@ -90,9 +125,8 @@ perft
 //            , clock.elapsed
 //            );
 }
-
-#include "chess/string.h"
-#include "chess/board.h"
+#include <stdio.h>
+char s[32000];
 u64
 _perft
 (   board_t*            board
@@ -118,16 +152,19 @@ _perft
         board_t board_prev;
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
 
-        // Perform the move. If it succeeds, recurse.
-        if ( move_parse ( moves.moves[ i ]
-                        , filter
-                        , attacks
-                        , board
-                        ))
+        // Perform the move.
+        if ( !move_parse ( moves.moves[ i ]
+                         , filter
+                         , attacks
+                         , board
+                         ))
         {
-            leaf_count += _perft ( board , depth - 1 , filter , attacks );
+            continue;
         }
-
+        
+        // Move succeeded. Recurse.
+        leaf_count += _perft ( board , depth - 1 , filter , attacks );
+        
         // Restore board state.
         memory_copy ( board , &board_prev , sizeof ( board_t ) );
     }

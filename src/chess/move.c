@@ -272,7 +272,7 @@ moves_push
 void
 moves_get
 (   moves_t*            moves
-,   board_t*            board
+,   const board_t*      board
 ,   const attacks_t*    attacks
 )
 {
@@ -427,7 +427,7 @@ moves_get
                        )
                     {
                         if (   !board_square_attackable ( board , attacks , E1 , BLACK )
-                            && !board_square_attackable ( board , attacks , C1 , BLACK )
+                            && !board_square_attackable ( board , attacks , D1 , BLACK )
                            )
                         {
                             moves_push ( moves
@@ -502,7 +502,7 @@ moves_get
                         dst = bitboard_lsb ( attack );
 
                         // Promotion + capture.
-                        if ( src >= A7 && src <= H7 )
+                        if ( src >= A2 && src <= H2 )
                         {
                             moves_push ( moves
                                        , move_encode ( src , dst , piece , q , 1 , 0 , 0 , 0 )
@@ -578,7 +578,7 @@ moves_get
                        )
                     {
                         if (   !board_square_attackable ( board , attacks , E8 , WHITE )
-                            && !board_square_attackable ( board , attacks , C8 , WHITE )
+                            && !board_square_attackable ( board , attacks , D8 , WHITE )
                            )
                         {
                             moves_push ( moves

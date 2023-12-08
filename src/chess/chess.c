@@ -82,7 +82,7 @@ chess_update
     
     /*  Temporary.  */
     //fen_parse ( FEN_TRICKY , &( *state ).board );
-    perft ( &( *state ).board , 4 , &( *state ).attacks );
+    perft ( &( *state ).board , 7 , &( *state ).attacks );
 
     moves_get ( &( *state ).moves
               , &( *state ).board
@@ -92,7 +92,6 @@ chess_update
     return true;
 }
 
-#include <stdio.h>
 void
 chess_render
 ( void )
