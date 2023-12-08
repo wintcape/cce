@@ -313,6 +313,7 @@ fen_from_board
                     , string_square ( ( *board ).enpassant )
                     , SQUARE_STRING_LENGTH
                     );
+        *dst = to_lowercase ( *dst );
         dst += SQUARE_STRING_LENGTH;
     }
     else

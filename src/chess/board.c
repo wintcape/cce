@@ -34,32 +34,30 @@ board_render
         {
             if ( !f )
             {
-                offs = string_format ( dst , "%u   " , 8 - r );
+                string_format ( dst , "%u   " , 8 - r );
                 platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
             }
 
             PIECE piece = EMPTY_SQ; 
 
-            for ( PIECE bb = P; bb < 12; ++bb )
+            for ( PIECE piece_ = P; piece_ < 12; ++piece_ )
             {
-                if ( bit ( ( *board ).pieces[ bb ] , SQUAREINDX ( r , f ) ) )
+                if ( bit ( ( *board ).pieces[ piece_ ]
+                         , SQUAREINDX ( r , f )
+                         ))
                 {
-                    piece = bb;
+                    piece = piece_;
                 }
             }
-
-            dst[ 0 ] = ' ';
-            dst[ 1 ] = ( piece == EMPTY_SQ ) ? ' '
-                                             : piecechr ( piece )
-                                             ;
-            dst[ 2 ] = ' ';
-            dst[ 3 ] = 0;
             
-            const bool blackchr = piece >= p && piece <= k;            
-            if ( blackchr )
-            {
-                dst[ 1 ] = to_uppercase ( dst[ 1 ] );
-            }
+            const bool blackchr = piece >= p && piece <= k;
+            
+            string_format ( dst
+                          , " %s "
+                          , ( piece != EMPTY_SQ ) ? ( blackchr ) ? piecewchr ( piece )
+                                                                 : piecewchr ( p + piece )
+                                                  : " "
+                          );
 
             if ( !( i % 2 ) )
             {

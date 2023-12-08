@@ -6,7 +6,7 @@
 #ifndef CHESS_COMMON_CASTLE_H
 #define CHESS_COMMON_CASTLE_H
 
-typedef u32 CASTLE;
+typedef u8 CASTLE;
 
 enum
 {

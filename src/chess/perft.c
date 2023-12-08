@@ -56,41 +56,43 @@ perft
             , clock.elapsed
             );
 
-    // Perform additional filtered tests to generate move statistics.
-    LOGINFO ( "\tCAPTURES:             %llu"
-            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-                     , depth
-                     , MOVE_FILTER_ONLY_CAPTURE
-                     , attacks
-                     )
-            , clock.elapsed
-            );
-    LOGINFO ( "\tEN PASSANT CAPTURES:  %llu"
-            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-                     , depth
-                     , MOVE_FILTER_ONLY_ENPASSANT
-                     , attacks
-                     )
-            , clock.elapsed
-            );
-    LOGINFO ( "\tCASTLES:              %llu"
-            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-                     , depth
-                     , MOVE_FILTER_ONLY_CASTLE
-                     , attacks
-                     )
-            , clock.elapsed
-            );
-    LOGINFO ( "\tPROMOTIONS:           %llu"
-            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-                     , depth
-                     , MOVE_FILTER_ONLY_PROMOTION
-                     , attacks
-                     )
-            , clock.elapsed
-            );
+//    // Perform additional filtered tests to generate move statistics.
+//    LOGINFO ( "\tCAPTURES:             %llu"
+//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+//                     , depth
+//                     , MOVE_FILTER_ONLY_CAPTURE
+//                     , attacks
+//                     )
+//            , clock.elapsed
+//            );
+//    LOGINFO ( "\tEN PASSANT CAPTURES:  %llu"
+//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+//                     , depth
+//                     , MOVE_FILTER_ONLY_ENPASSANT
+//                     , attacks
+//                     )
+//            , clock.elapsed
+//            );
+//    LOGINFO ( "\tCASTLES:              %llu"
+//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+//                     , depth
+//                     , MOVE_FILTER_ONLY_CASTLE
+//                     , attacks
+//                     )
+//            , clock.elapsed
+//            );
+//    LOGINFO ( "\tPROMOTIONS:           %llu"
+//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
+//                     , depth
+//                     , MOVE_FILTER_ONLY_PROMOTION
+//                     , attacks
+//                     )
+//            , clock.elapsed
+//            );
 }
 
+#include "chess/string.h"
+#include "chess/board.h"
 u64
 _perft
 (   board_t*            board

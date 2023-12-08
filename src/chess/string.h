@@ -43,6 +43,21 @@ static const char piecechrs[] = { [ P ] = 'P'
                                 , [ k ] = 'k'
                                 };
 
+// Defines a map for all pieces: piece -> Unicode alias.
+static const char* piecewchrs[] = { [ P ] = "♙"
+                                  , [ N ] = "♘"
+                                  , [ B ] = "♗"
+                                  , [ R ] = "♖"
+                                  , [ Q ] = "♕"
+                                  , [ K ] = "♔"
+                                  , [ p ] = "♟"
+                                  , [ n ] = "♞"
+                                  , [ b ] = "♝"
+                                  , [ r ] = "♜"
+                                  , [ q ] = "♛"
+                                  , [ k ] = "♚"
+                                  };
+
 // Defines a map for all pieces: ASCII alias -> piece.
 static const PIECE pieces[] = { [ 'P' ] = P
                               , [ 'N' ] = N
@@ -61,7 +76,7 @@ static const PIECE pieces[] = { [ 'P' ] = P
 /**
  * @brief Generates the ASCII alias for a given piece.
  * @param piece The piece to display.
- * @return ASCII char representing the piece.
+ * @return ASCII character representing the piece.
  */
 INLINE
 char
@@ -70,6 +85,20 @@ piecechr
 )
 {
     return piecechrs[ piece ];
+}
+
+/**
+ * @brief Generates the Unicode alias for a given piece.
+ * @param piece The piece to display.
+ * @return Unicode character representing the piece.
+ */
+INLINE
+const char*
+piecewchr
+(   const PIECE piece
+)
+{
+    return piecewchrs[ piece ];
 }
 
 /**

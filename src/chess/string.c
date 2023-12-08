@@ -47,7 +47,7 @@ string_moves
     {
         const move_t move = ( *moves ).moves[ i ];
         offs += string_format ( dst + offs
-                              ,  "   %s      %c        %u         %u         %u           %u\n\t"
+                              ,  "           %s      %c        %u         %u         %u           %u\n\t"
                               , string_move ( dst + offs , move )
                               , to_uppercase ( piecechr ( move_decode_piece ( move ) ) )
                               , move_decode_capture ( move )
