@@ -13,11 +13,13 @@
  * @brief Renders a chess board to the console.
  * @param dst Working string buffer.
  * @param board A chess board.
+ * @param color A console color code index.
  */
 void
 board_render
 (   char*           dst
 ,   const board_t*  board
+,   const u8        color
 );
 
 /**

@@ -9,9 +9,6 @@
 #include "platform/platform.h"
 
 // Console color code indices for text rendering.
-#define PLATFORM_COLOR_CHESS_WSWP 10
-#define PLATFORM_COLOR_CHESS_WSBP 11
-#define PLATFORM_COLOR_CHESS_BSWP 12
-#define PLATFORM_COLOR_CHESS_BSBP 13
+#define PLATFORM_COLOR_CCE_INFO 9
 
 #endif  // CHESS_PLATFORM_H

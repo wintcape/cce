@@ -14,9 +14,7 @@
 typedef struct
 {
     f32     dt;
-    
-    u64     chess_engine_memory_requirement;
-    void*   chess_engine_state;
+    void*   internal;
 }
 cce_t;
 

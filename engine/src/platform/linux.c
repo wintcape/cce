@@ -526,17 +526,6 @@ _platform_console_write
     fprintf ( file , "\033[%sm%s\033[0m" , colors[ color ] , mesg );
 }
 
-bool
-platform_console_read
-(   char*       dst
-,   const u64   n
-)
-{
-    const bool result = fgets ( dst , n , stdin );
-    fseek ( stdin , 0 , SEEK_END );
-    return result;
-}
-
 BUTTON
 platform_parse_button
 (   u32 x_code

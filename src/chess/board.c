@@ -14,13 +14,14 @@ void
 board_render
 (   char*           dst
 ,   const board_t*  board
+,   const u8        color
 )
 {
     u64 offs = string_format ( dst
-                             , "\n BOARD: %s\n"
+                             , "\n\tBOARD: %s\n"
                              , fen_from_board ( dst , board )
                              );
-    platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
+    platform_console_write ( dst , color );
 
     u8 i = 0;
     u8 r = 0;
@@ -28,14 +29,14 @@ board_render
 
     while ( r < 8 )
     {
-        platform_console_write ( "\n\t" , PLATFORM_COLOR_CHESS_INFO );
+        platform_console_write ( "\n\t\t\t" , color );
         
         while ( f < 8 )
         {
             if ( !f )
             {
                 string_format ( dst , "%u   " , 8 - r );
-                platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
+                platform_console_write ( dst , color );
             }
 
             PIECE piece = EMPTY_SQ; 
@@ -84,8 +85,8 @@ board_render
     }
     
     offs = string_format ( dst
-                         , "\n\n\t    "
-                         , PLATFORM_COLOR_CHESS_INFO
+                         , "\n\n\t\t\t    "
+                         , color
                          );
 
     r = 0;
@@ -99,7 +100,7 @@ board_render
     }
 
     offs += string_format ( dst + offs
-                          , "\n\n\n\tSide:         %s\n\tEn passant:      %s\n\tCastling:      %c%c%c%c\n\n"
+                          , "\n\n\n\t\t\tSide:         %s\n\t\t\tEn passant:      %s\n\t\t\tCastling:      %c%c%c%c\n\n"
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
                           , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
@@ -110,5 +111,5 @@ board_render
                           , ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-'
                           );
 
-    platform_console_write ( dst , PLATFORM_COLOR_CHESS_INFO );
+    platform_console_write ( dst , color );
 }

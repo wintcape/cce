@@ -204,7 +204,7 @@ fen_parse
         return false;
     }
 
-    // Write the new occupancy maps to the board.
+    // Update occupancy maps.
     for ( PIECE piece = P; piece <= K; ++piece )
     {
         board.occupancies[ WHITE ] |= board.pieces[ piece ];
@@ -216,6 +216,9 @@ fen_parse
     board.occupancies[ 2 ] = board.occupancies[ WHITE ]
                            | board.occupancies[ BLACK ]
                            ;
+
+    // Preserve board history.
+    board.history = ( *board_ ).history;
 
     // Write the board to the output buffer.
     memory_copy ( board_ , &board , sizeof ( board_t ) );

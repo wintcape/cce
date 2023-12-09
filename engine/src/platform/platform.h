@@ -154,17 +154,6 @@ platform_console_write_error
 );
 
 /**
- * @brief Platform-independent function to read n bytes of console input.
- * @param dst Output buffer.
- * @param n Number of bytes to read.
- */
-bool
-platform_console_read
-(   char*       dst
-,   const u64   n
-);
-
-/**
  * @brief Platform-independent get absolute time function.
  */
 f64

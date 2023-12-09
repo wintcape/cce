@@ -1,51 +1,18 @@
 /**
  * @file chess.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Chess engine subsystem.
+ * @brief Chess engine backend.
  */
 #ifndef CHESS_H
 #define CHESS_H
 
 #include "chess/common.h"
 
-// Defines the size of the render textbuffer.
-#define CHESS_RENDER_TEXTBUFFER_LENGTH 16384
-
-/**
- * @brief Initializes the chess engine subsystem. Call once to read the memory
- * requirement. Call again passing in a state pointer.
- * @param memory_requirement Output buffer to read memory requirement.
- * @param state Pass 0 to read memory requirement. Otherwise, pass a buffer.
- * @return false on error, true otherwise.
- */
-bool
-chess_startup
-(   u64*    memory_requirement
-,   void*   state
-);
-
-/**
- * @brief Terminates the chess engine subsystem.
- * @param state .
- */
-void
-chess_shutdown
-(   void* state
-);
-
-/**
- * @brief Updates the chess subsystem.
- * @return false on error, true otherwise.
- */
-bool
-chess_update
-( void );
-
-/**
- * @brief Renders the current chess board to the console.
- */
-void
-chess_render
-( void );
+#include "chess/attack.h"
+#include "chess/board.h"
+#include "chess/fen.h"
+#include "chess/move.h"
+#include "chess/platform.h"
+#include "chess/string.h"
 
 #endif  // CHESS_H

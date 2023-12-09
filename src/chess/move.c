@@ -230,7 +230,7 @@ move_parse
     board.castle &= castling_rights[ src ];
     board.castle &= castling_rights[ dst ];
 
-    // Write the new occupancy maps to the board.
+    // Update occupancy maps.
     memory_clear ( board.occupancies , sizeof ( board.occupancies ) );
     for ( PIECE piece = P; piece <= K; ++piece )
     {
@@ -258,6 +258,9 @@ move_parse
     {
         return false;
     }
+    
+    // Update history.
+    board.history += 1;
 
     // Overwrite the output buffer with the updated board.
     memory_copy ( board_ , &board , sizeof ( board_t ) );
