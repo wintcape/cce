@@ -144,7 +144,7 @@ move_parse
         {
             if ( bit ( board.pieces[ i ] , dst ) )
             {
-                // Clear piece on target square.
+                board.capture = i;
                 BITCLR ( board.pieces[ i ] , dst );
                 break;
             }
@@ -164,9 +164,16 @@ move_parse
     // Parse en passant capture.
     if ( enpassant )
     {
-        ( white ) ? BITCLR ( board.pieces[ p ] , dst + 8 )
-                  : BITCLR ( board.pieces[ P ] , dst - 8 )
-                  ;
+        if ( white )
+        {
+            board.capture = p;
+            BITCLR ( board.pieces[ p ] , dst + 8 );
+        }
+        else
+        {
+            board.capture = P;
+            BITCLR ( board.pieces[ P ] , dst - 8 );
+        }
     }
 
     // Reset en passant square.

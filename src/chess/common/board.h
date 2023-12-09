@@ -21,6 +21,8 @@ typedef struct
     SIDE        side;
     SQUARE      enpassant;
     CASTLE      castle;
+
+    PIECE       capture;
 }
 board_t;
 

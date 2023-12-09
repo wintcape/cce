@@ -160,31 +160,80 @@ chess_update
                      , &( *state ).board
                      ))
     {   
-        LOGINFO ( "Check: %s."
-                , string_move ( ( *state ).textbuffer
-                              , ( *state ).move
-                              ));
+        string_format ( ( *state ).textbuffer
+                      , "%s CHECK: %s\n"
+                      , ( ( *state ).board.side == WHITE ) ? "WHITE (player)"
+                                                           : "BLACK (engine)"
+                      , string_move ( ( *state ).textbuffer
+                                    , ( *state ).move
+                                    ));
+        platform_console_write ( ( *state ).textbuffer , LOG_INFO );
+
         event_context_t ctx = {};
         event_fire ( EVENT_CODE_APPLICATION_QUIT , 0 , ctx );
+
         ( *state ).render = false;
         return true;
     }
 
     ( *state ).ply += 1;
-    
-    string_format ( ( *state ).textbuffer
-                  , "\n\n %s MOVED:  "
-                  , ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                       : "BLACK (engine)"
-                  );
-    platform_console_write ( ( *state ).textbuffer , LOG_ERROR );
-    string_move ( ( *state ).textbuffer , ( *state ).move );
-    if ( ( *state ).textbuffer[ 4 ] == ' ' )
-    {
-        ( *state ).textbuffer[ 4 ] = 0;
-    }
 
-    platform_console_write ( ( *state ).textbuffer , LOG_FATAL );
+    if ( move_decode_capture ( ( *state ).move ) )
+    {
+        if ( move_decode_promotion ( ( *state ).move ) )
+        {
+            string_format ( ( *state ).textbuffer
+                          , "\n\n %s: %s ON %s TO CAPTURE %s on %s. PROMOTED TO %s."
+                          , ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                               : "BLACK (engine)"
+                          , string_piece ( move_decode_piece ( ( *state ).move ) )
+                          , string_square ( move_decode_src ( ( *state ).move ) )
+                          , string_piece ( ( *state ).board.capture )
+                          , string_square ( move_decode_dst ( ( *state ).move ) )
+                          , string_piece ( move_decode_promotion ( ( *state ).move ) )
+                          );
+        }
+        else
+        {
+            string_format ( ( *state ).textbuffer
+                          , "\n\n %s: %s ON %s TO CAPTURE %s on %s."
+                          , ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                               : "BLACK (engine)"
+                          , string_piece ( move_decode_piece ( ( *state ).move ) )
+                          , string_square ( move_decode_src ( ( *state ).move ) )
+                          , string_piece ( ( *state ).board.capture )
+                          , string_square ( move_decode_dst ( ( *state ).move ) )
+                          );
+        }
+    }
+    else
+    {
+        if ( move_decode_promotion ( ( *state ).move ) )
+        {
+            string_format ( ( *state ).textbuffer
+                          , "\n\n %s: %s ON %s TO %s. PROMOTED TO %s."
+                          , ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                               : "BLACK (engine)"
+                          , string_piece ( move_decode_piece ( ( *state ).move ) )
+                          , string_square ( move_decode_src ( ( *state ).move ) )
+                          , string_square ( move_decode_dst ( ( *state ).move ) )
+                          , string_piece ( move_decode_promotion ( ( *state ).move ) )
+                          );
+        }
+        else
+        {
+            string_format ( ( *state ).textbuffer
+                          , "\n\n %s: %s ON %s TO %s."
+                          , ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                               : "BLACK (engine)"
+                          , string_piece ( move_decode_piece ( ( *state ).move ) )
+                          , string_square ( move_decode_src ( ( *state ).move ) )
+                          , string_square ( move_decode_dst ( ( *state ).move ) )
+                          );
+        }
+    }
+    
+    platform_console_write ( ( *state ).textbuffer , LOG_INFO );
 
     return true;
 }
@@ -202,14 +251,6 @@ chess_render
     {
         return;
     }
-
-    string_format ( ( *state ).textbuffer
-                  , "\n\n PLY #%u:"
-                  , ( *state ).ply
-                  );
-    platform_console_write ( ( *state ).textbuffer
-                           , PLATFORM_COLOR_CHESS_INFO
-                           );
 
     // Render the board.
     board_render ( ( *state ).textbuffer , &( *state ).board );

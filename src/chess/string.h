@@ -116,6 +116,44 @@ chrpiece
 }
 
 /**
+ * @brief Generates the string alias for a given piece.
+ * @param piece The piece to display.
+ * @return A string representation of the piece.
+ */
+INLINE
+const char*
+string_piece
+(   const PIECE piece
+)
+{
+    if ( piece == P || piece == p )
+    {
+        return "PAWN";
+    }
+    if ( piece == N || piece == n )
+    {
+        return "KNIGHT";
+    }
+    if ( piece == B || piece == b )
+    {
+        return "BISHOP";
+    }
+    if ( piece == R || piece == r )
+    {
+        return "ROOK";
+    }
+    if ( piece == Q || piece == q )
+    {
+        return "QUEEN";
+    }
+    if ( piece == K || piece == k )
+    {
+        return "KING";
+    }
+    return "";
+}
+
+/**
  * @brief Stringify square.
  * @param square A square.
  * @return A string representation of the board square coordinate.
