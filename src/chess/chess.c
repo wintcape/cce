@@ -430,11 +430,7 @@ chess_handle_console_input
 
             ( *state ).input[ len ] = 0;
 
-            if ( ( *state ).move >= 0 )
-            {
-                err = false;
-            }
-            else
+            if ( ( *state ).move < 0 )
             {
     
                 platform_console_write ( "\t\tINVALID MOVE ENTERED:  "
@@ -445,7 +441,10 @@ chess_handle_console_input
                                        );
                 err += 1;
             }
-            
+            else
+            {
+                err = false;
+            }
         }
     }
     while ( err );
