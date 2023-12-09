@@ -166,6 +166,7 @@ chess_update
                               ));
         event_context_t ctx = {};
         event_fire ( EVENT_CODE_APPLICATION_QUIT , 0 , ctx );
+        ( *state ).render = false;
         return true;
     }
 
