@@ -45,7 +45,7 @@ obj/chess_attack.o:						src/chess/attack.c
 obj/chess_board.o:						src/chess/board.c
 obj/chess_fen.o:						src/chess/fen.c
 obj/chess_move.o:						src/chess/move.c
-obj/chess_perft.o:						src/chess/perft.c
+obj/chess_perft.o:						src/chess/test/perft.c
 
 # Test obj
 obj/test_main.o:						test/src/main.c

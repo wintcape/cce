@@ -296,15 +296,26 @@ fen_from_board
     dst[ 1 ] = ( ( *board ).side == WHITE ) ? 'w' : 'b';
     
     dst[ 2 ] = FEN_WHITESPACE_TOKEN;
+    dst += 3;
     
     // Append castle token.
-    dst[ 3 ] = ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-';
-    dst[ 4 ] = ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-';
-    dst[ 5 ] = ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-';
-    dst[ 6 ] = ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-';
+    if ( !( *board ).castle )
+    {
+        dst[ 0 ] = '-';
+        dst += 1;
 
-    dst[ 7 ] = FEN_WHITESPACE_TOKEN;
-    dst += 8;
+    }
+    else
+    {
+        dst[ 0 ] = ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-';
+        dst[ 1 ] = ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-';
+        dst[ 2 ] = ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-';
+        dst[ 3 ] = ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-';
+        dst += 4;
+    }
+
+    dst[ 0 ] = FEN_WHITESPACE_TOKEN;
+    dst += 1;
 
     // Append enpassant token.
     if ( ( *board ).enpassant != NO_SQ )

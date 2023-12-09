@@ -79,10 +79,6 @@ cce_update
         return false;
     }
     
-    // Quit the application.
-    event_context_t ctx = {};
-    event_fire ( EVENT_CODE_APPLICATION_QUIT , 0 , ctx );
-
     return true;
 }
 

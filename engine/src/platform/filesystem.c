@@ -200,4 +200,3 @@ file_write
     fflush ( file );
     return *written == size;
 }
-

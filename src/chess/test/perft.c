@@ -4,7 +4,7 @@
  * @brief Implementation of the perft header.
  * (see perft.h for additional details)
  */
-#include "chess/perft.h"
+#include "chess/test/perft.h"
 
 #include "chess/move.h"
 #include "chess/string.h"

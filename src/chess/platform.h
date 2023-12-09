@@ -15,4 +15,7 @@
 #define PLATFORM_COLOR_CHESS_BSWP 12
 #define PLATFORM_COLOR_CHESS_BSBP 13
 
+// Extra console color code indices for text rendering.
+#define PLATFORM_COLOR_CHESS_GSBP 14
+
 #endif  // CHESS_PLATFORM_H

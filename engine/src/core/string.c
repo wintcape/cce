@@ -55,7 +55,7 @@ string_equal
 ,   const char* s2
 )
 {
-    return strcmp ( s1 , s2 );
+    return !strcmp ( s1 , s2 );
 }
 
 i32
