@@ -29,7 +29,7 @@ board_render
 
     while ( r < 8 )
     {
-        platform_console_write ( "\n\t\t\t" , color );
+        platform_console_write ( "\n\t\t  " , color );
         
         while ( f < 8 )
         {
@@ -85,7 +85,7 @@ board_render
     }
     
     offs = string_format ( dst
-                         , "\n\n\t\t\t    "
+                         , "\n\n\t\t      "
                          , color
                          );
 
@@ -100,7 +100,7 @@ board_render
     }
 
     offs += string_format ( dst + offs
-                          , "\n\n\n\t\t\tSide:         %s\n\t\t\tEn passant:      %s\n\t\t\tCastling:      %c%c%c%c\n\n"
+                          , "\n\n\n\t\t  Side:         %s\n\t\t  En passant:      %s\n\t\t  Castling:      %c%c%c%c\n\n"
                           , ( ( *board ).side == WHITE ) ? "white"
                                                          : "black"
                           , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
