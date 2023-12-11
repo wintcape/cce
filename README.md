@@ -16,7 +16,7 @@ A generic unit testing subsystem. It is heavily based on tutorials from Travis V
 
 ## Build
 
-Requires GNU make.
+Requires GNU make. Currently works on Unix only. Windows build coming soon...I just have to finish testing the Windows platform layer.
 
 To build and launch: 
 ```
