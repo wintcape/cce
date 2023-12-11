@@ -9,7 +9,9 @@ The application consists of three separate libraries:
 ### `engine` 
 A generic application launcher and subsystems manager, including lots of utility headers for robust C programming (string, memory, platform abstraction, etc.). It is heavily based on early boilerplate tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
 ### `src`
-The chess application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine in C* YouTube series. Right now, it cannot calculate the "best move" from a list of valid chess moves; it merely validates if a given move is valid and performs a random move each ply; added functionality to have it actually evaluate before playing is coming very soon.
+The chess application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine in C* YouTube series.
+
+Right now, it cannot calculate the "best move" from a list of valid chess moves; it merely validates if a given move is valid and performs a random move each ply; added functionality to have it actually evaluate before playing is coming very soon.
 
 ### `test`
 A generic unit testing subsystem. It is heavily based on tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
