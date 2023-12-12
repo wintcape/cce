@@ -4,7 +4,7 @@ WINDOWS := windows
 ################################################################################
 
 default:
-        @echo "Please choose one of the following targets: linux windows"
+        @echo "Please choose from the available targets: linux windows linux-run windows-run linux-test windows-test"
 		@exit 2
 
 ################################################################################
