@@ -6,6 +6,9 @@
 #ifndef ASCII_H
 #define ASCII_H
 
+#include "common/inline.h"
+#include "common/types.h"
+
 INLINE
 bool
 uppercase
