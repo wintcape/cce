@@ -65,11 +65,6 @@ string_format
 ,   ...
 )
 {
-    if ( !dst )
-    {
-        return -1;
-    }
-
     __builtin_va_list args;
     va_start ( args, fmt );
     const i32 result = string_format_v ( dst , fmt , args );
@@ -84,11 +79,6 @@ string_format_v
 ,   void*       args
 )
 {
-    if ( !dst )
-    {
-        return -1;
-    }
-
     char buf[ STACK_STRING_MAX_LENGTH ];
     const i32 result = vsnprintf ( buf , STACK_STRING_MAX_LENGTH
                                  , fmt , args
@@ -129,7 +119,6 @@ string_trim
 )
 {
     const u64 len = string_length ( s );
-
     u64 i;
     
     // Calculate index of first non-whitespace character.

@@ -25,7 +25,7 @@ range_t;
  */
 INLINE
 u64
-get_aligned
+aligned
 (   u64 operand
 ,   u64 granularity
 )
@@ -42,14 +42,14 @@ get_aligned
  */
 INLINE
 range_t
-get_aligned_range
+aligned_range
 (   u64 offs
 ,   u64 size
 ,   u64 granularity
 )
 {
-    return ( range_t ){ get_aligned ( offs , granularity )
-                      , get_aligned ( size , granularity )
+    return ( range_t ){ aligned ( offs , granularity )
+                      , aligned ( size , granularity )
                       };
 }
 

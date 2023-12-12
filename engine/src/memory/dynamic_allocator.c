@@ -179,7 +179,7 @@ dynamic_allocator_allocate_aligned
     }
 
     void* blk = ( void* )( ( u64 )( ( *state ).memory_start ) + base_offs );
-    u64 blk_offs = get_aligned ( ( u64 ) blk + SIZE_STORAGE , alignment );
+    u64 blk_offs = aligned ( ( u64 ) blk + SIZE_STORAGE , alignment );
     u32* blk_size = ( u32* )( blk_offs - SIZE_STORAGE );
     *blk_size = ( u32 ) size;
     header_t* header = ( header_t* )( blk_offs + size );

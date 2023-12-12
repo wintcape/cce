@@ -393,9 +393,9 @@ mat4_orthographic
 /**
  * @brief Forms a perspective projection matrix.
  * @param fov The field of view (in radians).
- * @param ar  The aspect ratio.
- * @param n   The distance to the near clipping plane.
- * @param f   The distance to the far clipping plane.
+ * @param ar The aspect ratio.
+ * @param n The distance to the near clipping plane.
+ * @param f The distance to the far clipping plane.
  * @return A perspective projection matrix that fits the parameters.
  */
 INLINE

@@ -11,6 +11,7 @@
 #include "math/trig.h"
 
 // Time conversion.
+#define S_TO_NS         ( 1000.0f * 1000.0f * 1000.0f )
 #define S_TO_US         ( 1000.0f * 1000.0f )
 #define S_TO_MS         1000.0f
 #define MS_TO_S         0.001f
@@ -26,7 +27,7 @@
  */
 INLINE
 f32
-deg_to_rad
+radians
 (   f32 deg
 )
 {
@@ -40,7 +41,7 @@ deg_to_rad
  */
 INLINE
 f32
-rad_to_deg
+degrees
 (   f32 rad
 )
 {

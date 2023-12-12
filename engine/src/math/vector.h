@@ -205,19 +205,6 @@ vec2_dot
 }
 
 /**
- * @brief Variant of vec2_dot where the components of a and b are unwrapped.
- */
-INLINE
-f32
-vec2_dot2
-(   f32 a_i , f32 a_j
-,   f32 b_i , f32 b_j
-)
-{
-    return a_i * b_i + a_j * b_j;
-}
-
-/**
  * @brief Computes the magnitude of a two-component vector.
  * @param v A two-component vector of the form < i , j >
  * @return || v ||
@@ -315,7 +302,6 @@ vec3
 ,   f32 k
 )
 {
-    
     return ( vec3_t ){{ i , j , k }};
 }
 
@@ -496,20 +482,6 @@ vec3_dot
 }
 
 /**
- * @brief Variant of vec3_dot where the components of a and b are unwrapped.
- *        ( see vec3_dot(vec3_t,vec3_t) )
- */
-INLINE
-f32
-vec3_dot2
-(   f32 a_i , f32 a_j , f32 a_k
-,   f32 b_i , f32 b_j , f32 b_k
-)
-{
-    return a_i * b_i + a_j * b_j + a_k * b_k;
-}
-
-/**
  * @brief Computes the cross product of two three-component vectors.
  * @param a A three-component vector.
  * @param b A three-component vector.
@@ -630,16 +602,7 @@ vec4
 ,   f32 l
 )
 {
-    vec4_t v;
-    #if defined(USE_SIMD)
-        v.data = _mm_setr_ps ( i , j , k , l );
-    #else
-        v.i = i;
-        v.j = j;
-        v.k = k;
-        v.l = l;
-    #endif
-    return v;
+    return ( vec4_t ){{ i , j , k , l }};
 }
 
 /**
@@ -656,16 +619,7 @@ vec4_from_vec3
 ,   f32     l
 )
 {
-    vec4_t v_;
-    #if defined(USE_SIMD)
-        v_.data = _mm_setr_ps ( v.i , v.j , v.k , l );
-    #else
-        v_.i = v.i;
-        v_.j = v.j;
-        v_.k = v.k;
-        v_.l = l;
-    #endif
-    return v_;
+    return ( vec4_t ){{ v.i , v.j , v.k , l }};
 }
 
 /**
@@ -755,19 +709,6 @@ vec4_dot
 )
 {
     return a.i * b.i + a.j * b.j + a.k * b.k + a.l * b.l;
-}
-
-/**
- * @brief Variant of vec4_dot where the components of a and b are unwrapped.
- */
-INLINE
-f32
-vec4_dot2
-(   f32 a_i , f32 a_j , f32 a_k , f32 a_l
-,   f32 b_i , f32 b_j , f32 b_k , f32 b_l
-)
-{
-    return a_i * b_i + a_j * b_j + a_k * b_k + a_l * b_l;
 }
 
 /**

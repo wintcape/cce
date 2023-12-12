@@ -1,4 +1,5 @@
 # cce
+
 A bitboard chess engine.
 
 ## About
@@ -6,8 +7,10 @@ A bitboard chess engine.
 This is an experiment in improving my skills at programming basic applications in C.
 
 The application consists of three separate libraries: 
+
 ### `engine` 
 A generic application launcher and subsystems manager, including lots of utility headers for robust C programming (string, memory, platform abstraction, etc.). It is heavily based on early boilerplate tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
+
 ### `src`
 The chess application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine in C* YouTube series.
 
@@ -18,21 +21,25 @@ A generic unit testing subsystem. It is heavily based on tutorials from Travis V
 
 
 ## Build
-
-Requires GNU make.
-
-Currently works on Unix only. MS/Windows build coming soon...I just have to finish testing the Windows platform layer.
+Requires GCC and GNU make.
 
 To build and launch: 
 ```
-> make all
+> make linux-run
+> make windows-run
 ```
 To run unit tests, then build and launch:
 ```
-> make test
+> make linux-test
+> make windows-test
 ```
 To compile and launch the application separately:
 ```
-> make app
+> make linux
 > bin/chess
+
+       or
+
+> make windows
+> bin/chess.exe
 ```

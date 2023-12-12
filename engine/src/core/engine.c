@@ -14,6 +14,7 @@
 #include "core/string.h"
 
 #include "memory/linear_allocator.h"
+#include "logger.h"
 
 // Defaults.
 #define SUBSYSTEM_ALLOCATOR_CAP_DEFAULT ( MEBIBYTES ( 1 ) )
@@ -240,7 +241,7 @@ engine_startup
         return false;
     }
 
-    LOGINFO ( "CCE engine (ver. %i.%i.%i) is starting. . ."
+    LOGINFO ( "CCE engine ("PLATFORM_STRING", ver. %i.%i.%i) is starting. . ."
             , VERSION_MAJOR , VERSION_MINOR , VERSION_PATCH
             );
 
@@ -286,13 +287,14 @@ engine_startup
     
     // Platform.
     platform_startup ( &( *state ).platform_subsystem_memory_requirement
-                     , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0
+                     , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0
                      );
     ( *state ).platform_subsystem_state = linear_allocator_allocate ( &( *state ).subsystem_allocator
                                                                     , ( *state ).platform_subsystem_memory_requirement
                                                                     );
     if ( !platform_startup ( &( *state ).platform_subsystem_memory_requirement
                            , ( *state ).platform_subsystem_state
+                           , ( *app ).config.user_input
                            , ( *app ).config.window
                            , ( *app ).config.wm_title
                            , ( *app ).config.wm_class
@@ -302,7 +304,7 @@ engine_startup
                            , ( *app ).config.window_h
                            ))
     {
-        LOGERROR ( "engine_startup: Failed to initialize platform subsystem." );
+        LOGERROR ( "engine_startup: Failed to initialize "PLATFORM_STRING" platform layer." );
         return false;
     }
 

@@ -8,8 +8,10 @@
 
 #include "common.h"
 
-/* Defines an alias for the random function (this avoids function
- * signatures which clash with the platform-specific math header). */
+/**
+ * @brief Defines an alias for the random function (this avoids function
+ * signatures which clash with the platform-specific math header).
+ */
 #define random()  ( _random () )
 
 /**

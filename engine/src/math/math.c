@@ -24,9 +24,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-// Defaults.
-#define MATRIX_STRING_MAX_LENGTH 512
-
 // ( see random() ).
 static bool random_seeded = false;
 

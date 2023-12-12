@@ -19,7 +19,7 @@
 #include "math/vector.h"
 
 /**
- * @brief Calculates the minimum of two values.
+ * @brief Calculates the minimum of two integer values.
  */
 #define min(A,B)                \
    ({ __typeof__ (A) _A = (A);  \
@@ -28,7 +28,7 @@
     })
 
 /**
- * @brief Calculates the maximum of two values.
+ * @brief Calculates the maximum of two integer values.
  */
 #define max(A,B)                \
    ({ __typeof__ (A) _A = (A);  \
@@ -37,7 +37,7 @@
     })
 
 /**
- * @brief Clamps value to a range of min and max (inclusive).
+ * @brief Clamps an integer value between a min and max (inclusive).
  * @param value The value to be clamped.
  * @param min The minimum value of the range.
  * @param max The maximum value of the range.

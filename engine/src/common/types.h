@@ -2,14 +2,12 @@
  * @file types.h
  * @author Matthew Weissel (null@mattweissel.info)
  * @brief Common type definitions.
- * Hardware-specific types have their size verified at compile-time.
  */
 #ifndef TYPES_H
 #define TYPES_H
 
 /**
- * Type definitions for numeric types.
- * These are hardware-specific.
+ * @brief Type definitions for numeric types. These are hardware-specific.
  */
 
 // Integer (unsigned).
@@ -32,7 +30,7 @@ typedef double  f64;
 typedef int b32;
 
 /**
- * Type and instance definitions for generic boolean type.
+ * @brief Type and instance definitions for generic boolean type.
  */
 
 // Type definition.
@@ -43,7 +41,7 @@ typedef _Bool bool;
 #define false   ( ( bool ) 0 )
 
 /**
- * Compile-time assertions.
+ * @brief Compile-time assertions.
  */
 
 #include "static_assert.h"

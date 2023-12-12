@@ -43,7 +43,7 @@ linear_allocator_destroy
 /**
  * @brief Allocates memory using a linear allocator.
  * @param allocator The allocator.
- * @param size      The number of bytes to allocate.
+ * @param size The number of bytes to allocate.
  * @return The address of the allocated memory, on success.
  *         0, on error.
  */

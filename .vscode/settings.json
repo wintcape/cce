@@ -1,0 +1,12 @@
+{
+    "C_Cpp.dimInactiveRegions": false,
+    "files.associations": {
+        "*.make": "makefile",
+        ".post-linux": "shellscript",
+        "windows.h": "c",
+        "platform.h": "c",
+        "string.h": "c",
+        "windowsx.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

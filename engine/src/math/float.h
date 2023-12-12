@@ -12,13 +12,15 @@
 #define INFINITY        ( 1e30f * 1e30f )
 #define FLOAT_EPSILON   1.192092896e-07f
 
-/* Defines an alias for the absolute value function (this avoids function
- * signatures which clash with the platform-specific math header). */
+/**
+ * @brief Defines an alias for the absolute value function (this avoids function
+ * signatures which clash with the platform-specific math header).
+ */
 #define abs(X) ( _abs ( X ) )
 
 /**
  * @brief Absolute value function.
- * @param x A real number.
+ * @param x A floating point number.
  * @return abs(x)
  */
 f32

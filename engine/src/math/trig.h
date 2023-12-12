@@ -15,10 +15,12 @@
 #define HALF_PI         ( 0.5f * PI )
 #define QUARTER_PI      ( 0.25f * PI )
 #define DIV_PI          ( 1.0f / PI )
-#define DIV_TWO_PI      ( 1.0f / 2PI )
+#define DIV_TWO_PI      ( 1.0f / TWO_PI )
 
-/* Defines an alias for each trigonometric function (this avoids function
- * signatures which clash with the platform-specific math header). */
+/**
+ * @brief Defines an alias for each trigonometric function (this avoids function
+ * signatures which clash with the platform-specific math header).
+ */
 #define sin(X)  ( _sin ( X ) )
 #define cos(X)  ( _cos ( X ) )
 #define tan(X)  ( _tan ( X ) )
@@ -28,7 +30,7 @@
 
 /**
  * @brief Sine function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return sin(x)
  */
 f32
@@ -38,7 +40,7 @@ _sin
 
 /**
  * @brief Cosine function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return cos(x)
  */
 f32
@@ -48,7 +50,7 @@ _cos
 
 /**
  * @brief Tangent function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return tan(x)
  */
 f32
@@ -58,7 +60,7 @@ _tan
 
 /**
  * @brief Inverse sine function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return arcsin(x)
  */
 f32
@@ -68,7 +70,7 @@ _asin
 
 /**
  * @brief Inverse cosine function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return arccos(x)
  */
 f32
@@ -78,7 +80,7 @@ _acos
 
 /**
  * @brief Inverse tangent function.
- * @param x A real number.
+ * @param x A floating-point number.
  * @return arctan(x)
  */
 f32

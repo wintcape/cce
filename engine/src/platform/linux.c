@@ -34,43 +34,39 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Defines a string representation of the platform.
-#define PLATFORM_STRING "Linux"
-
 // Defines reserved console color codes.
-#define PLATFORM_CONSOLE_COLORS \
-    {                           \
-      "0;41"                    \
-    , "0;91"                    \
-    , "0;93"                    \
-    , "0;32"                    \
-    , "0;33"                    \
-    , "0;35"                    \
-                                \
-    , "0;97"                    \
-    , "0;37"                    \
-    , "0;90"                    \
-    , "0;35"                    \
-                                \
-    , "101;97"                  \
-    , "101;30"                  \
-    , "41;97"                   \
-    , "41;30"                   \
-                                \
-    , "42;90"                   \
-    }
+// Defines reserved console color codes.
+static const char* platform_console_colors[] = { "0;41" 
+                                               , "0;91" 
+                                               , "0;93" 
+                                               , "0;32" 
+                                               , "0;33" 
+                                               , "0;35" 
+             
+                                               , "0;97" 
+                                               , "0;37" 
+                                               , "0;90" 
+                                               , "0;35" 
+             
+                                               , "101;97"
+                                               , "101;30"
+                                               , "41;97"
+                                               , "41;30"
+             
+                                               , "42;90"
+                                               };
 
 // Type definition for platform subsystem state.
 typedef struct
 {
-    bool                windowed;
-
     Display*            display;
     xcb_connection_t*   connection;
     xcb_window_t        window;
     xcb_screen_t*       screen;
     xcb_atom_t          wm_protocols;
     xcb_atom_t          wm_delete_win;
+
+    bool                windowed;
 }
 state_t;
 
@@ -115,6 +111,7 @@ bool
 platform_startup
 (   u64*        memory_requirement
 ,   void*       state_
+,   const bool  user_input
 ,   const bool  windowed
 ,   const char* wm_title
 ,   const char* wm_class
@@ -152,7 +149,7 @@ platform_startup
     ( *state ).connection = XGetXCBConnection ( ( *state ).display );
     if ( xcb_connection_has_error ( ( *state ).connection ) )
     {
-        LOGFATAL ( "Failed to connect to X server via XCB." );
+        LOGFATAL ( "platform_startup ("PLATFORM_STRING"): Failed to connect to X server via XCB." );
         return false;
     }
 
@@ -267,8 +264,7 @@ platform_startup
     i32 stream_result = xcb_flush ( ( *state ).connection );
     if ( stream_result <= 0 )
     {
-        LOGFATAL ( "platform_startup (%s): An error occurred when flushing the stream: %d"
-                 , PLATFORM_STRING
+        LOGFATAL ( "platform_startup ("PLATFORM_STRING"): An error occurred when flushing the stream: %d"
                  , stream_result
                  );
         return false;
@@ -522,8 +518,11 @@ _platform_console_write
 ,   FILE*       file
 )
 {
-    const char* colors[] = PLATFORM_CONSOLE_COLORS;
-    fprintf ( file , "\033[%sm%s\033[0m" , colors[ color ] , mesg );
+    fprintf ( file
+            , "\033[%sm%s\033[0m"
+            , platform_console_colors[ color ]
+            , mesg
+            );
 }
 
 BUTTON

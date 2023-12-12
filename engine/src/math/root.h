@@ -14,8 +14,10 @@
 #define DIV_SQRT2       0.70710678118654752440f
 #define DIV_SQRT3       0.57735026918962576450f
 
-/* Defines an alias for the square root function (this avoids function
- * signatures which clash with the platform-specific math header). */
+/**
+ * @brief Defines an alias for the square root function (this avoids function
+ * signatures which clash with the platform-specific math header).
+ */
 #define sqrt(X) ( _sqrt ( X ) )
 
 /**

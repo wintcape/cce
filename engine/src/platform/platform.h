@@ -13,6 +13,7 @@
  * requirement. Call again passing in a state pointer.
  * @param memory_requirement Output buffer to read memory requirement.
  * @param state Pass 0 to read memory requirement. Otherwise, pass a buffer.
+ * @param user_input Interactive application? Y/N
  * @param windowed Windowed application? Y/N.
  * @param wm_title The title to assign the application window (if applicable).
  * @param wm_class The class name to assign the application window
@@ -29,6 +30,7 @@ bool
 platform_startup
 (   u64*        memory_requirement
 ,   void*       state
+,   const bool  user_input
 ,   const bool  windowed
 ,   const char* wm_title
 ,   const char* wm_class

@@ -9,7 +9,6 @@
 #include "common/align.h"
 #include "common/ascii.h"
 #include "common/bitops.h"
-#include "common/id.h"
 #include "common/inline.h"
 #include "common/static_assert.h"
 #include "common/types.h"

@@ -77,17 +77,14 @@ quaternion_from_angle
     const f32 r_ = 0.5f * r;
     const f32 sinr = sin ( r_ );
     const f32 cosr = cos ( r_ );
-
-    quaternion_t q = ( quaternion_t ){{ sinr * axis.x
-                                      , sinr * axis.y
-                                      , sinr * axis.z
-                                      , cosr
-                                      }};
-    if ( normalize )
-    {
-        return quaternion_norm ( q );
-    }
-    return q;
+    const quaternion_t q = ( quaternion_t ){{ sinr * axis.x
+                                            , sinr * axis.y
+                                            , sinr * axis.z
+                                            , cosr
+                                            }};
+    return ( normalize ) ? quaternion_norm ( q )
+                         : q
+                         ;
 }
 
 /**
@@ -154,8 +151,6 @@ quaternion_slerp
 )
 {
     const f32 threshold = 0.9995f;
-    
-    quaternion_t q;
 
     quaternion_t a_ = quaternion_norm ( a );
     quaternion_t b_ = quaternion_norm ( b );
@@ -171,12 +166,11 @@ quaternion_slerp
     }
     if ( dot > threshold )
     {
-        q = ( quaternion_t ){{ a_.i + s * ( b_.i - a_.i )
-                             , a_.j + s * ( b_.j - a_.j )
-                             , a_.k + s * ( b_.k - a_.k )
-                             , a_.l + s * ( b_.l - a_.l )
-                            }};
-        return quaternion_norm ( q );
+        return quaternion_norm ( ( quaternion_t ){{ a_.i + s * ( b_.i - a_.i )
+                                                  , a_.j + s * ( b_.j - a_.j )
+                                                  , a_.k + s * ( b_.k - a_.k )
+                                                  , a_.l + s * ( b_.l - a_.l )
+                                                 }});
     }
 
     const f32 r0 = acos ( dot );
