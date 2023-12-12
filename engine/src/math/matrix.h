@@ -145,7 +145,6 @@ mat4_inverse
     n.data[ 15 ] = d * ( ( t22 * m.data[ 10 ] + t16 * m.data[ 2 ] + t21 * m.data[ 6 ] ) 
                  - ( t20 * m.data[ 6 ] + t23 * m.data[ 10 ] + t17 * m.data[ 2 ] ) );
 
-
     return n;
 }
 
