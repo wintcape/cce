@@ -113,7 +113,8 @@ mat4_inverse
                 - ( t4 * m.data[ 1 ] + t9 * m.data[ 5 ] + t10 * m.data[ 9 ] );
 
     const f32 d = 1.0f / ( m.data[ 0 ] * n.data[ 0 ] + m.data[ 4 ] * n.data[ 1 ]
-                       + m.data[ 8 ] * n.data[ 2 ] + m.data[ 12 ] * n.data[ 3 ] );
+                         + m.data[ 8 ] * n.data[ 2 ] + m.data[ 12 ] * n.data[ 3 ]
+                         );
 
     n.data[ 0 ] = d * n.data[ 0 ];
     n.data[ 1 ] = d * n.data[ 1 ];
