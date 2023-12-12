@@ -129,6 +129,7 @@ string_trim
 )
 {
     const u64 len = string_length ( s );
+
     u64 i;
     
     // Calculate index of first non-whitespace character.
