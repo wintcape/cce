@@ -39,7 +39,7 @@ ichr
 (   const u8 i
 )
 {
-    return i + ( ( unsigned char ) '0' );
+    return ( ( unsigned char ) '0' ) + i;
 }
 
 INLINE
