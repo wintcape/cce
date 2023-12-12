@@ -11,10 +11,10 @@
 // Type definition.
 typedef struct
 {
-    u64 cap;
-    u64 allocated;
-    void* memory;
-    bool owns_memory;
+    u64     cap;
+    u64     allocated;
+    void*   memory;
+    bool    owns_memory;
 }
 linear_allocator_t;
 
