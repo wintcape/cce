@@ -124,11 +124,11 @@ string_bytesize
 }
 
 char*
-_string_trim
-(   char*       s
-,   const u64   len
+string_trim
+( char* s
 )
 {
+    const u64 len = string_length ( s );
     u64 i;
     
     // Calculate index of first non-whitespace character.
