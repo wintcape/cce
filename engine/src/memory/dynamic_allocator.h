@@ -1,7 +1,7 @@
 /**
  * @file dynamic_allocator.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Linear memory allocation subsystem.
+ * @brief Dynamic memory allocation subsystem.
  */
 #ifndef MEMORY_DYNAMIC_ALLOCATOR_H
 #define MEMORY_DYNAMIC_ALLOCATOR_H
