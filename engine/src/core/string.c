@@ -125,7 +125,7 @@ string_bytesize
 
 char*
 string_trim
-( char* s
+(   char* s
 )
 {
     const u64 len = string_length ( s );
