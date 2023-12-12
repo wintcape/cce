@@ -103,36 +103,13 @@ string_bytesize
 );
 
 /**
- * @brief Trims whitespace off front and back of string. In-place.
+ * @brief Trims whitespace off front and back of a string. In-place.
  * @param s The string to copy.
- * @return s.
- */
-#define string_trim(s)                      \
-    ( _string_trim ( s                      \
-                   , string_length ( s )    \
-                   ))
-
-/**
- * @brief Clamped variant of string_trim for unsafe strings.
- * @param s The string to copy.
- * @param lim The maximum number of characters to read from s.
- * @return s.
- */
-#define string_trim_clamp(s,lim)                        \
-    ( _string_trim ( s                                  \
-                   , string_length_clamp ( s , lim )    \
-                   ))
-
-/**
- * @brief Primary implementation of string_trim and string_trim_clamp.
- * @param s The string to copy.
- * @param len The precalculated string length of s.
  * @return s.
  */
 char*
-_string_trim
-(   char*       s
-,   const u64   len
+string_trim
+(   char* s
 );
 
 #endif  // STRING_H
