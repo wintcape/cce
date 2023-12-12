@@ -289,7 +289,6 @@ input_query_key_up_prev
 (   KEY key
 );
 
-
 /**
  * @brief Processes one button press.
  * @param button The button to process.
