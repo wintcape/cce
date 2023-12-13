@@ -14,7 +14,7 @@
 #include "platform/platform.h"
 
 // Defaults.
-#define MEMORY_STAT_STRING_MAX_LENGTH 1024
+#define MEMORY_STAT_TEXTBUFFER_MAX_LENGTH 1024
 
 // Defines an aligned string representation of each memory tag.
 static const char* memory_tags[ MEMORY_TAG_COUNT ] = { "UNKNOWN          "
@@ -34,6 +34,8 @@ typedef struct
 
     u64     allocated;
     u64     tagged_allocations[ MEMORY_TAG_COUNT ];
+
+    char    textbuffer[ MEMORY_STAT_TEXTBUFFER_MAX_LENGTH ];
 }
 stat_t;
 
@@ -269,7 +271,7 @@ char*
 memory_stat
 ( void )
 {
-    char buf[ MEMORY_STAT_STRING_MAX_LENGTH ];
+    char buf[ MEMORY_STAT_TEXTBUFFER_MAX_LENGTH ];
 
     u64 offs = string_format ( buf
                              , "System memory usage:\n"

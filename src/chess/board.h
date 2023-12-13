@@ -10,19 +10,6 @@
 #include "chess/bitboard.h"
 
 /**
- * @brief Renders a chess board to the console.
- * @param dst Working string buffer.
- * @param board A chess board.
- * @param color A console color code index.
- */
-void
-board_render
-(   char*           dst
-,   const board_t*  board
-,   const u8        color
-);
-
-/**
  * @brief Computes if a square on a chess board may be attacked by a given
  * side. Requires pregenerated attack tables.
  * @param board The chess board state.

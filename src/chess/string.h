@@ -166,4 +166,16 @@ string_bitboard
 ,   const bitboard_t    bitboard
 );
 
+/**
+ * @brief Stringify chess board.
+ * @param dst Output buffer.
+ * @param board A chess board.
+ * @return dst.
+ */
+char*
+string_board
+(   char*           dst
+,   const board_t*  board
+);
+
 #endif  // CHESS_STRING_H

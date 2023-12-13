@@ -119,7 +119,7 @@ file_read_all
  * @param f Handle to the file to write to.
  * @param size Number of bytes to write.
  * @param data The data to write.
- * @param read Output buffer to hold number of bytes written.
+ * @param written Output buffer to hold number of bytes written.
  * @return true if data written to file successfully; false otherwise.
  */
 bool

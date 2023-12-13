@@ -34,28 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Defines reserved console color codes.
-// Defines reserved console color codes.
-static const char* platform_console_colors[] = { "0;41" 
-                                               , "0;91" 
-                                               , "0;93" 
-                                               , "0;32" 
-                                               , "0;33" 
-                                               , "0;35" 
-             
-                                               , "0;97" 
-                                               , "0;37" 
-                                               , "0;90" 
-                                               , "0;35" 
-             
-                                               , "101;97"
-                                               , "101;30"
-                                               , "41;97"
-                                               , "41;30"
-             
-                                               , "42;90"
-                                               };
-
 // Type definition for platform subsystem state.
 typedef struct
 {
@@ -514,15 +492,10 @@ platform_sleep
 void
 _platform_console_write
 (   const char* mesg
-,   u8          color
 ,   FILE*       file
 )
 {
-    fprintf ( file
-            , "\033[%sm%s\033[0m"
-            , platform_console_colors[ color ]
-            , mesg
-            );
+    fprintf ( file , "%s" ANSI_CC_RESET , mesg );
 }
 
 BUTTON

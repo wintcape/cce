@@ -113,3 +113,12 @@ string_bitboard
     
     return dst;
 }
+
+char*
+string_board
+(   char*           dst
+,   const board_t*  board
+)
+{// to be implemented
+    return 0;
+}

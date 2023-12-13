@@ -12,7 +12,6 @@
 #include "chess/board.h"
 #include "chess/fen.h"
 #include "chess/move.h"
-#include "chess/platform.h"
 #include "chess/string.h"
 
 #endif  // CHESS_H

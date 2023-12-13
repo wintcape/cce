@@ -21,27 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-// Defines reserved console color codes.
-static const char* platform_console_colors[] = { "0;41" 
-                                               , "0;91" 
-                                               , "0;93" 
-                                               , "0;32" 
-                                               , "0;33" 
-                                               , "0;35" 
-             
-                                               , "0;97" 
-                                               , "0;37" 
-                                               , "0;90" 
-                                               , "0;35" 
-             
-                                               , "101;97"
-                                               , "101;30"
-                                               , "41;97"
-                                               , "41;30"
-             
-                                               , "42;90"
-                                               };
+#include <string.h>
 
 // Global system clock. Allows for clocks to function without having to call
 // platform_start first (see core/clock.h).
@@ -51,10 +31,10 @@ static LARGE_INTEGER    platform_clock_start_time;
 // Type definition for platform subsystem state.
 typedef struct
 {
-    HINSTANCE       h_instance;
-    HWND            hwnd;
+    HINSTANCE   h_instance;
+    HWND        hwnd;
 
-    bool            windowed;
+    bool        windowed;
 }
 state_t;
 
@@ -83,13 +63,11 @@ platform_clock_init
  * @brief Primary implementation of platform_console_write and
  * platform_console_write_error.
  * @param mesg The message to write.
- * @param color The message color code index.
  * @param file The file to write to.
  */
 void
 _platform_console_write
 (   const char* mesg
-,   u8          color
 ,   FILE*       file
 );
 
@@ -312,33 +290,17 @@ platform_memory_move
 void
 platform_console_write
 (   const char* mesg
-,   u8          color
 )
 {
-    _platform_console_write ( mesg , color , stdout );
+    _platform_console_write ( mesg , stdout );
 }
 
 void
 platform_console_write_error
 (   const char* mesg
-,   u8          color
 )
 {
-    _platform_console_write ( mesg , color , stderr );
-}
-
-void
-_platform_console_write
-(   const char* mesg
-,   u8          color
-,   FILE*       file
-)
-{
-    fprintf ( file
-            , "\033[%sm%s\033[0m"
-            , platform_console_colors[ color ]
-            , mesg
-            );
+    _platform_console_write ( mesg , stderr );
 }
 
 f64
@@ -361,6 +323,15 @@ platform_sleep
 )
 {
     Sleep ( ms );
+}
+
+void
+_platform_console_write
+(   const char* mesg
+,   FILE*       file
+)
+{
+    fprintf ( file , "%s" ANSI_CC_RESET , mesg );
 }
 
 void

@@ -95,17 +95,17 @@ main
         return -8;        
     } 
 
-    // Initialize the engine.
+    // Initialize the application.
     if ( !engine_startup ( &app ) )
     {
-        LOGFATAL ( "Failed to initialize the engine." );
+        LOGFATAL ( "Failed to initialize the application." );
         return 1; 
     }
     
-    // Launch the engine.
+    // Launch the application.
     if ( !engine_run () )
     {
-        LOGFATAL ( "Engine terminated with error." );
+        LOGFATAL ( "Application terminated with error." );
         return 2;
     }
 

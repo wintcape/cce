@@ -20,23 +20,44 @@
 #define LOG_MSG_MAX_LENGTH  32000
 #define LOG_FILEPATH        "console.log"
 
+// Defines logger output message prefixes.
+static const char* log_level_prefixes[] = { LOG_LEVEL_PREFIX_FATAL
+                                          , LOG_LEVEL_PREFIX_ERROR
+                                          , LOG_LEVEL_PREFIX_WARN
+                                          , LOG_LEVEL_PREFIX_INFO
+                                          , LOG_LEVEL_PREFIX_DEBUG
+                                          , LOG_LEVEL_PREFIX_TRACE
+                                          , LOG_LEVEL_PREFIX_SILENT
+                                          };
+
+// Defines logger output message colors.
+static const char* log_level_colors[] = { LOG_LEVEL_COLOR_FATAL
+                                        , LOG_LEVEL_COLOR_ERROR
+                                        , LOG_LEVEL_COLOR_WARN
+                                        , LOG_LEVEL_COLOR_INFO
+                                        , LOG_LEVEL_COLOR_DEBUG
+                                        , LOG_LEVEL_COLOR_TRACE
+                                        };
+
 // Type definition for logger subsystem state.
 typedef struct
 {
-    file_handle_t   file;
+    file_handle_t file;
 }
 state_t;
 
 // Global subsystem state.
 static state_t* state;
 
+
+
 /**
  * @brief Appends a message to the log file.
- * @param msg The message to append.
+ * @param mesg The message to append.
  */
 void
 logger_file_append
-(   const char* msg
+(   const char* mesg
 );
 
 bool
@@ -62,8 +83,9 @@ logger_startup
                     , &( *state ).file
                     ))
     {
-        platform_console_write_error ( "logger_startup: Unable to open '"LOG_FILEPATH"' for writing."
-                                     , LOG_ERROR
+        platform_console_write_error ( LOG_LEVEL_COLOR_ERROR
+                                       "logger_startup: Unable to open '"LOG_FILEPATH"' for writing."
+                                       ANSI_CC_RESET "\n"
                                      );
         return false;
     }
@@ -82,53 +104,43 @@ logger_shutdown
 void
 LOG
 (   const LOG_LEVEL lvl
-,   const char*     msg
+,   const char*     mesg
 ,   ...
 )
 {
-    const char* prefix[] = { "[FATAL]\t"
-                           , "[ERROR]\t"
-                           , "[WARN]\t"
-                           , "[INFO]\t"
-                           , "[DEBUG]\t"
-                           , "[TRACE]\t"
-                           };
     const bool err = lvl < LOG_WARN;
-  
+    const bool colored = lvl != LOG_INFO;
+
     char buf[ LOG_MSG_MAX_LENGTH ];
     memory_clear ( buf , sizeof ( char ) * LOG_MSG_MAX_LENGTH );
     
     __builtin_va_list args;
-    va_start ( args , msg );
-    string_format_v ( buf , msg , args );
+    va_start ( args , mesg );
+    string_format_v ( buf , mesg , args );
     va_end ( args );
 
-    if ( err )
+    // Write raw string to log file.
+    string_format ( buf , "%s%s" , log_level_prefixes[ lvl ] , buf );    
+    logger_file_append ( buf );
+    if ( lvl == LOG_SILENT )
     {
-        platform_console_write_error ( prefix[ lvl ] , lvl );
-        platform_console_write_error ( buf , lvl );
-        platform_console_write_error ( "\n" , LOG_LEVEL_COUNT );        
-    }
-    else if ( lvl == LOG_DEBUG )
-    {
-        platform_console_write ( prefix[ lvl ] , lvl );
-        platform_console_write ( buf , LOG_LEVEL_COUNT + 1 );        
-        platform_console_write ( "\n" , LOG_LEVEL_COUNT );        
-    }
-    else
-    {
-        platform_console_write ( prefix[ lvl ] , lvl );
-        platform_console_write ( buf , LOG_LEVEL_COUNT  );        
-        platform_console_write ( "\n" , LOG_LEVEL_COUNT ); 
+        return;
     }
 
-    string_format ( buf , "%s%s\n" , prefix[ lvl ] , buf );    
-    logger_file_append ( buf );
+    // Write formatted string to console.
+    string_format ( buf
+                  , "%s%s%s%s" ANSI_CC_RESET "\n"
+                  , log_level_colors[ lvl ] , log_level_prefixes[ lvl ]
+                  , ( colored ) ? "" : ANSI_CC_RESET
+                  , buf + string_length ( log_level_prefixes[ lvl ] )
+                  );
+    ( err ) ? platform_console_write_error ( buf )
+            : platform_console_write ( buf );
 }
 
 void
 logger_file_append
-(   const char* msg
+(   const char* mesg
 )
 {
     if ( !state || !( *state ).file.valid )
@@ -136,13 +148,17 @@ logger_file_append
         return;
     }
     
-    const u64 len = string_length ( msg );
+    const char newline = '\n';
+    const u64 len = string_length ( mesg ) + 1;
     u64 written = 0;
     
-    if ( !file_write ( &( *state ).file , len , msg , &written ) )
+    if (   !file_write ( &( *state ).file , len , mesg , &written )
+        || !file_write ( &( *state ).file , sizeof ( newline ) , &newline , &written )
+       )
     {
-        platform_console_write ( "Error writing to '"LOG_FILEPATH"'."
-                               , LOG_ERROR
+        platform_console_write ( LOG_LEVEL_COLOR_ERROR
+                                 "logger_file_append: Error writing to log file '"LOG_FILEPATH"'."
+                                 ANSI_CC_RESET "\n"
                                );
     }
 }

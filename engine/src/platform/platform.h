@@ -136,23 +136,19 @@ platform_memory_move
 /**
  * @brief Platform-independent console write function.
  * @param mesg The message to write.
- * @param color The message color code index.
  */
 void
 platform_console_write
 (   const char* mesg
-,   u8          color
 );
 
 /**
  * @brief Platform-independent console write error function.
  * @param mesg The error message to write.
- * @param color The message color code index.
  */
 void
 platform_console_write_error
 (   const char* mesg
-,   u8          color
 );
 
 /**
