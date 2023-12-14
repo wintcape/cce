@@ -17,7 +17,7 @@ TEST_OBJFILES := test_main.o test_memory_linear_allocator.o  test_memory_dynamic
 
 INCFLAGS := $(foreach x,$(INCLUDE), $(addprefix -I,$(x)))
 OBJFLAGS := $(CFLAGS) -c
-LDFLAGS := $(foreach x,$(DEPS), $(addprefix -L,$(x)))
+LDFLAGS := $(foreach x,$(DEPS), $(addprefix -l,$(x)))
 
 ENGINE_OBJ := $(foreach x,$(ENGINE_OBJFILES), $(addprefix obj/,$(x)))
 TARGET_UNIQUE_OBJ := $(foreach x,$(TARGET_OBJFILES), $(addprefix obj/,$(x)))

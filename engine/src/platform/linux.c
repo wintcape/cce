@@ -75,13 +75,11 @@ platform_parse_key
  * @brief Primary implementation of platform_console_write and
  * platform_console_write_error.
  * @param mesg The message to write.
- * @param color The message color code index.
  * @param file The system file to write to.
  */
 void
 _platform_console_write
 (   const char* mesg
-,   u8          color
 ,   FILE*       file
 );
 
@@ -446,19 +444,17 @@ platform_memory_move
 void
 platform_console_write
 (   const char* mesg
-,   u8          color
 )
 {
-    _platform_console_write ( mesg , color , stdout );
+    _platform_console_write ( mesg , stdout );
 }
 
 void
 platform_console_write_error
 (   const char* mesg
-,   u8          color
 )
 {
-    _platform_console_write ( mesg , color , stderr );
+    _platform_console_write ( mesg , stderr );
 }
 
 f64

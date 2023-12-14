@@ -833,6 +833,12 @@ cce_render_prompt_command
                                                         );
         }
 
+        // Render the previous move.
+        if ( ( *state ).ply )
+        {
+            cce_render_move ();
+        }
+
         // Render the board again.
         cce_render_board ();
 
@@ -879,7 +885,10 @@ cce_render_execute_command
     }
 
     // Render the previous move.
-    cce_render_move ();
+    if ( ( *state ).ply )
+    {
+        cce_render_move ();
+    }
     
     // Render the board state.
     cce_render_board ();
@@ -1070,13 +1079,15 @@ cce_render_board
             // layer console supports.
             const char* s_piece;
             #if PLATFORM_WINDOWS == 1
-                s_piece = ( blackchr ) ? piecewchr ( piece - p )
-                                       : piecewchr ( piece )
-                                       ;
+                s_piece = ( piece != EMPTY_SQ) ? ( blackchr ) ? piecewchr ( piece - p )
+                                                              : piecewchr ( piece )
+                                               : " "
+                                               ;
             #else
-                s_piece = ( blackchr ) ? piecewchr ( piece )
-                                       : piecewchr ( p + piece )
-                                       ;
+                s_piece = ( piece != EMPTY_SQ) ? ( blackchr ) ? piecewchr ( piece )
+                                                             : piecewchr ( p + piece )
+                                               : " "
+                                               ;
             #endif
         
             ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
