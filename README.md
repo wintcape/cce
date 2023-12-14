@@ -1,9 +1,7 @@
 # cce
-
 A bitboard chess engine.
 
-## About
-
+## About.
 This is an experiment in improving my skills at programming basic applications in C.
 
 The application consists of three separate libraries: 
@@ -19,9 +17,11 @@ Right now, it cannot calculate the "best move" from a list of valid chess moves;
 ### `test`
 A generic unit testing subsystem. It is heavily based on tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
 
+## Running the executable.
+Executables are located in `bin` directory. From a command console, launch `cce` if platform is GNU/Linux, or `cce.exe` if platform is Windows.
 
-## Build
-Requires GCC and GNU make.
+## Build.
+Building from source requires GCC and GNU make.
 
 To build and launch: 
 ```

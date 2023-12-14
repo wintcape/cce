@@ -756,19 +756,21 @@ cce_render_prompt_command
         {
             ( *state ).cmd[ MOVE_STRING_LENGTH - 1 ] = 0;
         }
+
         ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
-                                                    , CCE_COLOR_INFO "\n\t"
+                                                    , CCE_COLOR_INFO "\n\t" CCE_COLOR_DEFAULT
                                                       CCE_COLOR_HIGHLIGHT "%s"
                                                       CCE_COLOR_DEFAULT CCE_COLOR_ALERT " is not a known command or valid chess move."
                                                       CCE_COLOR_INFO    "\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
                                                     , ( *state ).cmd
                                                     );
     }
-
-    
-    ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
-                                                , CCE_COLOR_INFO "\n\n\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
-                                                );
+    else
+    {
+        ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
+                                                    , CCE_COLOR_INFO "\n\n\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
+                                                    );
+    }
 }
 
 void
@@ -972,18 +974,13 @@ cce_render_board
             // layer console supports.
             const char* s_piece;
             #if PLATFORM_WINDOWS == 1
-                char s_piece_buf[ 2 ];
-                memory_clear ( s_piece_buf , sizeof ( s_piece_buf ) );
-                s_piece_buf[ 0 ] = ( piece != EMPTY_SQ ) ? ( blackchr ) ? piecechr ( piece - p )
-                                                                        : piecechr ( piece )
-                                                         : ' '
-                                                         ;
-                s_piece = s_piece_buf;
+                s_piece = ( blackchr ) ? piecewchr ( piece - p )
+                                       : piecewchr ( piece )
+                                       ;
             #else
-                s_piece = ( piece != EMPTY_SQ ) ? ( blackchr ) ? piecewchr ( piece )
-                                                               : piecewchr ( p + piece )
-                                                : " "
-                                                ;
+                s_piece = ( blackchr ) ? piecewchr ( piece )
+                                       : piecewchr ( p + piece )
+                                       ;
             #endif
         
             ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs

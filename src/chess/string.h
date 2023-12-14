@@ -41,21 +41,26 @@ static const char piecechrs[] = { [ P ] = 'P'
                                 , [ r ] = 'r'
                                 , [ q ] = 'q'
                                 , [ k ] = 'k'
+
+                                , [ EMPTY_SQ ] = ' '
                                 };
 
 // Defines a map for all pieces: piece -> Unicode alias.
-static const char* piecewchrs[] = { [ P ] = "♙"
-                                  , [ N ] = "♘"
-                                  , [ B ] = "♗"
-                                  , [ R ] = "♖"
-                                  , [ Q ] = "♕"
-                                  , [ K ] = "♔"
-                                  , [ p ] = "♟"
-                                  , [ n ] = "♞"
-                                  , [ b ] = "♝"
-                                  , [ r ] = "♜"
-                                  , [ q ] = "♛"
-                                  , [ k ] = "♚"
+static const char* piecewchrs[] = { [ P ] = "♙" , [ P+13 ] = "P"
+                                  , [ N ] = "♘" , [ N+13 ] = "N"
+                                  , [ B ] = "♗" , [ B+13 ] = "B"
+                                  , [ R ] = "♖" , [ R+13 ] = "R"
+                                  , [ Q ] = "♕" , [ Q+13 ] = "Q"
+                                  , [ K ] = "♔" , [ K+13 ] = "K"
+                                  , [ p ] = "♟" , [ p+13 ] = "p"
+                                  , [ n ] = "♞" , [ n+13 ] = "n"
+                                  , [ b ] = "♝" , [ b+13 ] = "b"
+                                  , [ r ] = "♜" , [ r+13 ] = "r"
+                                  , [ q ] = "♛" , [ q+13 ] = "q"
+                                  , [ k ] = "♚" , [ k+13 ] = "k"
+                                  
+                                  , [ EMPTY_SQ ] = " "
+                                  , [ EMPTY_SQ+13 ] = " "
                                   };
 
 // Defines a map for all pieces: ASCII alias -> piece.
@@ -71,6 +76,8 @@ static const PIECE pieces[] = { [ 'P' ] = P
                               , [ 'r' ] = r
                               , [ 'q' ] = q
                               , [ 'k' ] = k
+
+                              , [ ' ' ] = EMPTY_SQ
                               };
 
 /**
@@ -98,7 +105,11 @@ piecewchr
 (   const PIECE piece
 )
 {
-    return piecewchrs[ piece ];
+    #if PLATFORM_WINDOWS == 1   // Unicode in console not supported.
+        return piecewchrs[ piece+13 ];
+    #else
+        return piecewchrs[ piece ];
+    #endif
 }
 
 /**
