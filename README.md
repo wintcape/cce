@@ -36,10 +36,10 @@ To run unit tests, then build and launch:
 To compile and launch the application separately:
 ```
 > make linux
-> bin/chess
+> bin/cce
 
        or
 
 > make windows
-> bin/chess.exe
+> bin/cce.exe
 ```
