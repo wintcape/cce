@@ -42,7 +42,7 @@ static const char piecechrs[] = { [ P ] = 'P'
                                 , [ q ] = 'q'
                                 , [ k ] = 'k'
 
-                                , [ EMPTY_SQ ] = ' '
+                                , [ EMPTY_SQ ] = '.'
                                 };
 
 // Defines a map for all pieces: piece -> Unicode alias.
@@ -59,8 +59,8 @@ static const char* piecewchrs[] = { [ P ] = "♙" , [ P+13 ] = "P"
                                   , [ q ] = "♛" , [ q+13 ] = "q"
                                   , [ k ] = "♚" , [ k+13 ] = "k"
                                   
-                                  , [ EMPTY_SQ ] = " "
-                                  , [ EMPTY_SQ+13 ] = " "
+                                  , [ EMPTY_SQ ] = "."
+                                  , [ EMPTY_SQ+13 ] = "."
                                   };
 
 // Defines a map for all pieces: ASCII alias -> piece.
@@ -77,7 +77,7 @@ static const PIECE pieces[] = { [ 'P' ] = P
                               , [ 'q' ] = q
                               , [ 'k' ] = k
 
-                              , [ ' ' ] = EMPTY_SQ
+                              , [ '.' ] = EMPTY_SQ
                               };
 
 /**

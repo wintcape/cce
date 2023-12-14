@@ -1,0 +1,896 @@
+
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	~                                                 ~
+	~                CCE CHESS ENGINE.                ~
+	~                (   v. 0.4.3   )                 ~
+	~           created by Matthew Weissel.           ~
+	~                                                 ~
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
+	New game of ENGINE VERSUS ENGINE started.
+
+
+
+	BOARD: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  P  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      KQkq
+
+
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	~                                                 ~
+	~                CCE CHESS ENGINE.                ~
+	~                (   v. 0.4.3   )                 ~
+	~           created by Matthew Weissel.           ~
+	~                                                 ~
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
+	New game of ENGINE VERSUS ENGINE started.
+
+
+
+	BOARD: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  P  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      KQkq
+
+
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	~                                                 ~
+	~                CCE CHESS ENGINE.                ~
+	~                (   v. 0.4.3   )                 ~
+	~           created by Matthew Weissel.           ~
+	~                                                 ~
+	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
+	New game of ENGINE VERSUS ENGINE started.
+
+
+
+	BOARD: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  P  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      KQkq
+
+
+
+
+	WHITE: P ON E2 TO E3.
+	BOARD: rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      KQkq
+
+
+
+
+	WHITE: P ON E2 TO E3.
+	BOARD: rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      KQkq
+
+
+
+
+	WHITE: P ON E2 TO E3.
+	BOARD: rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  p  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  .  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      KQkq
+
+
+
+
+	BLACK: p ON F7 TO F5.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPP1PPP/RNBQKBNR w KQkq f6
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      F6
+		  Castling:      KQkq
+
+
+
+
+	BLACK: p ON F7 TO F5.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPP1PPP/RNBQKBNR w KQkq f6
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      F6
+		  Castling:      KQkq
+
+
+
+
+	BLACK: p ON F7 TO F5.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPP1PPP/RNBQKBNR w KQkq f6
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  .  P  P  P 
+		  1    R  N  B  Q  K  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      F6
+		  Castling:      KQkq
+
+
+
+
+	WHITE: K ON E1 TO E2.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: K ON E1 TO E2.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: K ON E1 TO E2.
+	BOARD: rnbqkbnr/ppppp1pp/8/5p2/8/4P3/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  p  p  p  .  p  p 
+		  6    .  .  .  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON C7 TO C6.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/8/4P3/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON C7 TO C6.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/8/4P3/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON C7 TO C6.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/8/4P3/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  P  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E3 TO E4.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/4P3/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E3 TO E4.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/4P3/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E3 TO E4.
+	BOARD: rnbqkbnr/pp1pp1pp/2p5/5p2/4P3/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  p 
+		  6    .  .  p  .  .  .  .  . 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON H7 TO H6.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5p2/4P3/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON H7 TO H6.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5p2/4P3/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: p ON H7 TO H6.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5p2/4P3/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  p  .  . 
+		  4    .  .  .  .  P  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E4 CAPTURED p ON F5.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5P2/8/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E4 CAPTURED p ON F5.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5P2/8/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON E4 CAPTURED p ON F5.
+	BOARD: rnbqkbnr/pp1pp1p1/2p4p/5P2/8/8/PPPPKPPP/RNBQ1BNR b --kq -
+
+		  8    r  n  b  q  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: q ON D8 TO A5.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/8/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: q ON D8 TO A5.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/8/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	BLACK: q ON D8 TO A5.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/8/8/PPPPKPPP/RNBQ1BNR w --kq -
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  .  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  P  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON D2 TO D4.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR b --kq d3
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      D3
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON D2 TO D4.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR b --kq d3
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      D3
+		  Castling:      --kq
+
+
+
+
+	WHITE: P ON D2 TO D4.
+	BOARD: rnb1kbnr/pp1pp1p1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR b --kq d3
+
+		  8    r  n  b  .  k  b  n  r 
+		  7    p  p  .  p  p  .  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      D3
+		  Castling:      --kq
+
+
+
+
+	BLACK: k ON E8 TO F7.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	BLACK: k ON E8 TO F7.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	BLACK: k ON E8 TO F7.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPP1KPPP/RNBQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  .  K  P  P  P 
+		  1    R  N  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	WHITE: N ON B1 TO D2.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPPNKPPP/R1BQ1BNR b - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	WHITE: N ON B1 TO D2.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPPNKPPP/R1BQ1BNR b - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	WHITE: N ON B1 TO D2.
+	BOARD: rnb2bnr/pp1ppkp1/2p4p/q4P2/3P4/8/PPPNKPPP/R1BQ1BNR b - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    .  .  p  .  .  .  .  p 
+		  5    q  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         black
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	BLACK: q ON A5 TO A6.
+	BOARD: rnb2bnr/pp1ppkp1/q1p4p/5P2/3P4/8/PPPNKPPP/R1BQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    q  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	BLACK: q ON A5 TO A6.
+	BOARD: rnb2bnr/pp1ppkp1/q1p4p/5P2/3P4/8/PPPNKPPP/R1BQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    q  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+
+	BLACK: q ON A5 TO A6.
+	BOARD: rnb2bnr/pp1ppkp1/q1p4p/5P2/3P4/8/PPPNKPPP/R1BQ1BNR w - -
+
+		  8    r  n  b  .  .  b  n  r 
+		  7    p  p  .  p  p  k  p  . 
+		  6    q  .  p  .  .  .  .  p 
+		  5    .  .  .  .  .  P  .  . 
+		  4    .  .  .  P  .  .  .  . 
+		  3    .  .  .  .  .  .  .  . 
+		  2    P  P  P  N  K  P  P  P 
+		  1    R  .  B  Q  .  B  N  R 
+
+		       A  B  C  D  E  F  G  H 
+
+
+		  Side:         white
+		  En passant:      no
+		  Castling:      ----
+
+
+
+	WHITE CHECK: A2A3 
+
+	WHITE CHECK: A2A3 

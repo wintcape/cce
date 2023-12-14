@@ -6,6 +6,8 @@
  */
 #include "chess/string.h"
 
+#include "chess/fen.h"
+
 char*
 string_move
 (   char*           dst
@@ -119,6 +121,68 @@ string_board
 (   char*           dst
 ,   const board_t*  board
 )
-{// to be implemented
-    return 0;
+{
+    u64 offs = string_format ( dst
+                             , "\n\tBOARD: %s\n"
+                             , fen_from_board ( dst , board )
+                             );
+
+    u8 i = 0;
+    u8 r = 0;
+    u8 f = 0;
+
+    while ( r < 8 )
+    {
+        offs += string_format ( dst  + offs , "\n\t\t  " );
+        
+        while ( f < 8 )
+        {
+            if ( !f )
+            {
+                offs += string_format ( dst + offs , "%u   " , 8 - r );
+            }
+
+            PIECE piece = EMPTY_SQ; 
+            for ( PIECE piece_ = P; piece_ < 12; ++piece_ )
+            {
+                if ( bit ( ( *board ).pieces[ piece_ ]
+                         , SQUAREINDX ( r , f )
+                         ))
+                {
+                    piece = piece_;
+                }
+            }
+            offs += string_format ( dst + offs , " %c " , piecechr ( piece ) );
+
+            f += 1;
+            i += 1;
+        }
+
+        f = 0;
+        r += 1;
+        i += 1;
+    }
+    
+    offs += string_format ( dst + offs , "\n\n\t\t      " );
+
+    r = 0;
+    while ( r < 8 )
+    {
+        offs += string_format ( dst + offs , " %c ", 'A' + r );
+        r += 1;
+    }
+
+    offs += string_format ( dst + offs
+                          , "\n\n\n\t\t  Side:         %s\n\t\t  En passant:      %s\n\t\t  Castling:      %c%c%c%c\n\n"
+                          , ( ( *board ).side == WHITE ) ? "white"
+                                                               : "black"
+                          , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
+                                                                    : "no"
+                          , ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-'
+                          , ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-'
+                          , ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-'
+                          , ( ( *board ).castle & CASTLE_BQ ) ? 'q' : '-'
+                          );
+
+    return dst;
 }

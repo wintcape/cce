@@ -49,8 +49,6 @@ state_t;
 // Global subsystem state.
 static state_t* state;
 
-
-
 /**
  * @brief Appends a message to the log file.
  * @param mesg The message to append.
@@ -98,6 +96,14 @@ logger_shutdown
 (   void* state_
 )
 {
+    if ( !state )
+    {
+        return;
+    }
+
+    // Close log file.
+    file_close ( &( *state ).file );
+
     state = 0;
 }
 
@@ -119,7 +125,7 @@ LOG
     string_format_v ( buf , mesg , args );
     va_end ( args );
 
-    // Write raw string to log file.
+    // Write plaintext to log file.
     string_format ( buf , "%s%s" , log_level_prefixes[ lvl ] , buf );    
     logger_file_append ( buf );
     if ( lvl == LOG_SILENT )
@@ -127,7 +133,7 @@ LOG
         return;
     }
 
-    // Write formatted string to console.
+    // Write ANSI-formatted text to console.
     string_format ( buf
                   , "%s%s%s%s" ANSI_CC_RESET "\n"
                   , log_level_colors[ lvl ] , log_level_prefixes[ lvl ]
@@ -148,13 +154,7 @@ logger_file_append
         return;
     }
     
-    const char newline = '\n';
-    const u64 len = string_length ( mesg ) + 1;
-    u64 written = 0;
-    
-    if (   !file_write ( &( *state ).file , len , mesg , &written )
-        || !file_write ( &( *state ).file , sizeof ( newline ) , &newline , &written )
-       )
+    if ( !file_write_line ( &( *state ).file , mesg ) )
     {
         platform_console_write ( LOG_LEVEL_COLOR_ERROR
                                  "logger_file_append: Error writing to log file '"LOG_FILEPATH"'."
