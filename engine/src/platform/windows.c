@@ -19,6 +19,8 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#include <conio.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -301,6 +303,14 @@ platform_console_write_error
 )
 {
     _platform_console_write ( mesg , stderr );
+}
+
+char
+platform_console_read_key
+( void )
+{
+    const int key = _getche ();
+    return ( key >= 0 && key <= 127 ) ? key : 0;
 }
 
 f64

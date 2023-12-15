@@ -24,6 +24,8 @@
 
 #include <sys/time.h>
 
+#include <termios.h>    // Temporary.
+
 #if _POSIX_C_SOURCE >= 199309L
 #include <time.h>   // nanosleep
 #else
@@ -455,6 +457,22 @@ platform_console_write_error
 )
 {
     _platform_console_write ( mesg , stderr );
+}
+
+char
+platform_console_read_key
+( void )
+{
+    struct termios t;
+    struct termios t_prev;
+
+    tcgetattr ( STDIN_FILENO , &t_prev );
+    t = t_prev;
+    t.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr ( STDIN_FILENO , TCSANOW , &t );
+    const int key = getchar ();
+    tcsetattr ( STDIN_FILENO , TCSANOW , &t_prev );
+    return ( key >= 0 && key <= 127 ) ? key : 0;
 }
 
 f64

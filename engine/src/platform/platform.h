@@ -152,6 +152,15 @@ platform_console_write_error
 );
 
 /**
+ * @brief Platform-independent. Reads a single keystroke of console
+ * user input.
+ * @return The ASCII value of the last user-inputted keystroke.
+ */
+char
+platform_console_read_key
+( void );
+
+/**
  * @brief Platform-independent get absolute time function.
  */
 f64

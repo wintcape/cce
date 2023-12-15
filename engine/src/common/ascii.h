@@ -84,6 +84,15 @@ whitespace
 }
 
 INLINE
+bool
+newline
+(   const char c
+)
+{
+    return c == '\n' || c == '\r';
+}
+
+INLINE
 char
 to_uppercase
 (   const char c

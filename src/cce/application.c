@@ -77,7 +77,7 @@ typedef enum
 CCE_COMMAND;
 
 // Defines console user input command keycodes.
-#define CCE_KEY_SIGNAL_COMMAND_QUIT               'q'
+#define CCE_KEY_SIGNAL_COMMAND_QUIT               27
 #define CCE_KEY_SIGNAL_COMMAND_HELP               'h'
 #define CCE_KEY_SIGNAL_COMMAND_LIST_MOVES         'l'
 #define CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE 'r'
@@ -136,6 +136,7 @@ bool cce_prompt_command             ( void );
 bool cce_execute_command            ( void );
 bool cce_execute_move_player        ( void );
 bool cce_execute_move_engine        ( void );
+bool cce_handle_user_input          ( void );
 
 /**
  * @brief Primary implementation of cce_render (see cce_render).
@@ -196,7 +197,7 @@ void cce_log_check        ( void );
 ({                                  \
     ( *state ).textbuffer_offs = 0; \
     ( *state ).logbuffer_offs = 0;  \
-})                                  \
+})
 
 bool
 cce_startup
@@ -333,10 +334,6 @@ cce_render
     RENDER ();
 }
 
-// ---------- TEMPORARY ----------
-#include <stdio.h>              // TODO: Eliminate scanf calls for user input.
-// -------------------------------
-
 bool
 cce_game_init
 ( void )
@@ -402,22 +399,15 @@ bool
 cce_prompt_game_type
 ( void )
 {
-    state_t* state = ( *cce ).internal; 
-    
-    // Clear any previous user input.
-    ( *state ).in[ 0 ] = 0;
+    state_t* state = ( *cce ).internal;
 
-    // Read new user input.
-    if ( scanf ( "%8s" , ( *state ).in ) <= 0 )
+    // Read user response.
+    if ( !cce_handle_user_input () )
     {
-        LOGERROR ( "cce_prompt_game_type: Failed to read user input from stdin." );
+        LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
         return false;
     }
     
-    // Flush the input stream.
-    int garbage;
-    while ( ( garbage = getchar () ) != '\n' && garbage != EOF );
-       
     // Sanitize input string.
     ( *state ).in[ sizeof ( ( *state ).in ) - 2 ] = 0;
     
@@ -425,16 +415,6 @@ cce_prompt_game_type
     if ( string_length ( ( *state ).in ) != 1 )
     {
         ( *state ).ioerr += 1;
-        return true;
-    }
-
-    // Accept the quit command only at the start prompt.
-    else if ( ( *state ).in[ 0 ] == CCE_KEY_SIGNAL_COMMAND_QUIT )
-    {
-        ( *state ).cmd = CCE_COMMAND_QUIT;
-
-        ( *state ).render = CCE_RENDER_NONE;
-        ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
         return true;
     }
 
@@ -465,19 +445,12 @@ cce_prompt_command
 
     ( *state ).render = CCE_RENDER_PROMPT_COMMAND;
     
-    // Clear any previous user input.
-    ( *state ).in[ 0 ] = 0;
-
-    // Read new user input.
-    if ( scanf ( "%8s" , ( *state ).in ) <= 0 )
+    // Read user response.
+    if ( !cce_handle_user_input () )
     {
-        LOGERROR ( "cce_prompt_command: Failed to read user input from stdin." );
+        LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
         return false;
     }
-    
-    // Flush the input stream.
-    int garbage;
-    while ( ( garbage = getchar () ) != '\n' && garbage != EOF );
        
     // Sanitize input string.
     ( *state ).in[ sizeof ( ( *state ).in ) - 2 ] = 0;
@@ -493,7 +466,6 @@ cce_prompt_command
             case CCE_KEY_SIGNAL_COMMAND_HELP:               ( *state ).cmd = CCE_COMMAND_HELP               ;break;
             case CCE_KEY_SIGNAL_COMMAND_LIST_MOVES:         ( *state ).cmd = CCE_COMMAND_LIST_MOVES         ;break;
             case CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE: ( *state ).cmd = CCE_COMMAND_CHOOSE_RANDOM_MOVE ;break;
-            case CCE_KEY_SIGNAL_COMMAND_QUIT:               ( *state ).cmd = CCE_COMMAND_QUIT               ;break;
             
             default:
             {
@@ -719,6 +691,65 @@ cce_execute_move_engine
     return true;
 }
 
+bool
+cce_handle_user_input
+( void )
+{
+    state_t* state = ( *cce ).internal;
+
+    // Clear any previous user input.
+    memory_clear ( ( *state ).in , sizeof ( ( *state ).in ) );
+
+    char in;
+    u8 indx = 0;
+    for (;;)
+    {
+        in = platform_console_read_key ();
+        
+        if ( !in )
+        {
+            LOGERROR ( "cce_handle_user_input: Failed to get user input keystroke from stdin." );
+            return false;
+        }
+        
+        // Submit response? Y/N
+        if ( newline ( in ) )
+        {
+            return true;
+        }
+        
+        // Quit signal? Y/N
+        else if ( in == CCE_KEY_SIGNAL_COMMAND_QUIT )
+        {
+            ( *state ).cmd = CCE_COMMAND_QUIT;
+
+            ( *state ).render = CCE_RENDER_NONE;
+            ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
+            return true;
+        }
+           
+        // Response too long? Y/N
+        if ( indx >= CCE_INPUT_TEXTBUFFER_LENGTH )
+        {
+            continue;
+        }
+
+        // Handle backspace.
+        if ( in == '\b' && indx > 0 )
+        {
+            indx -= 1;
+            ( *state ).in[ indx ] = 0;
+        }
+
+        // Write to input buffer.
+        else
+        {
+            ( *state ).in[ indx ] = in;
+            indx += 1;
+        }
+    }
+}
+
 void
 cce_render_start
 ( void )
@@ -807,11 +838,10 @@ cce_render_prompt_game_type
                                                   "\n\t            [ 2 ]  PLAYER VERSUS ENGINE.           "
                                                   "\n\t            [ 3 ]  ENGINE VERSUS ENGINE.           "
                                                   "\n\t                                                   "
-                                                  CCE_COLOR_HINT "\n\t                   Press %c to quit."
+                                                  CCE_COLOR_HINT "\n\t                   Press <Esc> to quit."
                                                   CCE_COLOR_INFO "\n\tCHOICE:       "
                                                 , ( ( *state ).ioerr ) ? CCE_COLOR_ALERT "\tPLEASE CHOOSE FROM THE OPTIONS PROVIDED."
                                                                        : "\n"
-                                                , CCE_KEY_SIGNAL_COMMAND_QUIT
                                                 );
 }
 
@@ -1014,14 +1044,13 @@ cce_render_list_commands
                                                   "\n\t  %c :      List available moves.                  "
                                                   "\n\t  %c :      Choose random valid move.              "
                                                   "\n                                                     "
-                                                  "\n\t  %c :      Quit the application.                  "
+                                                  "\n\t<Esc>:      Quit the application.                  "
                                                   "\n\t                                                   "
                                                   "\n\t         =-=-=-                    -=-=-=          "
                                                   "\n"
                                                 , CCE_KEY_SIGNAL_COMMAND_HELP
                                                 , CCE_KEY_SIGNAL_COMMAND_LIST_MOVES
                                                 , CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE
-                                                , CCE_KEY_SIGNAL_COMMAND_QUIT
                                                 );
 }
 
