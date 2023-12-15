@@ -308,9 +308,6 @@ cce_render
 
     state_t* state = ( *cce ).internal;
 
-    // Clear the rendering and logging textbuffers.
-    RENDER_CLEAR ();
-
     // Write game state info to the textbuffers.
     // =>  Plaintext info into logbuffer.
     // =>  ANSI-formatted info into textbuffer.
@@ -318,16 +315,16 @@ cce_render
     switch ( render )
     {
         case CCE_RENDER_NONE               : return          ;
-        case CCE_RENDER_START              : cce_render_start ()               ;break;
-        case CCE_RENDER_END                : cce_render_end ()                 ;break;
-        case CCE_RENDER_GAME_SELECTED      : cce_render_game_selected ()       ;break;
-        case CCE_RENDER_PROMPT_GAME_TYPE   : cce_render_prompt_game_type ()    ;break;
-        case CCE_RENDER_PROMPT_COMMAND     : cce_render_prompt_command ()      ;break;
-        case CCE_RENDER_EXECUTE_COMMAND    : cce_render_execute_command ()     ;break;
-        case CCE_RENDER_EXECUTE_MOVE_PLAYER: cce_render_execute_move_player () ;break;
-        case CCE_RENDER_EXECUTE_MOVE_ENGINE: cce_render_execute_move_engine () ;break;
-        case CCE_RENDER_CHECK              : cce_render_check ()               ;break;
-        default                            : break                             ;
+        case CCE_RENDER_START              : RENDER_CLEAR () ; cce_render_start ()               ;break;
+        case CCE_RENDER_END                : RENDER_CLEAR () ; cce_render_end ()                 ;break;
+        case CCE_RENDER_GAME_SELECTED      : RENDER_CLEAR () ; cce_render_game_selected ()       ;break;
+        case CCE_RENDER_PROMPT_GAME_TYPE   : RENDER_CLEAR () ; cce_render_prompt_game_type ()    ;break;
+        case CCE_RENDER_PROMPT_COMMAND     : RENDER_CLEAR () ; cce_render_prompt_command ()      ;break;
+        case CCE_RENDER_EXECUTE_COMMAND    : RENDER_CLEAR () ; cce_render_execute_command ()     ;break;
+        case CCE_RENDER_EXECUTE_MOVE_PLAYER: RENDER_CLEAR () ; cce_render_execute_move_player () ;break;
+        case CCE_RENDER_EXECUTE_MOVE_ENGINE: RENDER_CLEAR () ; cce_render_execute_move_engine () ;break;
+        case CCE_RENDER_CHECK              : RENDER_CLEAR () ; cce_render_check ()               ;break;
+        default                            : RENDER_CLEAR () ;                                    break;
     }
 
     // Render the textbuffers to the console and log file.

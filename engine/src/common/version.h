@@ -9,7 +9,7 @@
 // Version number.
 #define VERSION_MAJOR   0
 #define VERSION_MINOR   4
-#define VERSION_PATCH   6
+#define VERSION_PATCH   7
 
 // Release build? Y/N
 #define VERSION_RELEASE 0
