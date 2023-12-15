@@ -291,7 +291,7 @@ void
 platform_console_write
 (   const char* mesg
 )
-, color {
+{
     _platform_console_write ( mesg , stdout );
 }
 
