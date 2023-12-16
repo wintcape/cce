@@ -14,6 +14,8 @@ The chess application, including the chess engine subsystem. Chess engine is hea
 
 Right now, it does not calculate the "best move" from a list of valid chess moves; it merely validates if a given move is valid and performs a random move each turn; added functionality to have it actually evaluate before playing is coming very soon.
 
+The code to detect checkmate is going to be part of the "best move" calculation. As such, it is not yet included in this version; the game exits as soon as the first side tries a move which would result in check. Again, this will be fixed very soon.
+
 ### `test`
 A generic unit testing subsystem. It is heavily based on tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
 

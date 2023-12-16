@@ -309,7 +309,7 @@ char
 platform_console_read_key
 ( void )
 {
-    const int key = _getche ();
+    const i32 key = _getch ();
     return ( key >= 0 && key <= 127 ) ? key : 0;
 }
 

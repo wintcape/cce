@@ -136,7 +136,6 @@ bool cce_prompt_command             ( void );
 bool cce_execute_command            ( void );
 bool cce_execute_move_player        ( void );
 bool cce_execute_move_engine        ( void );
-bool cce_handle_user_input          ( void );
 
 /**
  * @brief Primary implementation of cce_render (see cce_render).
@@ -157,6 +156,16 @@ void cce_render_list_moves          ( void );
 void cce_render_board               ( void );
 void cce_render_move                ( void );
 void cce_render_buffer              ( void );
+
+/**
+ * @brief User input handler.
+ * @param char_count Number of characters to prompt for.
+ * @return true on success, false otherwise.
+ */
+bool
+cce_handle_user_input
+(   const u8 char_count
+);
 
 // Log file interface.
 #define CCE_LOG_FILEPATH "console.game.log"
@@ -399,7 +408,7 @@ cce_prompt_game_type
     state_t* state = ( *cce ).internal;
 
     // Read user response.
-    if ( !cce_handle_user_input () )
+    if ( !cce_handle_user_input ( 1 ) )
     {
         LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
         return false;
@@ -443,7 +452,7 @@ cce_prompt_command
     ( *state ).render = CCE_RENDER_PROMPT_COMMAND;
     
     // Read user response.
-    if ( !cce_handle_user_input () )
+    if ( !cce_handle_user_input ( MOVE_STRING_LENGTH ) )
     {
         LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
         return false;
@@ -485,7 +494,7 @@ cce_prompt_command
     }
 
     // Validate input format.
-    if ( len < MOVE_STRING_LENGTH - 1 || len > MOVE_STRING_LENGTH )
+    if ( len < MOVE_STRING_LENGTH - 1 )
     {
         ( *state ).ioerr += 1;
         return true;
@@ -690,7 +699,8 @@ cce_execute_move_engine
 
 bool
 cce_handle_user_input
-( void )
+(   const u8 char_count
+)
 {
     state_t* state = ( *cce ).internal;
 
@@ -724,18 +734,23 @@ cce_handle_user_input
             ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
             return true;
         }
-           
-        // Response too long? Y/N
-        if ( indx >= CCE_INPUT_TEXTBUFFER_LENGTH )
-        {
-            continue;
-        }
 
         // Handle backspace.
-        if ( in == '\b' && indx > 0 )
+        if ( in == '\b' )
         {
+            if ( !indx )
+            {
+                continue;
+            }
             indx -= 1;
             ( *state ).in[ indx ] = 0;
+        }
+
+        // Response too long? Y/N
+        else if ( indx >= char_count )
+        {
+            indx = char_count;
+            continue;
         }
 
         // Write to input buffer.
@@ -744,6 +759,15 @@ cce_handle_user_input
             ( *state ).in[ indx ] = in;
             indx += 1;
         }
+
+        // Render the character.
+        RENDER_CLEAR ();
+        string_format ( ( *state ).textbuffer
+                      , "%s"
+                      , ( in == '\b' ) ? "\b \b"
+                                       : ( char[] ){ in , 0 }
+                      );
+        RENDER ();
     }
 }
 

@@ -465,10 +465,9 @@ platform_console_read_key
 {
     struct termios t;
     struct termios t_prev;
-
     tcgetattr ( STDIN_FILENO , &t_prev );
     t = t_prev;
-    t.c_lflag &= ~( ICANON | ECHO );
+    t.c_lflag &= ~( ICANON );
     tcsetattr ( STDIN_FILENO , TCSANOW , &t );
     const int key = getchar ();
     tcsetattr ( STDIN_FILENO , TCSANOW , &t_prev );
