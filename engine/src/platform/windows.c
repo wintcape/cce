@@ -328,7 +328,12 @@ platform_console_write_error
 KEY
 platform_console_read_key
 ( void )
-{ return 0; }
+{
+    // To be implemented.
+
+
+    return KEY_COUNT;
+}
 
 f64
 platform_get_absolute_time

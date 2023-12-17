@@ -699,7 +699,9 @@ cce_handle_user_input
         
         if ( key == KEY_COUNT )
         {
-            LOGERROR ( "cce_handle_user_input: Failed to get user input keystroke from stdin." );
+            LOGERROR ( "cce_handle_user_input: Failed to get user input keystroke from stdin."
+                       "\n\tThis may be because you are using Windows. I have to finish my implementation of platform_console_read_key on Windows for this to work. I used to use <conio.h> (non-standard header) for both Linux and Windows implementation of this function, but this update includes a rewritten Linux version of that function which does not depend on <conio.h>; the Windows non-<conio.h> input handler function is coming extremely soon (i.e. next push to the repo type-of soon). . ."
+                     );
             return false;
         }
         
