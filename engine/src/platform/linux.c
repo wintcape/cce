@@ -24,7 +24,8 @@
 
 #include <sys/time.h>
 
-#include <termios.h>    // Temporary.
+#include <termios.h>
+#include <unistd.h>
 
 #if _POSIX_C_SOURCE >= 199309L
 #include <time.h>   // nanosleep
@@ -35,6 +36,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Global terminal state.
+static struct termios tty;
 
 // Type definition for platform subsystem state.
 typedef struct
@@ -60,7 +64,7 @@ static state_t* state;
  */
 BUTTON
 platform_parse_button
-(   u32 x_code
+(   const u32 x_code
 );
 
 /**
@@ -70,7 +74,7 @@ platform_parse_button
  */
 KEY
 platform_parse_key
-(   u32 x_code
+(   const u32 x_code
 );
 
 /**
@@ -84,6 +88,13 @@ _platform_console_write
 (   const char* mesg
 ,   FILE*       file
 );
+
+/**
+ * @brief Resets terminal to canonical input mode.
+ */
+void
+platform_reset_tty
+( void );
 
 bool
 platform_startup
@@ -311,7 +322,7 @@ platform_pump_messages
 
                 // Pass the key to the input subsystem for processing.
                 KEY key = platform_parse_key ( keysym );
-                if ( key != 0 )
+                if ( key != KEY_COUNT )
                 {
                     input_process_key ( key
                                       , ( *event ).response_type == XCB_KEY_PRESS
@@ -459,19 +470,87 @@ platform_console_write_error
     _platform_console_write ( mesg , stderr );
 }
 
-char
+KEY
 platform_console_read_key
 ( void )
 {
-    struct termios t;
-    struct termios t_prev;
-    tcgetattr ( STDIN_FILENO , &t_prev );
-    t = t_prev;
-    t.c_lflag &= ~( ICANON );
-    tcsetattr ( STDIN_FILENO , TCSANOW , &t );
-    const int key = getchar ();
-    tcsetattr ( STDIN_FILENO , TCSANOW , &t_prev );
-    return ( key >= 0 && key <= 127 ) ? key : 0;
+    KEY key = KEY_COUNT;
+
+    // Configure terminal for non-canonical input.
+    struct termios tty_;
+    tcgetattr ( STDIN_FILENO , &tty );
+    tty_ = tty;
+    tty_.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr ( STDIN_FILENO , TCSANOW , &tty_ );
+    fflush ( stdout );
+    
+    // Read the key from the input stream.
+    // May be up to four bytes to handle special keys.
+    char in[ 4 ];
+    i8 written;
+    while ( ( written = read ( STDIN_FILENO , in , sizeof ( in ) ) ) > 0 )
+    {
+        for ( u8 i = 0; i < written; ++i )
+        {
+            // End of transmission.
+            if ( in[ i ] == 4 )
+            {
+                key = KEY_COUNT;
+                goto platform_console_read_key_end;
+            }
+
+            // ANSI escape sequence.
+            if ( in[ i ] == '\033' )
+            {
+                if ( written > i + 1 )
+                {
+                    key = 0;    // To be implemented.
+                    goto platform_console_read_key_end;
+                }
+                else
+                {
+                    fd_set set;
+                    struct timeval timeout;
+                    FD_ZERO ( &set );
+                    FD_SET ( STDIN_FILENO , &set );
+                    timeout.tv_sec = 0;
+                    timeout.tv_usec = 0;
+
+                    const int result = select ( 1 , &set , 0 , 0 , &timeout );
+                    if ( result == -1 )
+                    {
+                        key = KEY_COUNT;
+                        goto platform_console_read_key_end;
+                    }
+                    
+                    // <Esc> key.
+                    if ( result != 1 )
+                    {
+                        key = KEY_ESCAPE;
+                        goto platform_console_read_key_end;
+                    }
+
+                    else
+                    {
+                        key = 0;    // To be implemented.
+                        goto platform_console_read_key_end;
+                    }
+                }
+            }
+
+            // Otherwise, just take the first byte as an ASCII value.
+            else
+            {
+                // Backspace key is mapped to ASCII DELETE (for some reason).
+                key = ( *in == KEY_DELETE ) ? KEY_BACKSPACE : *in;
+                goto platform_console_read_key_end;
+            }
+        }
+    }
+
+    platform_console_read_key_end:
+        platform_reset_tty ();
+        return key;
 }
 
 f64
@@ -511,9 +590,17 @@ _platform_console_write
     fprintf ( file , "%s" ANSI_CC_RESET , mesg );
 }
 
+void
+platform_reset_tty
+( void )
+{
+    tcsetattr ( STDIN_FILENO , TCSANOW , &tty );
+    fflush ( stdout );
+}
+
 BUTTON
 platform_parse_button
-(   u32 x_code
+(   const u32 x_code
 )
 {
     switch ( x_code )
@@ -532,7 +619,7 @@ platform_parse_button
 
 KEY
 platform_parse_key
-(   u32 x_code
+(   const u32 x_code
 )
 {
     switch ( x_code )
@@ -543,10 +630,6 @@ platform_parse_key
             return KEY_ENTER;
         case XK_Tab:
             return KEY_TAB;
-        // case XK_Shift:
-        //     return KEY_SHIFT;
-        // case XK_Control:
-        //     return KEY_CONTROL;
         case XK_Pause:
             return KEY_PAUSE;
         case XK_Caps_Lock:
@@ -585,7 +668,7 @@ platform_parse_key
             return KEY_PRINT;
         case XK_Execute:
             return KEY_EXECUTE;
-        // case XK_snapshot:
+        // case :
         //     return KEY_SNAPSHOT; // Not supported.
         case XK_Insert:
             return KEY_INSERT;
@@ -597,9 +680,9 @@ platform_parse_key
             return KEY_LWIN;
         case XK_Meta_R:
             return KEY_RWIN;
-        // case XK_apps:
+        // case :
         //     return KEY_APPS;     // Not supported.
-        // case XK_sleep:
+        // case :
         //     return KEY_SLEEP;    // Not supported.
         case XK_KP_0:
             return KEY_NUMPAD0;
@@ -713,6 +796,26 @@ platform_parse_key
             return KEY_SLASH;
         case XK_grave:
             return KEY_GRAVE;
+        case XK_0:
+            return KEY_0;
+        case XK_1:
+            return KEY_1;
+        case XK_2:
+            return KEY_2;
+        case XK_3:
+            return KEY_3;
+        case XK_4:
+            return KEY_4;
+        case XK_5:
+            return KEY_5;
+        case XK_6:
+            return KEY_6;
+        case XK_7:
+            return KEY_7;
+        case XK_8:
+            return KEY_8;
+        case XK_9:
+            return KEY_9;
         case XK_a:
         case XK_A:
             return KEY_A;
@@ -793,7 +896,7 @@ platform_parse_key
             return KEY_Z;
 
         default:
-            return 0;
+            return KEY_COUNT;
     }
 }
 

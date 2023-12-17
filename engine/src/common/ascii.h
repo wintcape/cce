@@ -28,24 +28,6 @@ lowercase
 }
 
 INLINE
-u8
-chri
-(   const unsigned char c
-)
-{
-    return c - ( ( unsigned char ) '0' );
-}
-
-INLINE
-unsigned char
-ichr
-(   const u8 i
-)
-{
-    return ( ( unsigned char ) '0' ) + i;
-}
-
-INLINE
 bool
 alpha
 (   const char c
@@ -112,6 +94,24 @@ to_lowercase
     return uppercase ( c ) ? c + 32
                            : c
                            ;
+}
+
+INLINE
+u8
+int_char
+(   const unsigned char c
+)
+{
+    return c - ( ( unsigned char ) '0' );
+}
+
+INLINE
+unsigned char
+char_int
+(   const u8 i
+)
+{
+    return ( ( unsigned char ) '0' ) + i;
 }
 
 #endif  // ASCII_H

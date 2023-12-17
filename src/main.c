@@ -12,7 +12,7 @@ application
 (   application_t*  app
 )
 {
-    ( *app ).config = ( config_t ){ .memory_requirement = MEBIBYTES ( 64 )
+    ( *app ).config = ( config_t ){ .memory_requirement = MEBIBYTES ( 10 )
                                   , .window             = false
                                   , .user_input         = false
                                   };

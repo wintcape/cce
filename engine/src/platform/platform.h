@@ -8,6 +8,8 @@
 
 #include "common.h"
 
+#include "core/input.h"
+
 /**
  * @brief Initializes the platform subsystem. Call once to read the memory
  * requirement. Call again passing in a state pointer.
@@ -152,11 +154,11 @@ platform_console_write_error
 );
 
 /**
- * @brief Platform-independent. Reads a single keystroke of console
- * user input.
- * @return The ASCII value of the last user-inputted keystroke.
+ * @brief Platform-independent function to read a single keystroke of user
+ * input in the console.
+ * @return The last user-inputted keystroke.
  */
-char
+KEY
 platform_console_read_key
 ( void );
 

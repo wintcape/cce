@@ -8,6 +8,7 @@
 
 #include "core/clock.h"
 #include "core/event.h"
+#include "core/input.h"
 #include "core/logger.h"
 #include "core/memory.h"
 #include "core/string.h"
@@ -76,11 +77,11 @@ typedef enum
 }
 CCE_COMMAND;
 
-// Defines console user input command keycodes.
-#define CCE_KEY_SIGNAL_COMMAND_QUIT               27
-#define CCE_KEY_SIGNAL_COMMAND_HELP               'h'
-#define CCE_KEY_SIGNAL_COMMAND_LIST_MOVES         'l'
-#define CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE 'r'
+// Defines command strings.
+static const char* cce_command_strings[] = { "Q" , "H" , "L" , "R" };
+
+// Defines keycodes to automatically issue commands.
+#define CCE_KEY_SIGNAL_COMMAND_QUIT KEY_ESCAPE
 
 // Defines textbuffer sizes.
 #define CCE_RENDER_TEXTBUFFER_LENGTH 65535
@@ -298,10 +299,8 @@ cce_update
         case CCE_GAME_STATE_EXECUTE_COMMAND    : return cce_execute_command ()     ;
         case CCE_GAME_STATE_EXECUTE_MOVE_PLAYER: return cce_execute_move_player () ;
         case CCE_GAME_STATE_EXECUTE_MOVE_ENGINE: return cce_execute_move_engine () ;
-        default                                : break                             ;
+        default                                : return true                       ;
     }
-
-    return true;
 }
 
 void
@@ -320,8 +319,7 @@ cce_render
     // Write game state info to the textbuffers.
     // =>  Plaintext info into logbuffer.
     // =>  ANSI-formatted info into textbuffer.
-    const CCE_RENDER_TAG render = ( *state ).render;
-    switch ( render )
+    switch ( ( *state ).render )
     {
         case CCE_RENDER_NONE               : return          ;
         case CCE_RENDER_START              : RENDER_CLEAR () ; cce_render_start ()               ;break;
@@ -391,6 +389,8 @@ cce_game_end
     cce_render_end ();
     RENDER ();
 
+    LOGINFO ( "A copy of the game was written to the log file: "CCE_LOG_FILEPATH"." );
+
     // Signal engine to shutdown the application.
     event_context_t ctx = {};
     event_fire ( EVENT_CODE_APPLICATION_QUIT , 0 , ctx );
@@ -436,7 +436,7 @@ cce_prompt_game_type
     ( *state ).ioerr = 0;
 
     // Set the game type.
-    ( *state ).game = chri ( ( *state ).in[ 0 ] ) - 1;
+    ( *state ).game = int_char ( ( *state ).in[ 0 ] ) - 1;
 
     ( *state ).render = CCE_RENDER_NONE;
     ( *state ).state = CCE_GAME_STATE_GAME_START;
@@ -454,7 +454,7 @@ cce_prompt_command
     // Read user response.
     if ( !cce_handle_user_input ( MOVE_STRING_LENGTH ) )
     {
-        LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
+        LOGERROR ( "cce_prompt_command: cce_handle_user_input() failed." );
         return false;
     }
        
@@ -464,34 +464,18 @@ cce_prompt_command
     const u8 len = string_length ( ( *state ).in );
 
     // Attempt to parse command.
-    if ( len == 1 )
+    for ( CCE_COMMAND i = 0; i < CCE_COMMAND_COUNT; ++i )
     {
-        ( *state ).in[ 0 ] = to_lowercase ( ( *state ).in[ 0 ] );
-        switch ( ( *state ).in[ 0 ] )
+        if ( string_equal ( ( *state ).in , cce_command_strings[ i ] ) )
         {
-            case CCE_KEY_SIGNAL_COMMAND_HELP:               ( *state ).cmd = CCE_COMMAND_HELP               ;break;
-            case CCE_KEY_SIGNAL_COMMAND_LIST_MOVES:         ( *state ).cmd = CCE_COMMAND_LIST_MOVES         ;break;
-            case CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE: ( *state ).cmd = CCE_COMMAND_CHOOSE_RANDOM_MOVE ;break;
-            
-            default:
-            {
-                ( *state ).ioerr += 1;
-                return true;
-            }
+            ( *state ).cmd = i;
+            ( *state ).ioerr = 0;
+
+            ( *state ).render = CCE_RENDER_NONE;
+            ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
+            return true;
         }
-        ( *state ).ioerr = 0;
-
-        ( *state ).render = CCE_RENDER_NONE;
-        ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
-        return true;
-    }// Not a command.
-     // Attempt to parse move instead.
-
-    // Sanitize input.
-    for ( u8 i = 0; i < MOVE_STRING_LENGTH; ++i )
-    {
-        ( *state ).in[ i ] = to_uppercase ( ( *state ).in[ i ] );
-    }
+    }// Not a command. Attempt to parse move instead.
 
     // Validate input format.
     if ( len < MOVE_STRING_LENGTH - 1 )
@@ -707,26 +691,26 @@ cce_handle_user_input
     // Clear any previous user input.
     memory_clear ( ( *state ).in , sizeof ( ( *state ).in ) );
 
-    char in;
+    KEY key;
     u8 indx = 0;
     for (;;)
     {
-        in = platform_console_read_key ();
+        key = platform_console_read_key ();
         
-        if ( !in )
+        if ( key == KEY_COUNT )
         {
             LOGERROR ( "cce_handle_user_input: Failed to get user input keystroke from stdin." );
             return false;
         }
         
         // Submit response? Y/N
-        if ( newline ( in ) )
+        if ( newline ( key ) )
         {
             return true;
         }
         
         // Quit signal? Y/N
-        else if ( in == CCE_KEY_SIGNAL_COMMAND_QUIT )
+        if ( key == CCE_KEY_SIGNAL_COMMAND_QUIT )
         {
             ( *state ).cmd = CCE_COMMAND_QUIT;
 
@@ -736,7 +720,7 @@ cce_handle_user_input
         }
 
         // Handle backspace.
-        if ( in == '\b' )
+        if ( key == KEY_BACKSPACE )
         {
             if ( !indx )
             {
@@ -753,10 +737,16 @@ cce_handle_user_input
             continue;
         }
 
+        // Unparsed keycode? Y/N
+        else if ( !key || key > 0xFF )
+        {
+            continue;
+        }
+
         // Write to input buffer.
         else
         {
-            ( *state ).in[ indx ] = in;
+            ( *state ).in[ indx ] = to_uppercase ( key );
             indx += 1;
         }
 
@@ -764,8 +754,9 @@ cce_handle_user_input
         RENDER_CLEAR ();
         string_format ( ( *state ).textbuffer
                       , "%s"
-                      , ( in == '\b' ) ? "\b \b"
-                                       : ( char[] ){ in , 0 }
+                      , ( key == KEY_BACKSPACE ) ? "\b \b"
+                                                 : ( key != '[' ) ? ( char[] ){ key , 0 }
+                                                                  : ""
                       );
         RENDER ();
     }
@@ -882,8 +873,11 @@ cce_render_prompt_command
         if ( ( *state ).ioerr > 2 )
         {
             ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
-                                                        , CCE_COLOR_HINT "\n\n\tTrying to exit? Pass 'q' as the next move."
-                                                                           "\n\tNeed help? Pass 'h' for help options.\n"
+                                                        , CCE_COLOR_HINT "\n\n\tTrying to exit? Press <Esc> at any time,"
+                                                                           "\n\tor pass '%s' as the next move."
+                                                                         "\n\n\tNeed help? Pass '%s' for help options.\n"
+                                                        , cce_command_strings[ CCE_COMMAND_QUIT ]
+                                                        , cce_command_strings[ CCE_COMMAND_HELP ]
                                                         );
         }
 
@@ -897,24 +891,32 @@ cce_render_prompt_command
         cce_render_board ();
 
         // Render prompt.
-        const bool too_long = string_length ( ( *state ).in ) > MOVE_STRING_LENGTH;
+        const u8 len = string_length ( ( *state ).in );
+        const bool too_long = len > MOVE_STRING_LENGTH;
         if ( too_long )
         {
             ( *state ).in[ MOVE_STRING_LENGTH ] = 0;
         }
-        if ( string_length ( ( *state ).in ) > MOVE_STRING_LENGTH )
+        if ( len )
         {
-            ( *state ).in[ CCE_INPUT_TEXTBUFFER_LENGTH - 3 ] = '.';
-            ( *state ).in[ CCE_INPUT_TEXTBUFFER_LENGTH - 2 ] = '.';
+            ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
+                                                        , CCE_COLOR_INFO "\n\t" CCE_COLOR_DEFAULT
+                                                          CCE_COLOR_HIGHLIGHT "%s%s"
+                                                          CCE_COLOR_DEFAULT CCE_COLOR_ALERT " is not a known command or valid chess move."
+                                                          CCE_COLOR_INFO    "\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
+                                                        , ( *state ).in
+                                                        , ( too_long ) ? ".." : ""
+                                                        );
         }
-        ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
-                                                    , CCE_COLOR_INFO "\n\t" CCE_COLOR_DEFAULT
-                                                      CCE_COLOR_HIGHLIGHT "%s%s"
-                                                      CCE_COLOR_DEFAULT CCE_COLOR_ALERT " is not a known command or valid chess move."
-                                                      CCE_COLOR_INFO    "\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
-                                                    , ( *state ).in
-                                                    , ( too_long ) ? ".." : ""
-                                                    );
+        else
+        {
+            ( *state ).textbuffer_offs += string_format ( ( *state ).textbuffer + ( *state ).textbuffer_offs
+                                                        , CCE_COLOR_INFO "\n\t"
+                                                          CCE_COLOR_ALERT "Please issue a command or valid chess move."
+                                                          CCE_COLOR_INFO    "\n\tISSUE MOVE OR COMMAND:  " CCE_COLOR_DEFAULT
+                                                        );
+        }
+        
     }
     else
     {
@@ -1061,17 +1063,18 @@ cce_render_list_commands
                                                   "\n\t                                                   "
                                                   "\n\t         =-=-=- AVAILABLE COMMANDS -=-=-=          "
                                                   "\n\t                                                   "
-                                                  "\n\t  %c :      List available commands.               "
-                                                  "\n\t  %c :      List available moves.                  "
-                                                  "\n\t  %c :      Choose random valid move.              "
+                                                  "\n\t  %s :      List available commands.               "
+                                                  "\n\t  %s :      List available moves.                  "
+                                                  "\n\t  %s :      Choose random valid move.              "
                                                   "\n                                                     "
-                                                  "\n\t<Esc>:      Quit the application.                  "
+                                                  "\n\t  %s :      Quit the application.                  "
                                                   "\n\t                                                   "
                                                   "\n\t         =-=-=-                    -=-=-=          "
                                                   "\n"
-                                                , CCE_KEY_SIGNAL_COMMAND_HELP
-                                                , CCE_KEY_SIGNAL_COMMAND_LIST_MOVES
-                                                , CCE_KEY_SIGNAL_COMMAND_CHOOSE_RANDOM_MOVE
+                                                , cce_command_strings[ CCE_COMMAND_HELP ]
+                                                , cce_command_strings[ CCE_COMMAND_LIST_MOVES ]
+                                                , cce_command_strings[ CCE_COMMAND_CHOOSE_RANDOM_MOVE ]
+                                                , cce_command_strings[ CCE_COMMAND_QUIT ]
                                                 );
 }
 

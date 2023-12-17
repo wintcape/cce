@@ -73,7 +73,7 @@ fen_parse
             // Empty square token.
             if ( numeric ( *fen ) )
             {
-                const u8 i = chri ( *fen );
+                const u8 i = int_char ( *fen );
                 
                 // Validate.
                 if ( !i || i > 8 - f )
@@ -188,7 +188,7 @@ fen_parse
              && fen[ 2 ] == FEN_WHITESPACE_TOKEN
             )
     {
-        board.enpassant = SQUAREINDX ( 8 - chri ( fen[ 1 ] )
+        board.enpassant = SQUAREINDX ( 8 - int_char ( fen[ 1 ] )
                                      , fen[ 0 ] - 2 * '0' - 1
                                      );
         LOGINFO ( string_square (board.enpassant));
@@ -260,7 +260,7 @@ fen_from_board
                 const u8 i = f - nonempty - 1;
                 if ( i )
                 {
-                    *dst = ichr ( i );
+                    *dst = char_int ( i );
                     dst += 1;
                 }
 
@@ -277,7 +277,7 @@ fen_from_board
         const u8 i = f - nonempty - 1;
         if ( i )
         {
-            *dst = ichr ( i );
+            *dst = char_int ( i );
             dst += 1;
         }
         
