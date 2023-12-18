@@ -476,7 +476,7 @@ platform_console_read_key
     fflush ( stdout ); // In case echo functionality desired.
     
     // Read the key from the input stream.
-    char in[ 6 ]; // May be up to six bytes to handle special keys.
+    char in[ 6 ]; // Reserve up to six bytes to handle special keys.
     platform_memory_clear ( in , sizeof ( in ) );
     i32 result = read ( STDIN_FILENO , in , sizeof ( in ) );
     
