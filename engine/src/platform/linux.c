@@ -464,7 +464,7 @@ KEY
 platform_console_read_key
 ( void )
 {
-    KEY key = KEY_COUNT:
+    KEY key = KEY_COUNT;
 
     // Configure terminal for non-canonical input.
     struct termios tty;
@@ -473,75 +473,89 @@ platform_console_read_key
     tty_ = tty;
     tty_.c_lflag &= ~( ICANON | ECHO );
     tcsetattr ( STDIN_FILENO , TCSANOW , &tty_ );
-    fflush ( stdout );  // In case echo functionality desired.
+    fflush ( stdout ); // In case echo functionality desired.
     
     // Read the key from the input stream.
-    // May be up to four bytes to handle special keys.
-    char in[ 4 ];
-    i8 written;
-    while ( ( written = read ( STDIN_FILENO , in , sizeof ( in ) ) ) > 0 )
+    char in[ 6 ]; // May be up to six bytes to handle special keys.
+    i32 result = read ( STDIN_FILENO , in , sizeof ( in ) );
+    if ( result < 0 )
     {
-        for ( u8 i = 0; i < written; ++i )
-        {
-            // End of transmission.
-            if ( in[ i ] == 4 )
-            {
-                key = KEY_COUNT;
-                goto platform_console_read_key_end;
-            }
+        key = KEY_COUNT; // Not parsed.
+        goto platform_console_read_key_end;
+    }
 
-            // ANSI escape sequence.
-            if ( in[ i ] == '\033' )
+    // Parse what was read.
+    for ( u8 i = 0; i < result; ++i )
+    {
+        // End of transmission.
+        if ( in[ i ] == 4 )
+        {
+            key = KEY_COUNT; // Not parsed.
+            goto platform_console_read_key_end;
+        }
+
+        // ANSI escape sequence.
+        if ( in[ i ] == '\033' || in[ i ] == '~' )
+        {
+            // Parse final byte.
+            if ( i == result - 1 )
             {
-                if ( written > i + 1 )
+                // Set no delay for evaluating next byte.
+                fd_set set;
+                struct timeval timeout;
+                FD_ZERO ( &set );
+                FD_SET ( STDIN_FILENO , &set );
+                timeout.tv_sec = 0;
+                timeout.tv_usec = 0;
+
+                result = select ( 1 , &set , 0 , 0 , &timeout );
+                if ( result == -1 )
                 {
-                    key = 0;    // To be implemented.
+                    key = KEY_COUNT; // Not parsed.
                     goto platform_console_read_key_end;
                 }
-                else
+                
+                if ( result != 1 )
                 {
-                    fd_set set;
-                    struct timeval timeout;
-                    FD_ZERO ( &set );
-                    FD_SET ( STDIN_FILENO , &set );
-                    timeout.tv_sec = 0;
-                    timeout.tv_usec = 0;
-
-                    const int result = select ( 1 , &set , 0 , 0 , &timeout );
-                    if ( result == -1 )
-                    {
-                        key = KEY_COUNT;
-                        goto platform_console_read_key_end;
-                    }
-                    
                     // <Esc> key.
-                    if ( result != 1 )
+                    if ( in[ i ] == '\033' )
                     {
                         key = KEY_ESCAPE;
                         goto platform_console_read_key_end;
                     }
 
-                    else
+                    // <~> key.
+                    if ( in[ i ] == '~' )
                     {
-                        key = 0;    // To be implemented.
+                        key = '~';
                         goto platform_console_read_key_end;
                     }
                 }
+
+                else
+                {
+                    key = 0; // To be implemented.
+                    goto platform_console_read_key_end;
+                }
             }
 
-            // Otherwise, just take the first byte as an ASCII value.
-            else
-            {
-                // Backspace key is mapped to ASCII DELETE (for some reason).
-                key = ( *in == KEY_DELETE ) ? KEY_BACKSPACE : *in;
-                goto platform_console_read_key_end;
-            }
+            // Parse non-final byte.
+            key = 0; // To be implemented.
+            goto platform_console_read_key_end;
+        }
+
+        // Otherwise, just take the first byte as an ASCII value.
+        else
+        {
+            // Backspace key is mapped to ASCII 'delete' (for some reason).
+            key = ( *in == KEY_DELETE ) ? KEY_BACKSPACE : *in;
+            goto platform_console_read_key_end;
         }
     }
 
     platform_console_read_key_end:
         tcsetattr ( STDIN_FILENO , TCSANOW , &tty );
-        fflush ( stdout );  // In case echo functionality desired.
+        fflush ( stdout ); // In case echo functionality desired.
         return key;
 }
 

@@ -42,7 +42,7 @@ perft
 
     // Generate moves.
     moves_t moves;
-    moves_get ( &moves , board_ , attacks );
+    moves_compute ( &moves , board_ , attacks );
 
     // Initialize the clock.
     clock_t clock;
@@ -143,7 +143,7 @@ _perft
 
     // Generate move options.
     moves_t moves;
-    moves_get ( &moves , board , attacks );
+    moves_compute ( &moves , board , attacks );
 
     u64 leaf_count = 0;
     for ( u32 i = 0; i < moves.count; ++i )

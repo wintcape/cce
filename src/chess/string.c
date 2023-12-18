@@ -175,9 +175,9 @@ string_board
     offs += string_format ( dst + offs
                           , "\n\n\n\t\t  Side:         %s\n\t\t  En passant:      %s\n\t\t  Castling:      %c%c%c%c\n\n"
                           , ( ( *board ).side == WHITE ) ? "white"
-                                                               : "black"
+                                                         : "black"
                           , ( ( *board ).enpassant != NO_SQ ) ? string_square ( ( *board ).enpassant )
-                                                                    : "no"
+                                                              : "no"
                           , ( ( *board ).castle & CASTLE_WK ) ? 'K' : '-'
                           , ( ( *board ).castle & CASTLE_WQ ) ? 'Q' : '-'
                           , ( ( *board ).castle & CASTLE_BK ) ? 'k' : '-'

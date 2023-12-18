@@ -25,8 +25,8 @@ typedef enum
 {
     DEFINE_KEY ( BACKSPACE      , 0x008 )
 ,   DEFINE_KEY ( TAB            , 0x009 )
-,   DEFINE_KEY ( ENTER          , 0x010 )
-,   DEFINE_KEY ( SPACE          , 0x032 )
+,   DEFINE_KEY ( ENTER          , 0x00A )
+,   DEFINE_KEY ( SPACE          , 0x020 )
 ,   DEFINE_KEY ( DELETE         , 0x07F )
 
 ,   DEFINE_KEY ( SHIFT          , 0x100 )
