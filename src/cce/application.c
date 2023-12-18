@@ -510,9 +510,9 @@ cce_prompt_command
     {
         if ( string_equal ( ( *state ).in , cce_command_strings[ i ] ) )
         {
-            ( *state ).cmd = i;
             ( *state ).ioerr = 0;
 
+            ( *state ).cmd = i;
             ( *state ).render = CCE_RENDER_NONE;
             ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
             return true;
@@ -556,7 +556,6 @@ cce_prompt_command
         ( *state ).in[ MOVE_STRING_LENGTH - 1 ] = ' ';
         ( *state ).in[ MOVE_STRING_LENGTH ] = 0;
     }
-    ( *state ).ioerr += 0;
     
     // Validate move is present in list of valid move options.
     bool valid = false;
