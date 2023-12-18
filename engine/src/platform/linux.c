@@ -464,7 +464,7 @@ KEY
 platform_console_read_key
 ( void )
 {
-    KEY key;
+    KEY key = KEY_COUNT:
 
     // Configure terminal for non-canonical input.
     struct termios tty;
