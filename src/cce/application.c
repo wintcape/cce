@@ -757,7 +757,7 @@ cce_handle_user_input
         string_format ( ( *state ).textbuffer
                       , "%s"
                       , ( key == KEY_BACKSPACE ) ? "\b \b"
-                                                : ( char[] ){ key , 0 }
+                                                 : ( char[] ){ key , 0 }
                       );
         RENDER ();
     }
