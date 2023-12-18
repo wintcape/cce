@@ -477,82 +477,75 @@ platform_console_read_key
     
     // Read the key from the input stream.
     char in[ 6 ]; // May be up to six bytes to handle special keys.
+    platform_memory_clear ( in , sizeof ( in ) );
     i32 result = read ( STDIN_FILENO , in , sizeof ( in ) );
+    
+    // I/O error.
     if ( result < 0 )
     {
-        key = KEY_COUNT; // Not parsed.
+        key = KEY_COUNT;
         goto platform_console_read_key_end;
     }
 
-    // Parse what was read.
-    for ( u8 i = 0; i < result; ++i )
+    // End of transmission (I/O error).
+    if (   in[ 0 ] == 4
+        || in[ 1 ] == 4
+        || in[ 2 ] == 4
+        || in[ 3 ] == 4
+        || in[ 4 ] == 4
+        || in[ 5 ] == 4
+        )
     {
-        // End of transmission.
-        if ( in[ i ] == 4 )
-        {
-            key = KEY_COUNT; // Not parsed.
-            goto platform_console_read_key_end;
-        }
+        key = KEY_COUNT;
+        goto platform_console_read_key_end;
+    }
 
-        // ANSI escape sequence.
-        if ( in[ i ] == '\033' || in[ i ] == '~' )
+    // ANSI escape sequence.
+    if ( *in == '\033' || *in == '~' )
+    {
+        // Standalone keycode.
+        if ( !in[ 1 ] )
         {
-            // Parse final byte.
-            if ( i == result - 1 )
+            switch ( *in )
             {
-                // Set no delay for evaluating next byte.
-                fd_set set;
-                struct timeval timeout;
-                FD_ZERO ( &set );
-                FD_SET ( STDIN_FILENO , &set );
-                timeout.tv_sec = 0;
-                timeout.tv_usec = 0;
-
-                result = select ( 1 , &set , 0 , 0 , &timeout );
-                if ( result == -1 )
-                {
-                    key = KEY_COUNT; // Not parsed.
-                    goto platform_console_read_key_end;
-                }
-                
-                if ( result != 1 )
-                {
-                    // <Esc> key.
-                    if ( in[ i ] == '\033' )
-                    {
-                        key = KEY_ESCAPE;
-                        goto platform_console_read_key_end;
-                    }
-
-                    // <~> key.
-                    if ( in[ i ] == '~' )
-                    {
-                        key = '~';
-                        goto platform_console_read_key_end;
-                    }
-                }
-
-                else
-                {
-                    key = 0; // To be implemented.
-                    goto platform_console_read_key_end;
-                }
+                case '\033': key = KEY_ESCAPE ;break;
+                case '~'   : key = '~'        ;break;
+                default    : key = 0          ;break;
             }
-
-            // Parse non-final byte.
-            key = 0; // To be implemented.
             goto platform_console_read_key_end;
         }
 
-        // Otherwise, just take the first byte as an ASCII value.
+        // Composite keycode.
         else
         {
-            // Backspace key is mapped to ASCII 'delete' (for some reason).
-            key = ( *in == KEY_DELETE ) ? KEY_BACKSPACE : *in;
+            if ( in[ 1 ] == '[' )
+            {
+                switch ( in[ 2 ] )
+                {
+                    case 'A': key = KEY_UP    ;break;
+                    case 'B': key = KEY_DOWN  ;break;
+                    case 'C': key = KEY_RIGHT ;break;
+                    case 'D': key = KEY_LEFT  ;break;
+                    default : key = 0         ;break;
+                }
+            }
+            else
+            {
+                key = 0;
+            }
             goto platform_console_read_key_end;
         }
     }
 
+    // Standalone ASCII character.
+    else
+    {
+        // Backspace key is mapped to ASCII 'delete' (for some reason).
+        key = ( *in == KEY_DELETE ) ? KEY_BACKSPACE : *in;
+        goto platform_console_read_key_end;
+    }
+
+    // Reset terminal to canonical input mode.
     platform_console_read_key_end:
         tcsetattr ( STDIN_FILENO , TCSANOW , &tty );
         fflush ( stdout ); // In case echo functionality desired.

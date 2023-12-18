@@ -156,7 +156,10 @@ platform_console_write_error
 /**
  * @brief Platform-independent function to read a single keystroke of user
  * input in the console.
- * @return The last user-inputted keystroke.
+ * @return If successfully parsed, the function returns the last user-inputted
+ * keystroke. If the keycode of the pressed key was unknown, the function
+ * returns 0. If there was an error reading from the input stream, the function
+ * returns KEY_COUNT.
  */
 KEY
 platform_console_read_key
