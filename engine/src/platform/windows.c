@@ -328,10 +328,7 @@ platform_console_write_error
 KEY
 platform_console_read_key
 ( void )
-{
-    // To be implemented.
-
-
+{   // TODO: Implementation.
     return KEY_COUNT;
 }
 

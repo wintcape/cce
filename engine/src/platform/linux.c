@@ -37,9 +37,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Global terminal state.
-static struct termios tty;
-
 // Type definition for platform subsystem state.
 typedef struct
 {
@@ -88,13 +85,6 @@ _platform_console_write
 (   const char* mesg
 ,   FILE*       file
 );
-
-/**
- * @brief Resets terminal to canonical input mode.
- */
-void
-platform_reset_tty
-( void );
 
 bool
 platform_startup
@@ -474,15 +464,16 @@ KEY
 platform_console_read_key
 ( void )
 {
-    KEY key = KEY_COUNT;
+    KEY key;
 
     // Configure terminal for non-canonical input.
+    struct termios tty;
     struct termios tty_;
     tcgetattr ( STDIN_FILENO , &tty );
     tty_ = tty;
     tty_.c_lflag &= ~( ICANON | ECHO );
     tcsetattr ( STDIN_FILENO , TCSANOW , &tty_ );
-    fflush ( stdout );
+    fflush ( stdout );  // In case echo functionality desired.
     
     // Read the key from the input stream.
     // May be up to four bytes to handle special keys.
@@ -549,7 +540,8 @@ platform_console_read_key
     }
 
     platform_console_read_key_end:
-        platform_reset_tty ();
+        tcsetattr ( STDIN_FILENO , TCSANOW , &tty );
+        fflush ( stdout );  // In case echo functionality desired.
         return key;
 }
 
@@ -588,14 +580,6 @@ _platform_console_write
 )
 {
     fprintf ( file , "%s" ANSI_CC_RESET , mesg );
-}
-
-void
-platform_reset_tty
-( void )
-{
-    tcsetattr ( STDIN_FILENO , TCSANOW , &tty );
-    fflush ( stdout );
 }
 
 BUTTON
