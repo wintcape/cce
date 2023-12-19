@@ -448,7 +448,6 @@ cce_prompt_game_type
     // Read user response.
     if ( !cce_handle_user_input ( 1 ) )
     {
-        LOGERROR ( "cce_prompt_game_type: cce_handle_user_input() failed." );
         return false;
     }
     
@@ -492,7 +491,6 @@ cce_prompt_command
     // Read user response.
     if ( !cce_handle_user_input ( MOVE_STRING_LENGTH ) )
     {
-        LOGERROR ( "cce_prompt_command: cce_handle_user_input() failed." );
         return false;
     }
        
