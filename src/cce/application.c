@@ -478,7 +478,7 @@ cce_prompt_game_type
     ( *state ).ioerr = 0;
 
     // Set the game type.
-    ( *state ).game = int_char ( ( *state ).in[ 0 ] ) - 1;
+    ( *state ).game = to_digit ( ( *state ).in[ 0 ] ) - 1;
 
     ( *state ).render = CCE_RENDER_NONE;
     ( *state ).state = CCE_GAME_STATE_GAME_START;
@@ -502,6 +502,7 @@ cce_prompt_command
        
     // Sanitize input string.
     ( *state ).in[ sizeof ( ( *state ).in ) - 2 ] = 0;
+    string_trim ( ( *state ).in );
     
     const u8 len = string_length ( ( *state ).in );
 
@@ -511,7 +512,6 @@ cce_prompt_command
         if ( string_equal ( ( *state ).in , cce_command_strings[ i ] ) )
         {
             ( *state ).ioerr = 0;
-
             ( *state ).cmd = i;
             ( *state ).render = CCE_RENDER_NONE;
             ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
@@ -571,6 +571,7 @@ cce_prompt_command
             break;
         }
     }
+    string_trim ( ( *state ).in );  // Sanitize for display.
     if ( !valid )
     {
         ( *state ).ioerr += 1;

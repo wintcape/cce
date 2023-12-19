@@ -38,7 +38,7 @@ alpha
 
 INLINE
 bool
-numeric
+digit
 (   const char c
 )
 {
@@ -51,7 +51,7 @@ alphanumeric
 (   const char c
 )
 {
-    return alpha ( c ) || numeric ( c );
+    return alpha ( c ) || digit ( c );
 }
 
 INLINE
@@ -98,7 +98,7 @@ to_lowercase
 
 INLINE
 u8
-int_char
+to_digit
 (   const unsigned char c
 )
 {
@@ -107,7 +107,7 @@ int_char
 
 INLINE
 unsigned char
-char_int
+char_digit
 (   const u8 i
 )
 {
