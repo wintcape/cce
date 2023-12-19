@@ -39,17 +39,17 @@ bitboard_count
  * @brief Computes the index of the least significant digit of the first set bit
  * within a bitboard.
  * @param bitboard A bitboard.
- * @return The index of the least significant digit of the first set bit within
- * a bitboard, or -1 if bitboard is empty.
+ * @return The square of the least significant digit of the first set bit within
+ * a bitboard, or NO_SQ if bitboard is empty.
  */
 INLINE
-i8
+SQUARE
 bitboard_lsb
 (   bitboard_t bitboard
 )
 {
     return ( bitboard ) ? bitboard_count ( ( bitboard & -bitboard ) - 1 )
-                        : -1
+                        : NO_SQ
                         ;
 }
 

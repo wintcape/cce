@@ -27,13 +27,14 @@ board_square_attackable
 ,   const SIDE          side
 )
 {
-    return ( bitboard_pawn_attack ( attacks , square , ( side != WHITE ) ? WHITE : BLACK ) & ( ( side == WHITE ) ? ( *board ).pieces[ P ] : ( *board ).pieces[ p ] ) )
-        || ( bitboard_knight_attack ( attacks , square )  & ( ( side == WHITE ) ? ( *board ).pieces[ N ] : ( *board ).pieces[ n ] ) )
-        || ( bitboard_bishop_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ B ] : ( *board ).pieces[ b ] ) )
-        || ( bitboard_rook_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ R ] : ( *board ).pieces[ r ] ) )
-        || ( bitboard_queen_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ Q ] : ( *board ).pieces[ q ] ) )
-        || ( bitboard_king_attack ( attacks , square ) & ( ( side == WHITE ) ? ( *board ).pieces[ K ] : ( *board ).pieces[ k ] ) )
-        ;
+    return square != NO_SQ
+        && (   ( bitboard_pawn_attack ( attacks , square , !side ) & ( ( side == WHITE ) ? ( *board ).pieces[ P ] : ( *board ).pieces[ p ] ) )
+            || ( bitboard_knight_attack ( attacks , square )  & ( ( side == WHITE ) ? ( *board ).pieces[ N ] : ( *board ).pieces[ n ] ) )
+            || ( bitboard_bishop_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ B ] : ( *board ).pieces[ b ] ) )
+            || ( bitboard_rook_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ R ] : ( *board ).pieces[ r ] ) )
+            || ( bitboard_queen_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ Q ] : ( *board ).pieces[ q ] ) )
+            || ( bitboard_king_attack ( attacks , square ) & ( ( side == WHITE ) ? ( *board ).pieces[ K ] : ( *board ).pieces[ k ] ) )
+           );
 }
 
 /**
@@ -57,7 +58,7 @@ board_check
                                    , bitboard_lsb ( ( side == WHITE ) ? ( *board ).pieces[ K ]
                                                                       : ( *board ).pieces[ k ]
                                                                       )
-                                   , ( side != WHITE ) ? WHITE : BLACK
+                                   , !side
                                    );
 }
 

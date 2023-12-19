@@ -387,7 +387,7 @@ cce_game_init
     ( *state ).state = CCE_GAME_STATE_PROMPT_GAME_TYPE;
     return true;
 }
-#include "chess/test/perft.h"
+
 bool
 cce_game_start
 ( void )
@@ -634,7 +634,7 @@ cce_execute_move_player
     
     // Parse the move.
     if ( !move_parse ( ( *state ).move
-                     , MOVE_FILTER_NONE
+                     , MOVE_FILTER_NO_CHECK
                      , &( *state ).attacks
                      , &( *state ).board
                      ))
@@ -695,7 +695,7 @@ cce_execute_move_engine
 
     // Parse the move.
     if ( !move_parse ( ( *state ).move
-                     , MOVE_FILTER_NONE
+                     , MOVE_FILTER_NO_CHECK
                      , &( *state ).attacks
                      , &( *state ).board
                      ))

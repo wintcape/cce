@@ -245,16 +245,13 @@ move_parse
                            ;
 
     // Toggle side.
-    board.side = ( board.side != WHITE ) ? WHITE : BLACK;
+    board.side = !board.side;
 
-    // If new side's king is in check, discard the working board.
-    if ( board_square_attackable ( &board
-                                 , attacks
-                                 , bitboard_lsb ( ( !white ) ? board.pieces[ k ]
-                                                             : board.pieces[ K ]
-                                                             )
-                                 , board.side
-                                 ))
+    // Test if move resulted in check.
+    const bool check = board_check ( &board , attacks , board.side );
+    if (   ( filter == MOVE_FILTER_NO_CHECK && check )
+        || ( filter == MOVE_FILTER_ONLY_CHECK && !check )
+       )
     {
         return false;
     }
