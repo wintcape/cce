@@ -14,7 +14,7 @@
 #include "core/memory.h"
 
 bool
-move_parse
+move_perform
 (   const move_t        move
 ,   const MOVE_FILTER   filter
 ,   const attacks_t*    attacks
@@ -34,91 +34,91 @@ move_parse
     switch ( filter )
     {
         case MOVE_FILTER_ONLY_PAWN:
-            return ( piece == 'P' || piece == 'p' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'P' || piece == 'p' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_KNIGHT:
-            return ( piece == 'N' || piece == 'n' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'N' || piece == 'n' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_BISHOP:
-            return ( piece == 'B' || piece == 'b' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'B' || piece == 'b' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_ROOK:
-            return ( piece == 'R' || piece == 'r' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'R' || piece == 'r' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_QUEEN:
-            return ( piece == 'Q' || piece == 'q' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'Q' || piece == 'q' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_KING:
-            return ( piece == 'K' || piece == 'k' ) ? move_parse ( move
-                                                                , MOVE_FILTER_NONE
-                                                                , attacks
-                                                                , board_
-                                                                )
+            return ( piece == 'K' || piece == 'k' ) ? move_perform ( move
+                                                                   , MOVE_FILTER_NONE
+                                                                   , attacks
+                                                                   , board_
+                                                                   )
                                                     : false
                                                     ;
         case MOVE_FILTER_ONLY_CAPTURE:
-            return ( capture ) ? move_parse ( move
-                                            , MOVE_FILTER_NONE
-                                            , attacks
-                                            , board_
-                                            )
+            return ( capture ) ? move_perform ( move
+                                               , MOVE_FILTER_NONE
+                                               , attacks
+                                               , board_
+                                               )
                                : false
                                ;
         case MOVE_FILTER_ONLY_PROMOTION:
-            return ( promotion ) ? move_parse ( move
-                                              , MOVE_FILTER_NONE
-                                              , attacks
-                                              , board_
-                                              )
+            return ( promotion ) ? move_perform ( move
+                                                 , MOVE_FILTER_NONE
+                                                 , attacks
+                                                 , board_
+                                                 )
                                : false
                                ;
         case MOVE_FILTER_ONLY_DOUBLE_PUSH:
-            return ( double_push ) ? move_parse ( move
-                                                , MOVE_FILTER_NONE
-                                                , attacks
-                                                , board_
-                                                )
+            return ( double_push ) ? move_perform ( move
+                                                   , MOVE_FILTER_NONE
+                                                   , attacks
+                                                   , board_
+                                                   )
                                    : false
                                    ;
         case MOVE_FILTER_ONLY_ENPASSANT:
-            return ( enpassant ) ? move_parse ( move
-                                              , MOVE_FILTER_NONE
-                                              , attacks
-                                              , board_
-                                              )
+            return ( enpassant ) ? move_perform ( move
+                                                 , MOVE_FILTER_NONE
+                                                 , attacks
+                                                 , board_
+                                                 )
                                  : false
                                  ;
         case MOVE_FILTER_ONLY_CASTLE:
-            return ( castle ) ? move_parse ( move
-                                           , MOVE_FILTER_NONE
-                                           , attacks                                           
-                                           , board_
-                                           )
+            return ( castle ) ? move_perform ( move
+                                              , MOVE_FILTER_NONE
+                                              , attacks                                           
+                                              , board_
+                                              )
                               : false
                               ;
         default:
@@ -182,9 +182,7 @@ move_parse
     // Parse double push.
     if ( double_push )
     {
-        ( white ) ? ( board.enpassant = dst + 8 )
-                  : ( board.enpassant = dst - 8 )
-                  ;
+        board.enpassant = ( white ) ? dst + 8 : dst - 8;
     }
 
     // Parse castling.
@@ -265,6 +263,93 @@ move_parse
     return true;
 }
 
+bool
+move_parse
+(   const char*         s
+,   const moves_t*      moves
+,   const attacks_t*    attacks
+,   move_t*             move
+)
+{
+    const u8 len = string_length_clamp ( s , MOVE_STRING_LENGTH + 1 );
+
+    // Validate input string length.
+    if ( len > MOVE_STRING_LENGTH )
+    {
+        return false;
+    }
+
+    // Copy input string into working buffer.
+    char buf[ MOVE_STRING_LENGTH + 1 ];
+    memory_copy ( buf , s , len );
+    buf[ len ] = 0; // Append terminator.
+
+    // Sanitize.
+    string_trim ( buf );
+    for ( u8 i = 0; i < len; ++ i )
+    {
+        buf[ i ] = to_uppercase ( buf[ i ] );
+    }
+
+    // Validate.
+    if (   len < MOVE_STRING_LENGTH - 1
+        || buf[ 0 ] < 'A' || buf[ 0 ] > 'H'
+        || buf[ 1 ] < '1' || buf[ 1 ] > '8'
+        || buf[ 2 ] < 'A' || buf[ 2 ] > 'H'
+        || buf[ 3 ] < '1' || buf[ 3 ] > '8'
+       )
+    {
+        return false;
+    }
+    if (   len == MOVE_STRING_LENGTH
+        && buf[ 4 ] != 'N'
+        && buf[ 4 ] != 'B'
+        && buf[ 4 ] != 'R'
+        && buf[ 4 ] != 'Q'
+       )
+    {
+        return false;
+    }
+    
+    // Parse the move string.
+    const SQUARE src = SQUAREINDX ( 8 - to_digit ( buf[ 1 ] )
+                                  , buf[ 0 ] - 'A'
+                                  );
+    const SQUARE dst = SQUAREINDX ( 8 - to_digit ( buf[ 3 ] )
+                                  , buf[ 2 ] - 'A'
+                                  );
+
+    LOGINFO("%s%s",string_square(src),string_square(dst));
+
+    // Check move validity.
+    for ( u8 i = 0; i < ( *moves ).count; ++i )
+    {
+        const move_t move_ = ( *moves ).moves[ i ];
+        if (   src != move_decode_src ( move_ )
+            || dst != move_decode_dst ( move_ )
+           )
+        {
+            continue;
+        }
+
+        const PIECE promotion = move_decode_promotion ( move_ );
+        if (   ( buf[ 4 ] == 'N' && promotion != N && promotion != n )
+            || ( buf[ 4 ] == 'B' && promotion != B && promotion != b )
+            || ( buf[ 4 ] == 'R' && promotion != R && promotion != r )
+            || ( buf[ 4 ] == 'Q' && ( promotion == Q || promotion == q ) )
+           )
+        {
+            continue;
+        }
+        
+        // Write valid move to the output buffer.
+        *move = move_;
+        return true;
+    }
+
+    return false;
+}
+
 INLINE
 void
 moves_push
@@ -276,7 +361,7 @@ moves_push
     ( *moves ).count += 1;
 }
 
-void
+moves_t*
 moves_compute
 (   moves_t*            moves
 ,   const board_t*      board
@@ -812,4 +897,6 @@ moves_compute
         }
 
     }// END for.
+
+    return moves;
 }

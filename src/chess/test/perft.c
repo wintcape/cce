@@ -56,7 +56,7 @@ perft
         memory_copy ( &board , board_ , sizeof ( board_t ) );        
         
         // Perform moves until check reached.
-        if ( !move_parse ( moves.moves[ i ]
+        if ( !move_perform ( moves.moves[ i ]
                          , MOVE_FILTER_NO_CHECK
                          , attacks
                          , &board
@@ -118,7 +118,7 @@ _perft
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
 
         // Perform the move.
-        if ( !move_parse ( moves.moves[ i ]
+        if ( !move_perform ( moves.moves[ i ]
                          , filter
                          , attacks
                          , board

@@ -498,8 +498,6 @@ cce_prompt_command
     ( *state ).in[ sizeof ( ( *state ).in ) - 2 ] = 0;
     string_trim ( ( *state ).in );
     
-    const u8 len = string_length ( ( *state ).in );
-
     // Attempt to parse command.
     for ( CCE_COMMAND i = 0; i < CCE_COMMAND_COUNT; ++i )
     {
@@ -511,62 +509,14 @@ cce_prompt_command
             ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
             return true;
         }
-    }// Not a command. Attempt to parse move instead.
+    }
 
-    // Validate input format.
-    if ( len < MOVE_STRING_LENGTH - 1 )
-    {
-        ( *state ).ioerr += 1;
-        return true;
-    }
-    else if (   ( *state ).in[ 0 ] < 'A'
-             || ( *state ).in[ 0 ] > 'H'
-             || ( *state ).in[ 1 ] < '1'
-             || ( *state ).in[ 1 ] > '8'
-             || ( *state ).in[ 2 ] < 'A'
-             || ( *state ).in[ 2 ] > 'H'
-             || ( *state ).in[ 3 ] < '1'
-             || ( *state ).in[ 3 ] > '8'
-            )
-    {
-        ( *state ).ioerr += 1;
-        return true;
-    }
-    else if ( len == MOVE_STRING_LENGTH )
-    {
-        if (   ( *state ).in[ MOVE_STRING_LENGTH - 1 ] != 'N'
-            && ( *state ).in[ MOVE_STRING_LENGTH - 1 ] != 'B'
-            && ( *state ).in[ MOVE_STRING_LENGTH - 1 ] != 'R'
-            && ( *state ).in[ MOVE_STRING_LENGTH - 1 ] != 'Q'
-           )
-        {
-            ( *state ).ioerr += 1;
-            return true;
-        }
-    }
-    else
-    {
-        // Sanitize for string comparison.
-        ( *state ).in[ MOVE_STRING_LENGTH - 1 ] = ' ';
-        ( *state ).in[ MOVE_STRING_LENGTH ] = 0;
-    }
-    
-    // Validate move is present in list of valid move options.
-    bool valid = false;
-    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
-    {
-        if ( string_equal ( ( *state ).in
-                          , string_move ( ( *state ).textbuffer
-                                        , ( *state ).moves.moves[ i ]
-                                        )))
-        {
-            ( *state ).move = ( *state ).moves.moves[ i ];
-            valid = true;
-            break;
-        }
-    }
-    string_trim ( ( *state ).in );  // Sanitize for display.
-    if ( !valid )
+    // Not a command. Attempt to parse move instead.
+    if ( !move_parse ( ( *state ).in
+                     , &( *state ).moves
+                     , &( *state ).attacks
+                     , &( *state ).move
+                     ))
     {
         ( *state ).ioerr += 1;
         return true;
@@ -628,7 +578,7 @@ cce_execute_move_player
     state_t* state = ( *cce ).internal;
     
     // Parse the move.
-    if ( !move_parse ( ( *state ).move
+    if ( !move_perform ( ( *state ).move
                      , MOVE_FILTER_NONE
                      , &( *state ).attacks
                      , &( *state ).board
@@ -698,7 +648,7 @@ cce_execute_move_engine
     RENDER ();
 
     // Parse the move.
-    if ( !move_parse ( ( *state ).move
+    if ( !move_perform ( ( *state ).move
                      , MOVE_FILTER_NONE
                      , &( *state ).attacks
                      , &( *state ).board
@@ -1049,7 +999,7 @@ cce_render_splash_title
                   "\n\t=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                   "\n\t~                                                 ~"
                   "\n\t~                CCE CHESS ENGINE.                ~"
-                  "\n\t~                (   v. %i.%i.%i   )                ~"
+                  "\n\t~                (   v. %i.%i.%i   )                 ~"
                   "\n\t~           created by Matthew Weissel.           ~"
                   "\n\t~                                                 ~"
                   "\n\t=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
@@ -1271,7 +1221,7 @@ cce_log_splash_title
     LOG_PUSH ( "\n\t=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                "\n\t~                                                 ~"
                "\n\t~                CCE CHESS ENGINE.                ~"
-               "\n\t~                (   v. %i.%i.%i   )                ~"
+               "\n\t~                (   v. %i.%i.%i   )                 ~"
                "\n\t~           created by Matthew Weissel.           ~"
                "\n\t~                                                 ~"
                "\n\t=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
