@@ -59,7 +59,6 @@ typedef enum
 ,   CCE_RENDER_EXECUTE_COMMAND
 ,   CCE_RENDER_EXECUTE_MOVE_PLAYER
 ,   CCE_RENDER_EXECUTE_MOVE_ENGINE
-,   CCE_RENDER_CHECK
 
 ,   CCE_RENDER_TAG_COUNT
 }
@@ -149,7 +148,6 @@ void cce_render_prompt_command      ( void );
 void cce_render_execute_command     ( void );
 void cce_render_execute_move_player ( void );
 void cce_render_execute_move_engine ( void );
-void cce_render_check               ( void );
 void cce_render_splash_title        ( void );
 void cce_render_splash_end          ( void );
 void cce_render_list_commands       ( void );
@@ -187,7 +185,6 @@ cce_filter_user_input
 void cce_log_splash_title ( void );
 void cce_log_board        ( void );
 void cce_log_move         ( void );
-void cce_log_check        ( void );
 
 // Console color code indices for text rendering.
 #define CCE_COLOR_DEFAULT   ANSI_CC ( ANSI_CC_NONE )
@@ -369,7 +366,6 @@ cce_render
         case CCE_RENDER_EXECUTE_COMMAND    : RENDER_CLEAR () ; cce_render_execute_command ()     ;break;
         case CCE_RENDER_EXECUTE_MOVE_PLAYER: RENDER_CLEAR () ; cce_render_execute_move_player () ;break;
         case CCE_RENDER_EXECUTE_MOVE_ENGINE: RENDER_CLEAR () ; cce_render_execute_move_engine () ;break;
-        case CCE_RENDER_CHECK              : RENDER_CLEAR () ; cce_render_check ()               ;break;
         default                            : RENDER_CLEAR () ;                                    break;
     }
 
@@ -635,14 +631,16 @@ cce_execute_move_player
     
     // Parse the move.
     if ( !move_parse ( ( *state ).move
-                     , MOVE_FILTER_NO_CHECK
+                     , MOVE_FILTER_NONE
                      , &( *state ).attacks
                      , &( *state ).board
                      ))
     {
-        ( *state ).render = CCE_RENDER_CHECK;
-        ( *state ).state = CCE_GAME_STATE_GAME_END;
-        return true;
+        LOGERROR ( "cce_execute_move_player: Failed to parse move '%s'."
+                 , string_trim ( string_move ( ( *state ).textbuffer
+                                             , ( *state ).move
+                                             )));
+        return false;
     }
 
     ( *state ).ply += 1;
@@ -653,10 +651,17 @@ cce_execute_move_player
                   , &( *state ).attacks
                   );
     
+    // Test if move resulted in check.
+    const bool check = board_check ( &( *state ).board
+                                   , &( *state ).attacks
+                                   , ( *state ).board.side
+                                   );
+
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_PLAYER;
-    ( *state ).state = ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                            : CCE_GAME_STATE_PROMPT_COMMAND
-                                                                            ;
+    ( *state ).state = ( !check ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                         : CCE_GAME_STATE_PROMPT_COMMAND
+                                  : CCE_GAME_STATE_GAME_END /* Temporary. */
+                                  ;
     return true;
 }
 
@@ -696,14 +701,16 @@ cce_execute_move_engine
 
     // Parse the move.
     if ( !move_parse ( ( *state ).move
-                     , MOVE_FILTER_NO_CHECK
+                     , MOVE_FILTER_NONE
                      , &( *state ).attacks
                      , &( *state ).board
                      ))
     {
-        ( *state ).render = CCE_RENDER_CHECK;
-        ( *state ).state = CCE_GAME_STATE_GAME_END;
-        return true;
+        LOGERROR ( "cce_execute_move_player: Failed to parse move '%s'."
+                 , string_trim ( string_move ( ( *state ).textbuffer
+                                             , ( *state ).move
+                                             )));
+        return false;
     }
 
     ( *state ).ply += 1;
@@ -713,11 +720,18 @@ cce_execute_move_engine
                   , &( *state ).board
                   , &( *state ).attacks
                   );
+                  
+    // Test if move resulted in check.
+    const bool check = board_check ( &( *state ).board
+                                   , &( *state ).attacks
+                                   , ( *state ).board.side
+                                   );
     
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_ENGINE;
-    ( *state ).state = ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                            : CCE_GAME_STATE_PROMPT_COMMAND
-                                                                            ;
+    ( *state ).state = ( !check ) ? ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                         : CCE_GAME_STATE_PROMPT_COMMAND
+                                  : CCE_GAME_STATE_GAME_END /* Temporary. */
+                                  ;
     return true;
 }
 
@@ -1029,24 +1043,6 @@ cce_render_execute_move_engine
 }
 
 void
-cce_render_check
-( void )
-{
-    state_t* state = ( *cce ).internal;
-    RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s CHECK: %s" CCE_COLOR_DEFAULT
-                , ( ( *state ).state == CCE_GAME_STATE_EXECUTE_MOVE_PLAYER ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? "WHITE (player)"
-                                                                                                                                    : ( ( *state ).board.side == WHITE ) ? "WHITE"
-                                                                                                                                                                         : "BLACK"
-                                                                             : ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? "BLACK (engine)"
-                                                                                                                                    : ( ( *state ).board.side == WHITE ) ? "WHITE"
-                                                                                                                                                                         : "BLACK"
-                , string_move ( ( *state ).textbuffer
-                , ( *state ).move
-                ));
-    cce_log_check ();
-}
-
-void
 cce_render_splash_title
 ( void )
 {
@@ -1213,63 +1209,51 @@ cce_render_move
 ( void )
 {
     state_t* state = ( *cce ).internal;
+
+    // Capture.
     if ( move_decode_capture ( ( *state ).move ) )
     {
-        if ( move_decode_promotion ( ( *state ).move ) )
-        {
-            RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s CAPTURED %s ON %s. PROMOTED TO %s."
-                        , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                    : "BLACK (engine)"
-                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                    : "BLACK"
-                        , piecewchr ( move_decode_piece ( ( *state ).move ) )
-                        , string_square ( move_decode_src ( ( *state ).move ) )
-                        , piecewchr ( ( *state ).board.capture )
-                        , string_square ( move_decode_dst ( ( *state ).move ) )
-                        , piecewchr ( move_decode_promotion ( ( *state ).move ) )
-                        );
-        }
-        else
-        {
-            RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s CAPTURED %s ON %s."
-                        , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                    : "BLACK (engine)"
-                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                    : "BLACK"
-                        , piecewchr ( move_decode_piece ( ( *state ).move ) )
-                        , string_square ( move_decode_src ( ( *state ).move ) )
-                        , piecewchr ( ( *state ).board.capture )
-                        , string_square ( move_decode_dst ( ( *state ).move ) )
-                        );
-        }
+        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s CAPTURED %s ON %s."
+                    , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                                : "BLACK (engine)"
+                                                                           : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                : "BLACK"
+                    , piecewchr ( move_decode_piece ( ( *state ).move ) )
+                    , string_square ( move_decode_src ( ( *state ).move ) )
+                    , piecewchr ( ( *state ).board.capture )
+                    , string_square ( move_decode_dst ( ( *state ).move ) )
+                    );
     }
+
+    // Quiet.
     else
     {
-        if ( move_decode_promotion ( ( *state ).move ) )
-        {
-            RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s TO %s. PROMOTED TO %s."
-                        , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                    : "BLACK (engine)"
-                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                    : "BLACK"
-                        , piecewchr ( move_decode_piece ( ( *state ).move ) )
-                        , string_square ( move_decode_src ( ( *state ).move ) )
-                        , string_square ( move_decode_dst ( ( *state ).move ) )
-                        , piecewchr ( move_decode_promotion ( ( *state ).move ) )
-                        );
-        }
-        else
-        {
-            RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s TO %s."
-                        , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                    : "BLACK (engine)"
-                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                    : "BLACK"
-                        , piecewchr ( move_decode_piece ( ( *state ).move ) )
-                        , string_square ( move_decode_src ( ( *state ).move ) )
-                        , string_square ( move_decode_dst ( ( *state ).move ) )
-                        );
-        }
+        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s TO %s."
+                    , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                                : "BLACK (engine)"
+                                                                           : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                : "BLACK"
+                    , piecewchr ( move_decode_piece ( ( *state ).move ) )
+                    , string_square ( move_decode_src ( ( *state ).move ) )
+                    , string_square ( move_decode_dst ( ( *state ).move ) )
+                    );
+    }
+
+    // Promotion.
+    if ( move_decode_promotion ( ( *state ).move ) )
+    {
+        RENDER_PUSH ( " PROMOTED TO %s."
+                    , piecewchr ( move_decode_promotion ( ( *state ).move ) )
+                    );
+    }
+    
+    // Check.
+    if ( board_check ( &( *state ).board
+                     , &( *state ).attacks
+                     , ( *state ).board.side
+                     ))
+    {
+        RENDER_PUSH ( CCE_COLOR_ALERT "\tCHECK." );
     }
 }
 
@@ -1314,79 +1298,50 @@ cce_log_move
 ( void )
 {
     state_t* state = ( *cce ).internal;
+
+    // Capture.
     if ( move_decode_capture ( ( *state ).move ) )
     {
-        if ( move_decode_promotion ( ( *state ).move ) )
-        {
-            LOG_PUSH ( "\n\n\t%s: %c ON %s CAPTURED %c ON %s. PROMOTED TO %c."
-                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                 : "BLACK (engine)"
-                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                 : "BLACK"
-                     , piecechr ( move_decode_piece ( ( *state ).move ) )
-                     , string_square ( move_decode_src ( ( *state ).move ) )
-                     , piecechr ( ( *state ).board.capture )
-                     , string_square ( move_decode_dst ( ( *state ).move ) )
-                     , piecechr ( move_decode_promotion ( ( *state ).move ) )
-                     );
-        }
-        else
-        {
-            LOG_PUSH ( "\n\n\n\t%s: %c ON %s CAPTURED %c ON %s."
-                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                 : "BLACK (engine)"
-                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                 : "BLACK"
-                     , piecechr ( move_decode_piece ( ( *state ).move ) )
-                     , string_square ( move_decode_src ( ( *state ).move ) )
-                     , piecechr ( ( *state ).board.capture )
-                     , string_square ( move_decode_dst ( ( *state ).move ) )
-                     );
-        }
+        LOG_PUSH ( "\n\n\t%s: %s ON %s CAPTURED %s ON %s."
+                 , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                             : "BLACK (engine)"
+                                                                        : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                             : "BLACK"
+                 , piecewchr ( move_decode_piece ( ( *state ).move ) )
+                 , string_square ( move_decode_src ( ( *state ).move ) )
+                 , piecewchr ( ( *state ).board.capture )
+                 , string_square ( move_decode_dst ( ( *state ).move ) )
+                 );
     }
+
+    // Quiet.
     else
     {
-        if ( move_decode_promotion ( ( *state ).move ) )
-        {
-            LOG_PUSH ( "\n\n\n\t%s: %c ON %s TO %s. PROMOTED TO %c."
-                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                 : "BLACK (engine)"
-                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                 : "BLACK"
-                     , piecechr ( move_decode_piece ( ( *state ).move ) )
-                     , string_square ( move_decode_src ( ( *state ).move ) )
-                     , string_square ( move_decode_dst ( ( *state ).move ) )
-                     , piecechr ( move_decode_promotion ( ( *state ).move ) )
-                     );
-        }
-        else
-        {
-            LOG_PUSH ( "\n\n\n\t%s: %c ON %s TO %s."
-                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
-                                                                                                                 : "BLACK (engine)"
-                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                 : "BLACK"
-                     , piecechr ( move_decode_piece ( ( *state ).move ) )
-                     , string_square ( move_decode_src ( ( *state ).move ) )
-                     , string_square ( move_decode_dst ( ( *state ).move ) )
-                     );
-        }
+        LOG_PUSH ( "\n\n\t%s: %s ON %s TO %s."
+                 , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                             : "BLACK (engine)"
+                                                                        : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                             : "BLACK"
+                 , piecewchr ( move_decode_piece ( ( *state ).move ) )
+                 , string_square ( move_decode_src ( ( *state ).move ) )
+                 , string_square ( move_decode_dst ( ( *state ).move ) )
+                 );
     }
-}
 
-void
-cce_log_check
-( void )
-{
-    state_t* state = ( *cce ).internal;
-    LOG_PUSH ( "\n\t%s CHECK: %s"
-             , ( ( *state ).state == CCE_GAME_STATE_EXECUTE_MOVE_PLAYER ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? "WHITE (player)"
-                                                                                                                                 : ( ( *state ).board.side == WHITE ) ? "WHITE"
-                                                                                                                                                                      : "BLACK"
-                                                                          : ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? "BLACK (engine)"
-                                                                                                                                 : ( ( *state ).board.side == WHITE ) ? "WHITE"
-                                                                                                                                                                      : "BLACK"
-             , string_move ( ( *state ).logbuffer + ( *state ).logbuffer_offs
-                           , ( *state ).move
-                           ));
+    // Promotion.
+    if ( move_decode_promotion ( ( *state ).move ) )
+    {
+        LOG_PUSH ( " PROMOTED TO %s."
+                 , piecewchr ( move_decode_promotion ( ( *state ).move ) )
+                 );
+    }
+    
+    // Check.
+    if ( board_check ( &( *state ).board
+                     , &( *state ).attacks
+                     , ( *state ).board.side
+                     ))
+    {
+        LOG_PUSH ( "\tCHECK." );
+    }
 }
