@@ -55,9 +55,9 @@ perft
         // Initialize a working board state.
         memory_copy ( &board , board_ , sizeof ( board_t ) );        
         
-        // Perform a move.
+        // Perform moves until check reached.
         if ( !move_parse ( moves.moves[ i ]
-                         , MOVE_FILTER_NONE
+                         , MOVE_FILTER_NO_CHECK
                          , attacks
                          , &board
                          ))
@@ -68,7 +68,7 @@ perft
         // Recurse.
         const u64 result = _perft ( &board
                                   , depth - 1
-                                  , MOVE_FILTER_NONE
+                                  , MOVE_FILTER_NO_CHECK
                                   , attacks
                                   );
         leaf_count += result;
@@ -90,43 +90,8 @@ perft
             , depth
             , clock.elapsed
             );
-
-//    // Perform additional filtered tests to generate move statistics.
-//    LOGINFO ( "\tCAPTURES:             %llu"
-//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-//                     , depth
-//                     , MOVE_FILTER_ONLY_CAPTURE
-//                     , attacks
-//                     )
-//            , clock.elapsed
-//            );
-//    LOGINFO ( "\tEN PASSANT CAPTURES:  %llu"
-//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-//                     , depth
-//                     , MOVE_FILTER_ONLY_ENPASSANT
-//                     , attacks
-//                     )
-//            , clock.elapsed
-//            );
-//    LOGINFO ( "\tCASTLES:              %llu"
-//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-//                     , depth
-//                     , MOVE_FILTER_ONLY_CASTLE
-//                     , attacks
-//                     )
-//            , clock.elapsed
-//            );
-//    LOGINFO ( "\tPROMOTIONS:           %llu"
-//            , _perft ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-//                     , depth
-//                     , MOVE_FILTER_ONLY_PROMOTION
-//                     , attacks
-//                     )
-//            , clock.elapsed
-//            );
 }
-#include <stdio.h>
-char s[32000];
+
 u64
 _perft
 (   board_t*            board

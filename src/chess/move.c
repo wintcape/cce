@@ -245,7 +245,7 @@ move_parse
                            ;
 
     // Toggle side.
-    board.side ^= 1;
+    board.side = ( board.side != WHITE ) ? WHITE : BLACK;
 
     // If new side's king is in check, discard the working board.
     if ( board_square_attackable ( &board

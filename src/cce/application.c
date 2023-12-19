@@ -387,7 +387,7 @@ cce_game_init
     ( *state ).state = CCE_GAME_STATE_PROMPT_GAME_TYPE;
     return true;
 }
-
+#include "chess/test/perft.h"
 bool
 cce_game_start
 ( void )
@@ -405,9 +405,9 @@ cce_game_start
     
     // Populate move list.
     moves_compute ( &( *state ).moves
-              , &( *state ).board
-              , &( *state ).attacks
-              );
+                  , &( *state ).board
+                  , &( *state ).attacks
+                  );
 
     ( *state ).render = CCE_RENDER_GAME_SELECTED;
     ( *state ).state = ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE

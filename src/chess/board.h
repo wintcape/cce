@@ -27,13 +27,38 @@ board_square_attackable
 ,   const SIDE          side
 )
 {
-    return ( bitboard_pawn_attack ( attacks , square , !side ) & ( ( side == WHITE ) ? ( *board ).pieces[ P ] : ( *board ).pieces[ p ] ) )
+    return ( bitboard_pawn_attack ( attacks , square , ( side != WHITE ) ? WHITE : BLACK ) & ( ( side == WHITE ) ? ( *board ).pieces[ P ] : ( *board ).pieces[ p ] ) )
         || ( bitboard_knight_attack ( attacks , square )  & ( ( side == WHITE ) ? ( *board ).pieces[ N ] : ( *board ).pieces[ n ] ) )
         || ( bitboard_bishop_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ B ] : ( *board ).pieces[ b ] ) )
         || ( bitboard_rook_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ R ] : ( *board ).pieces[ r ] ) )
         || ( bitboard_queen_attack ( attacks , square , ( *board ).occupancies[ 2 ] ) & ( ( side == WHITE ) ? ( *board ).pieces[ Q ] : ( *board ).pieces[ q ] ) )
         || ( bitboard_king_attack ( attacks , square ) & ( ( side == WHITE ) ? ( *board ).pieces[ K ] : ( *board ).pieces[ k ] ) )
         ;
+}
+
+/**
+ * @brief Computes if a given side is in check. Requires pregenerated attack
+ * tables.
+ * @param board The chess board state.
+ * @param attacks Pregenerated attack tables.
+ * @param side The side to test.
+ * @return true if side's king is in check, false otherwise.
+ */
+INLINE
+bool
+board_check
+(   const board_t*      board
+,   const attacks_t*    attacks
+,   const SIDE          side
+)
+{
+    return board_square_attackable ( board
+                                   , attacks
+                                   , bitboard_lsb ( ( side == WHITE ) ? ( *board ).pieces[ K ]
+                                                                      : ( *board ).pieces[ k ]
+                                                                      )
+                                   , ( side != WHITE ) ? WHITE : BLACK
+                                   );
 }
 
 #endif  // CHESS_BOARD_H
