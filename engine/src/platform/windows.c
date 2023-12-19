@@ -19,6 +19,8 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#include <conio.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -328,8 +330,32 @@ platform_console_write_error
 KEY
 platform_console_read_key
 ( void )
-{   // TODO: Implementation.
-    return KEY_COUNT;
+{
+    i32 getch;
+    
+    getch = _getch ();
+
+    // Error.
+    if ( getch < 0 )
+    {
+        return KEY_COUNT;
+    }
+
+    // Standalone ASCII keycode.
+    if ( getch != 0 && getch != 224 && getch < 0x100 )
+    {
+        return newline ( getch ) ? KEY_ENTER
+                                 : ( getch == '\033' ) ? KEY_ESCAPE
+                                                       : getch
+                                                       ;
+    }
+
+    // Extended keycode.
+    getch = _getch ();
+    switch ( getch )
+    {
+        default: return 0;  // Unknown keycode.
+    }
 }
 
 f64
@@ -501,7 +527,7 @@ platform_parse_key
 ,   const u16 vk_code_l
 )
 {
-    const bool extended = ( HIWORD ( l_param ) & KF_EXTENDED ) == KF_EXTENDED;
+    const bool extended = ( HIWORD ( vk_code_l ) & KF_EXTENDED ) == KF_EXTENDED;
     if ( vk_code_w == VK_MENU )
     {
         return ( extended ) ? KEY_RALT : KEY_LALT;
