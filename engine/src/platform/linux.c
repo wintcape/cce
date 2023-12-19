@@ -478,8 +478,8 @@ platform_console_read_key
     // Read the key from the input stream.
     char in[ 6 ]; // Reserve up to six bytes to handle special keys.
     platform_memory_clear ( in , sizeof ( in ) );
-    i32 result = read ( STDIN_FILENO , in , sizeof ( in ) );
-    
+    const i32 result = read ( STDIN_FILENO , in , sizeof ( in ) );
+
     // I/O error.
     if ( result < 0 )
     {
@@ -501,38 +501,143 @@ platform_console_read_key
     }
 
     // ANSI escape sequence.
-    if ( *in == '\033' || *in == '~' )
+    if ( *in == '\033' )
     {
+        char* extended = &in[ 1 ];
+
         // Standalone keycode.
-        if ( !in[ 1 ] )
+        if ( !( *extended ) )
         {
-            switch ( *in )
-            {
-                case '\033': key = KEY_ESCAPE ;break;
-                case '~'   : key = '~'        ;break;
-                default    : key = 0          ;break;
-            }
+            key = KEY_ESCAPE;
             goto platform_console_read_key_end;
         }
 
         // Composite keycode.
         else
         {
-            if ( in[ 1 ] == '[' )
+            const char CODE_KEY_UP[] = { 91 , 65 };
+            if ( !memcmp ( extended , CODE_KEY_UP , sizeof ( CODE_KEY_UP ) ) )
             {
-                switch ( in[ 2 ] )
-                {
-                    case 'A': key = KEY_UP    ;break;
-                    case 'B': key = KEY_DOWN  ;break;
-                    case 'C': key = KEY_RIGHT ;break;
-                    case 'D': key = KEY_LEFT  ;break;
-                    default : key = 0         ;break;
-                }
+                key = KEY_UP;
+                goto platform_console_read_key_end;
             }
-            else
+            const char CODE_KEY_DOWN[] = { 91 , 66 };
+            if ( !memcmp ( extended , CODE_KEY_DOWN , sizeof ( CODE_KEY_DOWN ) ) )
             {
-                key = 0;
+                key = KEY_DOWN;
+                goto platform_console_read_key_end;
             }
+            const char CODE_KEY_RIGHT[] = { 91 , 67 };
+            if ( !memcmp ( extended , CODE_KEY_RIGHT , sizeof ( CODE_KEY_RIGHT ) ) )
+            {
+                key = KEY_RIGHT;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_LEFT[] = { 91 , 68 };
+            if ( !memcmp ( extended , CODE_KEY_LEFT , sizeof ( CODE_KEY_LEFT ) ) )
+            {
+                key = KEY_LEFT;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F1[] = { 79 , 80 };
+            if ( !memcmp ( extended , CODE_KEY_F1 , sizeof ( CODE_KEY_F1 ) ) )
+            {
+                key = KEY_F1;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F2[] = { 79 , 81 };
+            if ( !memcmp ( extended , CODE_KEY_F2 , sizeof ( CODE_KEY_F2 ) ) )
+            {
+                key = KEY_F2;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F3[] = { 79 , 82 };
+            if ( !memcmp ( extended , CODE_KEY_F3 , sizeof ( CODE_KEY_F3 ) ) )
+            {
+                key = KEY_F3;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F4[] = { 79 , 83 };
+            if ( !memcmp ( extended , CODE_KEY_F4 , sizeof ( CODE_KEY_F4 ) ) )
+            {
+                key = KEY_F4;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F5[] = { 91 , 49 , 53 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F5 , sizeof ( CODE_KEY_F5 ) ) )
+            {
+                key = KEY_F5;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F6[] = { 91 , 49 , 55 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F6 , sizeof ( CODE_KEY_F6 ) ) )
+            {
+                key = KEY_F6;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F7[] = { 91 , 49 , 56 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F7 , sizeof ( CODE_KEY_F7 ) ) )
+            {
+                key = KEY_F7;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F8[] = { 91 , 49 , 57 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F8 , sizeof ( CODE_KEY_F8 ) ) )
+            {
+                key = KEY_F8;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F9[] = { 91 , 50 , 48 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F9 , sizeof ( CODE_KEY_F9 ) ) )
+            {
+                key = KEY_F9;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F10[] = { 91 , 50 , 49 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F10 , sizeof ( CODE_KEY_F10 ) ) )
+            {
+                key = KEY_F10;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F11[] = { 91 , 50 , 51 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F11 , sizeof ( CODE_KEY_F11 ) ) )
+            {
+                key = KEY_F11;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_F12[] = { 91 , 50 , 52 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_F12 , sizeof ( CODE_KEY_F12 ) ) )
+            {
+                key = KEY_F12;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_INSERT[] = { 91 , 50 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_INSERT , sizeof ( CODE_KEY_INSERT ) ) )
+            {
+                key = KEY_INSERT;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_DELETE[] = { 91 , 51 , 126 };
+            if ( !memcmp ( extended , CODE_KEY_DELETE , sizeof ( CODE_KEY_DELETE ) ) )
+            {
+                key = KEY_DELETE;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_HOME[] = { 91 , 72 };
+            if ( !memcmp ( extended , CODE_KEY_HOME , sizeof ( CODE_KEY_HOME ) ) )
+            {
+                key = KEY_HOME;
+                goto platform_console_read_key_end;
+            }
+            const char CODE_KEY_END[] = { 91 , 70 };
+            if ( !memcmp ( extended , CODE_KEY_END , sizeof ( CODE_KEY_END ) ) )
+            {
+                key = KEY_END;
+                goto platform_console_read_key_end;
+            }
+
+            // Unknown key code.
+            key = 0;
             goto platform_console_read_key_end;
         }
     }
