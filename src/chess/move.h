@@ -59,15 +59,18 @@ moves_compute
 );
 
 /**
- * @brief Applies a filter to a list of moves.
+ * @brief Applies a filter to a list of moves. Writes the filtered list
+ * to an output buffer.
  * @param moves The list of moves.
  * @param filter The filter to apply.
- * @return moves.
+ * @param filtered Output buffer.
+ * @return filtered.
  */
 moves_t*
 moves_filter
-(   moves_t*    moves
-,   MOVE_FILTER filter
+(   const moves_t*  moves
+,   MOVE_FILTER     filter
+,   moves_t*        filtered
 );
 
 #endif  // CHESS_MOVE_H
