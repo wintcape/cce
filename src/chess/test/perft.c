@@ -6,7 +6,7 @@
  */
 #include "chess/test/perft.h"
 
-#include "chess/move.h"
+#include "chess/board.h"
 #include "chess/string.h"
 
 #include "core/clock.h"
@@ -17,7 +17,6 @@
  * @brief Primary implementation of perft (see perft).
  * @param board A chess board state.
  * @param depth The current recursion depth.
- * @param filter A move filter.
  * @param attacks The pregenerated attack tables.
  * @return The current leaf node count.
  */
@@ -25,7 +24,6 @@ u64
 _perft
 (   board_t*            board
 ,   u32                 depth
-,   const MOVE_FILTER   filter
 ,   const attacks_t*    attacks
 );
 
@@ -55,12 +53,14 @@ perft
         // Initialize a working board state.
         memory_copy ( &board , board_ , sizeof ( board_t ) );        
         
-        // Perform moves until check reached.
-        if ( !move_perform ( moves.moves[ i ]
-                         , MOVE_FILTER_NO_CHECK
-                         , attacks
-                         , &board
-                         ))
+        // Perform a move.
+        board_move ( &board
+                   , moves.moves[ i ]
+                   , attacks
+                   );
+        
+        // Check? Y/N
+        if ( board_check ( &board , attacks , board.side ) )
         {
             continue;
         }
@@ -68,7 +68,6 @@ perft
         // Recurse.
         const u64 result = _perft ( &board
                                   , depth - 1
-                                  , MOVE_FILTER_NO_CHECK
                                   , attacks
                                   );
         leaf_count += result;
@@ -96,7 +95,6 @@ u64
 _perft
 (   board_t*            board
 ,   u32                 depth
-,   const MOVE_FILTER   filter
 ,   const attacks_t*    attacks
 )
 {
@@ -117,18 +115,20 @@ _perft
         board_t board_prev;
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
 
-        // Perform the move.
-        if ( !move_perform ( moves.moves[ i ]
-                         , filter
-                         , attacks
-                         , board
-                         ))
+        // Perform a move.
+        board_move ( board
+                   , moves.moves[ i ]
+                   , attacks
+                   );
+                                
+        // Check? Y/N
+        if ( board_check ( board , attacks , ( *board ).side ) )
         {
             continue;
         }
         
         // Move succeeded. Recurse.
-        leaf_count += _perft ( board , depth - 1 , filter , attacks );
+        leaf_count += _perft ( board , depth - 1 , attacks );
         
         // Restore board state.
         memory_copy ( board , &board_prev , sizeof ( board_t ) );

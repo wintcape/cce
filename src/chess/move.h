@@ -23,27 +23,8 @@ typedef enum
 ,   MOVE_FILTER_ONLY_DOUBLE_PUSH
 ,   MOVE_FILTER_ONLY_ENPASSANT
 ,   MOVE_FILTER_ONLY_CASTLE
-,   MOVE_FILTER_ONLY_CHECK
-,   MOVE_FILTER_NO_CHECK
 }
 MOVE_FILTER;
-
-/**
- * @brief Updates the provided board state by performing a move. Requires
- * pregenerated attack tables.
- * @param move The move to make.
- * @param filter A move filter.
- * @param attacks The pregenerated attack tables.
- * @param board The board state to mutate.
- * @return false if move not made, true otherwise.
- */
-bool
-move_perform
-(   const move_t        move
-,   const MOVE_FILTER   filter
-,   const attacks_t*    attacks
-,   board_t*            board
-);
 
 /**
  * @brief Parses a move string and writes it to an output buffer if it is valid.
@@ -75,6 +56,18 @@ moves_compute
 (   moves_t*            moves
 ,   const board_t*      board
 ,   const attacks_t*    attacks
+);
+
+/**
+ * @brief Applies a filter to a list of moves.
+ * @param moves The list of moves.
+ * @param filter The filter to apply.
+ * @return moves.
+ */
+moves_t*
+moves_filter
+(   moves_t*    moves
+,   MOVE_FILTER filter
 );
 
 #endif  // CHESS_MOVE_H

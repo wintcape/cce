@@ -577,20 +577,11 @@ cce_execute_move_player
 {
     state_t* state = ( *cce ).internal;
     
-    // Parse the move.
-    if ( !move_perform ( ( *state ).move
-                     , MOVE_FILTER_NONE
-                     , &( *state ).attacks
-                     , &( *state ).board
-                     ))
-    {
-        LOGERROR ( "cce_execute_move_player: Failed to parse move '%s'."
-                 , string_trim ( string_move ( ( *state ).textbuffer
-                                             , ( *state ).move
-                                             )));
-        return false;
-    }
-
+    // Perform the move.
+    board_move ( &( *state ).board
+               , ( *state ).move
+               , &( *state ).attacks
+               );
     ( *state ).ply += 1;
 
     // Populate move list.
@@ -627,8 +618,11 @@ cce_execute_move_engine
     // Start clock.
     clock_start ( &( *state ).clock );
     
-    // Calculate best move. ( TODO: Make this not just a random move. . . )
-    ( *state ).move = ( *state ).moves.moves[ random2 ( 0 , ( *state ).moves.count - 1 ) ];
+    // Calculate best move.
+    ( *state ).move = board_best_move ( &( *state ).board
+                                      , &( *state ).attacks
+                                      , &( *state ).moves
+                                      );
 
     // Stop clock.
     clock_update ( &( *state ).clock );
@@ -647,20 +641,11 @@ cce_execute_move_engine
     }
     RENDER ();
 
-    // Parse the move.
-    if ( !move_perform ( ( *state ).move
-                     , MOVE_FILTER_NONE
-                     , &( *state ).attacks
-                     , &( *state ).board
-                     ))
-    {
-        LOGERROR ( "cce_execute_move_player: Failed to parse move '%s'."
-                 , string_trim ( string_move ( ( *state ).textbuffer
-                                             , ( *state ).move
-                                             )));
-        return false;
-    }
-
+    // Perform the move.
+    board_move ( &( *state ).board
+               , ( *state ).move
+               , &( *state ).attacks
+               );
     ( *state ).ply += 1;
 
     // Populate move list.
@@ -717,8 +702,13 @@ cce_handle_user_input
         // Quit signal? Y/N
         if ( key == CCE_KEY_SIGNAL_COMMAND_QUIT )
         {
-            ( *state ).cmd = CCE_COMMAND_QUIT;
+            // Render simulated input.
+            RENDER_CLEAR ();
+            RENDER_PUSH ( "%s" , cce_command_strings[ CCE_COMMAND_QUIT ] );
+            RENDER ();
 
+            // Issue the 'quit' command.
+            ( *state ).cmd = CCE_COMMAND_QUIT;
             ( *state ).render = CCE_RENDER_NONE;
             ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
             return true;

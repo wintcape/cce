@@ -8,6 +8,7 @@
 
 #include "chess/common.h"
 #include "chess/bitboard.h"
+#include "chess/move.h"
 
 /**
  * @brief Computes if a square on a chess board may be attacked by a given
@@ -61,5 +62,35 @@ board_check
                                    , !side
                                    );
 }
+
+/**
+ * @brief Updates the provided board state by performing a move. Requires
+ * pregenerated attack tables.
+ * @param board The board state to mutate.
+ * @param move The move to make.
+ * @param filter A move filter.
+ * @param attacks The pregenerated attack tables.
+ */
+void
+board_move
+(   board_t*            board
+,   const move_t        move
+,   const attacks_t*    attacks
+);
+
+/**
+ * @brief Given a board state, computes the best possible move. Requires
+ * pregenerated attack tables.
+ * @param board A chess board state.
+ * @param attacks The pregenerated attacks tables.
+ * @param moves **Temporary**
+ * @return The optimal move. **(TBD what that means)**
+ */
+move_t
+board_best_move
+(   const board_t*      board
+,   const attacks_t*    attacks
+,   moves_t*            moves
+);
 
 #endif  // CHESS_BOARD_H
