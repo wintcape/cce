@@ -650,19 +650,28 @@ moves_compute
 
 moves_t*
 moves_filter
-(   moves_t*    moves_
-,   MOVE_FILTER filter_
+(   const moves_t*  moves
+,   MOVE_FILTER     filter_
+,   moves_t*        filtered
 )
-{
-    moves_t moves;
-    for ( u8 i = 0; i < ( *moves_ ).count; ++i )
+{    
+    // No filter: copy entire list.
+    if ( filter_ == MOVE_FILTER_NONE )
     {
-        const move_t move = ( *moves_ ).moves[ i ];
+        return memory_copy ( filtered , moves , sizeof ( moves_t ) );
+    }
+
+    // Initialize new empty list.
+    memory_clear ( filtered , sizeof ( moves_t ) );
+
+    // Filter.
+    for ( u8 i = 0; i < ( *moves ).count; ++i )
+    {
+        const move_t move = ( *moves ).moves[ i ];
         const PIECE piece = move_decode_piece ( move );
         bool filter;
         switch ( filter_ )
         {
-            case MOVE_FILTER_NONE            : return moves_                             ;
             case MOVE_FILTER_ONLY_PAWN       : filter = ( piece == P || piece == p )     ;break;
             case MOVE_FILTER_ONLY_KNIGHT     : filter = ( piece == N || piece == n )     ;break;
             case MOVE_FILTER_ONLY_BISHOP     : filter = ( piece == B || piece == b )     ;break;
@@ -674,12 +683,12 @@ moves_filter
             case MOVE_FILTER_ONLY_DOUBLE_PUSH: filter = move_decode_double_push ( move ) ;break;
             case MOVE_FILTER_ONLY_ENPASSANT  : filter = move_decode_enpassant ( move )   ;break;
             case MOVE_FILTER_ONLY_CASTLE     : filter = move_decode_castle ( move )      ;break;
-            default                          : return moves_                             ;
+            default                          : filter = false                            ;break;
         }
         if ( filter )
         {
-            moves_push ( &moves , move );
+            moves_push ( filtered , move );
         }
     }
-    return memory_copy ( moves_ , &moves , sizeof ( moves_t ) );
+    return filtered;
 }
