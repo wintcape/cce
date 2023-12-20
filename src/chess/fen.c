@@ -191,7 +191,6 @@ fen_parse
         board.enpassant = SQUAREINDX ( 8 - to_digit ( fen[ 1 ] )
                                      , fen[ 0 ] - 'A'
                                      );
-        LOGINFO ( string_square (board.enpassant));
         fen += 3;
     }
 
@@ -219,6 +218,7 @@ fen_parse
 
     // Preserve board history.
     board.history = ( *board_ ).history;
+    board.ply = ( *board_ ).ply;
 
     // Write the board to the output buffer.
     memory_copy ( board_ , &board , sizeof ( board_t ) );

@@ -68,7 +68,6 @@ board_check
  * pregenerated attack tables.
  * @param board The board state to mutate.
  * @param move The move to make.
- * @param filter A move filter.
  * @param attacks The pregenerated attack tables.
  */
 void
@@ -90,7 +89,7 @@ move_t
 board_best_move
 (   const board_t*      board
 ,   const attacks_t*    attacks
-,   moves_t*            moves
+,   const u32           depth
 );
 
 #endif  // CHESS_BOARD_H

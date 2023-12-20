@@ -25,6 +25,7 @@ typedef struct
     PIECE       capture;
 
     u32         history;
+    u32         ply;
 }
 board_t;
 

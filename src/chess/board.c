@@ -7,6 +7,7 @@
 #include "chess/board.h"
 
 #include "chess/castle.h"
+#include "chess/negamax.h"
 
 void
 board_move
@@ -145,6 +146,7 @@ board_move
     board.side = !board.side;
     
     // Update history.
+    board.ply += 1;
     board.history += 1;
 
     // Overwrite the output buffer with the updated board.
@@ -153,13 +155,10 @@ board_move
 
 move_t
 board_best_move
-(   const board_t*      board_
+(   const board_t*      board
 ,   const attacks_t*    attacks
-,   moves_t*            moves
+,   const u32           depth
 )
 {
-    move_t move;
-    // Compute best move. TODO: Make this not just a random move.
-    move = ( *moves ).moves[ random2 ( 0 , ( *moves ).count - 1 ) ];
-    return move;
+    return negamax ( board , -50000 , -50000 , depth , attacks );
 }

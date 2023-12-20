@@ -47,8 +47,8 @@ move_parse
  * @brief Generates the move options for a given board state using pregenerated
  * attack tables.
  * @param moves Output buffer.
- * @param attacks The pregenerated attack tables.
  * @param board A chess board state.
+ * @param attacks The pregenerated attack tables.
  * @return moves.
  */
 moves_t*

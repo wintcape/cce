@@ -42,6 +42,7 @@ typedef enum
 ,   CCE_GAME_STATE_EXECUTE_COMMAND
 ,   CCE_GAME_STATE_EXECUTE_MOVE_PLAYER
 ,   CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+,   CCE_GAME_STATE_DEBUG
 
 ,   CCE_GAME_STATE_COUNT
 }
@@ -71,13 +72,19 @@ typedef enum
 ,   CCE_COMMAND_HELP
 ,   CCE_COMMAND_LIST_MOVES
 ,   CCE_COMMAND_CHOOSE_RANDOM_MOVE
+,   CCE_COMMAND_DEBUG
 
 ,   CCE_COMMAND_COUNT
 }
 CCE_COMMAND;
 
 // Defines command strings.
-static const char* cce_command_strings[] = { "Q" , "H" , "L" , "R" };
+static const char* cce_command_strings[] = { [ CCE_COMMAND_QUIT ]               = "Q"
+                                           , [ CCE_COMMAND_HELP ]               = "H"
+                                           , [ CCE_COMMAND_LIST_MOVES ]         = "L"
+                                           , [ CCE_COMMAND_CHOOSE_RANDOM_MOVE ] = "R"
+                                           , [ CCE_COMMAND_DEBUG ]              = "D"
+                                           };
 
 // Defines keycodes to automatically issue commands.
 #define CCE_KEY_SIGNAL_COMMAND_QUIT KEY_ESCAPE
@@ -101,7 +108,6 @@ typedef struct
     board_t         board;
     moves_t         moves;
     move_t          move;
-    u32             ply;
 
     // Benchmarking.
     clock_t         clock;
@@ -136,6 +142,7 @@ bool cce_prompt_command             ( void );
 bool cce_execute_command            ( void );
 bool cce_execute_move_player        ( void );
 bool cce_execute_move_engine        ( void );
+bool cce_debug                      ( void );
 
 /**
  * @brief Primary implementation of cce_render (see cce_render).
@@ -335,6 +342,7 @@ cce_update
         case CCE_GAME_STATE_EXECUTE_COMMAND    : return cce_execute_command ()     ;
         case CCE_GAME_STATE_EXECUTE_MOVE_PLAYER: return cce_execute_move_player () ;
         case CCE_GAME_STATE_EXECUTE_MOVE_ENGINE: return cce_execute_move_engine () ;
+        case CCE_GAME_STATE_DEBUG              : return cce_debug ()               ;
         default                                : return true                       ;
     }
 }
@@ -391,12 +399,11 @@ cce_game_start
     state_t* state = ( *cce ).internal;
 
     ( *state ).ioerr = 0;
-    ( *state ).ply = 0;
-
     ( *state ).elapsed = 0;
 
     // Initialize chess board.
     ( *state ).board.history = 0;
+    ( *state ).board.ply = 0;
     fen_parse ( FEN_START , &( *state ).board );
     
     // Populate move list.
@@ -424,7 +431,7 @@ cce_game_end
     cce_render_end ();
     RENDER ();
 
-    if ( ( *state ).ply )
+    if ( ( *state ).board.ply )
     {
         LOGINFO ( "A copy of the game was written to the log file: "CCE_LOG_FILEPATH"." );
     }
@@ -458,6 +465,18 @@ cce_prompt_game_type
     if ( string_length ( ( *state ).in ) != 1 )
     {
         ( *state ).ioerr += 1;
+        return true;
+    }
+
+    // Debug command issued? Y/N
+    else if ( string_equal ( ( *state ).in
+                           , cce_command_strings[ CCE_COMMAND_DEBUG ]
+                           ))
+    {
+        // Issue the 'debug' command.
+        ( *state ).cmd = CCE_COMMAND_DEBUG;
+        ( *state ).render = CCE_RENDER_NONE;
+        ( *state ).state = CCE_GAME_STATE_EXECUTE_COMMAND;
         return true;
     }
 
@@ -552,6 +571,13 @@ cce_execute_command
                 ( *state ).state = CCE_GAME_STATE_EXECUTE_MOVE_PLAYER;
                 return true;
             }
+
+            case CCE_COMMAND_DEBUG:
+            {
+                ( *state ).render = CCE_RENDER_NONE;
+                ( *state ).state = CCE_GAME_STATE_DEBUG;
+                return true;
+            }
             
             case CCE_COMMAND_QUIT:
             {
@@ -582,7 +608,7 @@ cce_execute_move_player
                , ( *state ).move
                , &( *state ).attacks
                );
-    ( *state ).ply += 1;
+    ( *state ).board.ply += 1;
 
     // Populate move list.
     moves_compute ( &( *state ).moves
@@ -621,7 +647,7 @@ cce_execute_move_engine
     // Calculate best move.
     ( *state ).move = board_best_move ( &( *state ).board
                                       , &( *state ).attacks
-                                      , &( *state ).moves
+                                      , 1
                                       );
 
     // Stop clock.
@@ -646,7 +672,7 @@ cce_execute_move_engine
                , ( *state ).move
                , &( *state ).attacks
                );
-    ( *state ).ply += 1;
+    ( *state ).board.ply += 1;
 
     // Populate move list.
     moves_compute ( &( *state ).moves
@@ -870,7 +896,7 @@ cce_render_prompt_command
         }
 
         // Render the previous move.
-        if ( ( *state ).ply )
+        if ( ( *state ).board.ply )
         {
             cce_render_move ();
         }
@@ -929,7 +955,7 @@ cce_render_execute_command
     }
 
     // Render the previous move.
-    if ( ( *state ).ply )
+    if ( ( *state ).board.ply )
     {
         cce_render_move ();
     }
@@ -1282,4 +1308,38 @@ cce_log_move
     {
         LOG_PUSH ( "\tCHECK." );
     }
+}
+
+bool
+cce_debug
+( void )
+{
+    state_t* state = ( *cce ).internal;
+
+    // Render newline.
+    RENDER_CLEAR ();
+    RENDER_PUSH ( "\n" );
+    RENDER ();
+
+    LOGDEBUG ( "cce_debug: Running debug routine. . ." );
+
+    board_t board;
+    fen_parse ( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+              , &board
+              );
+
+    u32 depth = 4;
+    move_t move = board_best_move ( &board
+                                  , &( *state ).attacks
+                                  , depth
+                                  );
+    LOGINFO ( "negamax depth %u search finished. Best move:\t%s"
+            , depth , string_move ( ( *state ).textbuffer , move )
+            );
+
+    LOGDEBUG ( "cce_debug: Done. Exiting." );
+
+    ( *state ).render = CCE_RENDER_NONE;
+    ( *state ).state = CCE_GAME_STATE_GAME_END;
+    return true;
 }
