@@ -22,6 +22,20 @@ typedef struct
 negamax_t;
 
 /**
+ * @brief Quiescence search.
+ * @param alpha Alpha negamax cutoff.
+ * @param beta Beta negamax cutoff.
+ * @param args Static function arguments.
+ * @return Current negamax score.
+ */
+i32
+negamax_quiescence
+(   i32         alpha
+,   i32         beta
+,   negamax_t*  args
+);
+
+/**
  * @brief Negamax board evaluation function.
  * @param board A chess board state.
  * @return A negamax score corresponding to the board state.
@@ -77,7 +91,7 @@ _negamax
     // Base case.
     if ( !depth )
     {
-        return negamax_score ( &( *args ).board );
+        return negamax_quiescence ( alpha , beta , args );
     }
 
     ( *args ).leaf_count += 1;
@@ -142,23 +156,105 @@ _negamax
                 best = moves.moves[ i ];
             }
         }
-
-        // No legal moves.
-        if ( !( ( *args ).move_count ) )
-        {
-            if ( check )
-            {
-                return -49000 + ( *args ).root;
-            }
-            return 0; // Stalemate.
-        }
     }// END for.
+
+    // No legal moves.
+    if ( !( ( *args ).move_count ) )
+    {
+        if ( check ) // Checkmate.
+        {       
+            return -49000 + ( *args ).root;
+        }
+        return 0;    // Stalemate.
+    }
 
     // Write new best move to output buffer.
     if ( alpha != alpha_ )
     {
         ( *args ).move = best;
     }
+
+    return alpha;
+}
+
+i32
+negamax_quiescence
+(   i32         alpha
+,   i32         beta
+,   negamax_t*  args
+)
+{
+    i32 score;
+    
+    score = negamax_score ( &( *args ).board );
+
+    // Beta cutoff - no move found.
+    if ( score >= beta )
+    {
+        return beta;
+    }
+
+    // Alpha cutoff - new best move.
+    if ( score > alpha )
+    {
+        alpha = score;
+    }
+
+    // Generate capture options.
+    moves_t moves;
+    moves_filter ( moves_compute ( &moves
+                                 , &( *args ).board
+                                 , ( *args ).attacks
+                                 )
+                 , MOVE_FILTER_ONLY_CAPTURE
+                 , &moves
+                 );
+    
+    for ( u8 i = 0; i < moves.count; ++i )
+    {
+        // Preserve board state.
+        board_t board_prev;
+        memory_copy ( &board_prev , &( *args ).board , sizeof ( board_t ) );
+        ( *args ).root += 1;
+        
+        // Perform next capture.
+        board_move ( &( *args ).board
+                   , moves.moves[ i ]
+                   , ( *args ).attacks
+                   );
+
+        // Filter the move if it put the moving side into check.
+        if ( board_check ( &( *args ).board
+                         , ( *args ).attacks
+                         , !( *args ).board.side
+                         ))
+        {
+            // Restore board state.
+            memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
+            ( *args ).root -= 1;
+            continue;
+        }
+        ( *args ).move_count += 1;
+
+        // Score the capture.
+        score = -negamax_quiescence ( -beta , -alpha , args );
+
+        // Restore board state.
+        memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
+        ( *args ).root -= 1;
+
+        // Beta cutoff - no move found.
+        if ( score >= beta )
+        {
+            return beta;
+        }
+
+        // Alpha cutoff - new best move.
+        if ( score > alpha )
+        {
+            alpha = score;
+        }
+    }// END for.
 
     return alpha;
 }

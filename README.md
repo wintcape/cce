@@ -40,5 +40,5 @@ To compile and launch the application separately:
        or
 
 > make windows
-> bin/cce.exe
+> bin\cce.exe
 ```

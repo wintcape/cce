@@ -654,7 +654,7 @@ moves_filter
 ,   MOVE_FILTER     filter_
 ,   moves_t*        filtered
 )
-{    
+{
     // No filter: copy entire list.
     if ( filter_ == MOVE_FILTER_NONE )
     {
@@ -662,7 +662,7 @@ moves_filter
     }
 
     // Initialize new empty list.
-    memory_clear ( filtered , sizeof ( moves_t ) );
+    ( *filtered ).count = 0;
 
     // Filter.
     for ( u8 i = 0; i < ( *moves ).count; ++i )
