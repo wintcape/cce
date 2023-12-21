@@ -618,11 +618,15 @@ cce_execute_move_player
                   , &( *state ).attacks
                   );
     
-    // Test if move resulted in check.
+    // Test if move resulted in check for either side.
     const bool check = board_check ( &( *state ).board
                                    , &( *state ).attacks
                                    , ( *state ).board.side
-                                   );
+                                   )    // (Congratulations!)
+                    || board_check ( &( *state ).board
+                                   , &( *state ).attacks
+                                   , !( *state ).board.side
+                                   );   // (You doofus!)
 
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_PLAYER;
     ( *state ).state = ( !check ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
@@ -681,7 +685,8 @@ cce_execute_move_engine
                   , &( *state ).attacks
                   );
                   
-    // Test if move resulted in check.
+    // Test if move resulted in check for the opposite side.
+    // (Engine will not make moves that put itself into check.)
     const bool check = board_check ( &( *state ).board
                                    , &( *state ).attacks
                                    , ( *state ).board.side

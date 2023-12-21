@@ -9,6 +9,18 @@
 #include "chess/board.h"
 #include "chess/score.h"
 
+// Type definition for a container to hold negamax function parameters.
+typedef struct
+{
+    board_t             board;
+    move_t              move;
+    u32                 root;
+    u32                 leaf_count;
+    u32                 move_count;
+    const attacks_t*    attacks;
+}
+negamax_t;
+
 /**
  * @brief Negamax board evaluation function.
  * @param board A chess board state.
@@ -21,115 +33,99 @@ negamax_score
 
 /**
  * @brief Primary implementation of negamax (see negamax).
- * @param board Current chess board state.
- * @param alpha Current alpha negamax cutoff.
- * @param beta Current beta negamax cutoff.
+ * @param alpha Alpha negamax cutoff.
+ * @param beta Beta negamax cutoff.
  * @param depth Current recursion depth.
- * @param attacks The pregenerated attack tables.
- * @param move Output buffer to hold best move.
- * @param leaf_count Output buffer to hold leaf node count.
+ * @param args Static function arguments.
  * @return Current negamax score.
  */
 i32
 _negamax
-(   board_t*            board
-,   i32                 alpha
-,   i32                 beta
-,   const u32           depth
-,   const attacks_t*    attacks
-,   move_t*             best
-,   u32*                leaf_count
-,   u32*                root
+(   i32         alpha
+,   i32         beta
+,   u32         depth
+,   negamax_t*  args
 );
 
 move_t
 negamax
-(   const board_t*      board_
+(   const board_t*      board
 ,   const i32           alpha
 ,   const i32           beta
 ,   const u32           depth
 ,   const attacks_t*    attacks
 )
 {
-    board_t board;
-    move_t move;
-    u32 leaf_count = 0;
-    u32 root = 0;
-    _negamax ( memory_copy ( &board , board_ , sizeof ( board_t ) )
-             , alpha
-             , beta
-             , depth
-             , attacks
-             , &move
-             , &leaf_count
-             , &root
-             );
-    return move;
+    negamax_t args;
+    memory_copy ( &args.board , board , sizeof ( board_t ) );
+    args.root = 0;
+    args.leaf_count = 0;
+    args.move_count = 0;
+    args.attacks = attacks;
+    _negamax ( alpha , beta , depth , &args );
+    return args.move;
 }
 
 i32
 _negamax
-(   board_t*            board
-,   i32                 alpha
-,   i32                 beta
-,   const u32           depth
-,   const attacks_t*    attacks
-,   move_t*             best
-,   u32*                leaf_count
-,   u32*                root
+(   i32         alpha
+,   i32         beta
+,   u32         depth
+,   negamax_t*  args
 )
 {
     // Base case.
     if ( !depth )
     {
-        return negamax_score ( board );
+        return negamax_score ( &( *args ).board );
     }
 
-    *leaf_count += 1;
+    ( *args ).leaf_count += 1;
+
+    // Check? Y/N
+    const bool check = board_check ( &( *args ).board
+                                   , ( *args ).attacks
+                                   , ( *args ).board.side
+                                   );
 
     // Generate move options.
     moves_t moves;
-    moves_compute ( &moves , board , attacks );
+    moves_compute ( &moves , &( *args ).board , ( *args ).attacks );
     
-    move_t best_ = moves.moves[ 0 ];
+    move_t best = moves.moves[ 0 ]; // Default.
     i32 alpha_ = alpha;
     for ( u8 i = 0; i < moves.count; ++i )
     {
         // Preserve board state.
         board_t board_prev;
-        memory_copy ( &board_prev , board , sizeof ( board_t ) );
+        memory_copy ( &board_prev , &( *args ).board , sizeof ( board_t ) );
+        ( *args ).root += 1;
         
-        *root += 1;
-        
-        // Score next move, if it is valid.
-        board_move ( board
+        // Perform next move.
+        board_move ( &( *args ).board
                    , moves.moves[ i ]
-                   , attacks
+                   , ( *args ).attacks
                    );
-        if ( board_check ( board , attacks , ( *board ).side ) )
+
+        // Filter the move if it put the moving side into check.
+        if ( board_check ( &( *args ).board
+                         , ( *args ).attacks
+                         , !( *args ).board.side
+                         ))
         {
             // Restore board state.
-            memory_copy ( board , &board_prev , sizeof ( board_t ) );
-
-            *root -= 1;
-
+            memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
+            ( *args ).root -= 1;
             continue;
         }
+        ( *args ).move_count += 1;
 
-        const i32 score = -_negamax ( board
-                                    , -beta
-                                    , -alpha
-                                    , depth - 1
-                                    , attacks
-                                    , best
-                                    , leaf_count
-                                    , root
-                                    );
+        // Score the move.
+        const i32 score = -_negamax ( -beta , -alpha , depth - 1 , args );
 
-        // Restore the board state.
-        memory_copy ( board , &board_prev , sizeof ( board_t ) );
-
-        *root -= 1;
+        // Restore board state.
+        memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
+        ( *args ).root -= 1;
 
         // Beta cutoff - no move found.
         if ( score >= beta )
@@ -141,17 +137,27 @@ _negamax
         if ( score > alpha )
         {
             alpha = score;
-            if ( !( *root ) )
+            if ( !( ( *args ).root ) )
             {
-                best_ = moves.moves[ i ];
+                best = moves.moves[ i ];
             }
         }
-    }
+
+        // No legal moves.
+        if ( !( ( *args ).move_count ) )
+        {
+            if ( check )
+            {
+                return -49000 + ( *args ).root;
+            }
+            return 0; // Stalemate.
+        }
+    }// END for.
 
     // Write new best move to output buffer.
     if ( alpha != alpha_ )
     {
-        *best = best_;
+        ( *args ).move = best;
     }
 
     return alpha;

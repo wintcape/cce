@@ -82,8 +82,8 @@ board_move
  * pregenerated attack tables.
  * @param board A chess board state.
  * @param attacks The pregenerated attacks tables.
- * @param moves **Temporary**
- * @return The optimal move. **(TBD what that means)**
+ * @param depth Number of moves ahead to peek.
+ * @return The optimal move.
  */
 move_t
 board_best_move

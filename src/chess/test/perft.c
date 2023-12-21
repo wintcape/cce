@@ -59,8 +59,8 @@ perft
                    , attacks
                    );
         
-        // Check? Y/N
-        if ( board_check ( &board , attacks , board.side ) )
+        // Filter the move if it put the moving side into check.
+        if ( board_check ( &board , attacks , !board.side ) )
         {
             continue;
         }
@@ -121,8 +121,8 @@ _perft
                    , attacks
                    );
                                 
-        // Check? Y/N
-        if ( board_check ( board , attacks , ( *board ).side ) )
+        // Filter the move if it put the moving side into check.
+        if ( board_check ( board , attacks , !( *board ).side ) )
         {
             // Restore board state.
             memory_copy ( board , &board_prev , sizeof ( board_t ) );
