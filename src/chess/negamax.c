@@ -10,12 +10,12 @@
 #include "chess/score.h"
 
 /**
- * @brief Score evaluation function.
+ * @brief Negamax board evaluation function.
  * @param board A chess board state.
- * @return A score corresponding to the board state.
+ * @return A negamax score corresponding to the board state.
  */
 i32
-board_score
+negamax_score
 (   const board_t* board
 );
 
@@ -39,6 +39,7 @@ _negamax
 ,   const attacks_t*    attacks
 ,   move_t*             best
 ,   u32*                leaf_count
+,   u32*                root
 );
 
 move_t
@@ -53,6 +54,7 @@ negamax
     board_t board;
     move_t move;
     u32 leaf_count = 0;
+    u32 root = 0;
     _negamax ( memory_copy ( &board , board_ , sizeof ( board_t ) )
              , alpha
              , beta
@@ -60,12 +62,11 @@ negamax
              , attacks
              , &move
              , &leaf_count
+             , &root
              );
     return move;
 }
 
-//#include "chess/string.h"
-//static char tb[9999];
 i32
 _negamax
 (   board_t*            board
@@ -75,11 +76,13 @@ _negamax
 ,   const attacks_t*    attacks
 ,   move_t*             best
 ,   u32*                leaf_count
+,   u32*                root
 )
 {
+    // Base case.
     if ( !depth )
     {
-        return board_score ( board );
+        return negamax_score ( board );
     }
 
     *leaf_count += 1;
@@ -96,6 +99,8 @@ _negamax
         board_t board_prev;
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
         
+        *root += 1;
+        
         // Score next move, if it is valid.
         board_move ( board
                    , moves.moves[ i ]
@@ -105,6 +110,9 @@ _negamax
         {
             // Restore board state.
             memory_copy ( board , &board_prev , sizeof ( board_t ) );
+
+            *root -= 1;
+
             continue;
         }
 
@@ -115,25 +123,32 @@ _negamax
                                     , attacks
                                     , best
                                     , leaf_count
+                                    , root
                                     );
 
         // Restore the board state.
         memory_copy ( board , &board_prev , sizeof ( board_t ) );
 
-        // Beta cutoff.
+        *root -= 1;
+
+        // Beta cutoff - no move found.
         if ( score >= beta )
         {
             return beta;
         }
 
-        // Alpha cutoff.
+        // Alpha cutoff - new best move.
         if ( score > alpha )
         {
             alpha = score;
+            if ( !( *root ) )
+            {
+                best_ = moves.moves[ i ];
+            }
         }
     }
 
-    // Write best move to output buffer.
+    // Write new best move to output buffer.
     if ( alpha != alpha_ )
     {
         *best = best_;
@@ -143,7 +158,7 @@ _negamax
 }
 
 i32
-board_score
+negamax_score
 (   const board_t* board
 )
 {

@@ -1,8 +1,7 @@
 /**
  * @file score.h
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Defines literals to score potential moves
- * (for evaluating the best move).
+ * @brief Defines literals to score potential moves (see also, negamax.h).
  */
 #ifndef CHESS_SCORE_H
 #define CHESS_SCORE_H

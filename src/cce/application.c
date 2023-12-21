@@ -611,7 +611,6 @@ cce_execute_move_player
                , ( *state ).move
                , &( *state ).attacks
                );
-    ( *state ).board.ply += 1;
 
     // Populate move list.
     moves_compute ( &( *state ).moves
@@ -675,7 +674,6 @@ cce_execute_move_engine
                , ( *state ).move
                , &( *state ).attacks
                );
-    ( *state ).board.ply += 1;
 
     // Populate move list.
     moves_compute ( &( *state ).moves
