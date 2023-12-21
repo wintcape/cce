@@ -163,6 +163,9 @@ void cce_render_board               ( void );
 void cce_render_move                ( void );
 void cce_render_buffer              ( void );
 
+// Defines engine search depth.
+#define CCE_ENGINE_SEARCH_DEPTH 4
+
 /**
  * @brief User input handler.
  * @param char_count Number of characters to prompt for.
@@ -647,7 +650,7 @@ cce_execute_move_engine
     // Calculate best move.
     ( *state ).move = board_best_move ( &( *state ).board
                                       , &( *state ).attacks
-                                      , 1
+                                      , CCE_ENGINE_SEARCH_DEPTH
                                       );
 
     // Stop clock.
@@ -1324,9 +1327,17 @@ cce_debug
     LOGDEBUG ( "cce_debug: Running debug routine. . ." );
 
     board_t board;
+    memory_clear ( &board , sizeof ( board_t ) );
     fen_parse ( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
               , &board
               );
+
+    moves_t moves;
+    LOGINFO ( string_moves ( ( *state ).textbuffer
+                           , moves_compute ( &moves
+                                           , &board
+                                           , &( *state ).attacks
+                                           )));
 
     u32 depth = 4;
     move_t move = board_best_move ( &board

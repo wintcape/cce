@@ -160,5 +160,5 @@ board_best_move
 ,   const u32           depth
 )
 {
-    return negamax ( board , -50000 , -50000 , depth , attacks );
+    return negamax ( board , -50000 , 50000 , depth , attacks );
 }

@@ -124,6 +124,8 @@ _perft
         // Check? Y/N
         if ( board_check ( board , attacks , ( *board ).side ) )
         {
+            // Restore board state.
+            memory_copy ( board , &board_prev , sizeof ( board_t ) );
             continue;
         }
         

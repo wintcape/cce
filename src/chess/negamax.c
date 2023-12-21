@@ -64,6 +64,8 @@ negamax
     return move;
 }
 
+//#include "chess/string.h"
+//static char tb[9999];
 i32
 _negamax
 (   board_t*            board
@@ -86,14 +88,14 @@ _negamax
     moves_t moves;
     moves_compute ( &moves , board , attacks );
     
-    move_t best_ = 0;
+    move_t best_ = moves.moves[ 0 ];
     i32 alpha_ = alpha;
     for ( u8 i = 0; i < moves.count; ++i )
     {
         // Preserve board state.
         board_t board_prev;
         memory_copy ( &board_prev , board , sizeof ( board_t ) );
-
+        
         // Score next move, if it is valid.
         board_move ( board
                    , moves.moves[ i ]
@@ -101,8 +103,11 @@ _negamax
                    );
         if ( board_check ( board , attacks , ( *board ).side ) )
         {
+            // Restore board state.
+            memory_copy ( board , &board_prev , sizeof ( board_t ) );
             continue;
         }
+
         const i32 score = -_negamax ( board
                                     , -beta
                                     , -alpha
@@ -125,10 +130,6 @@ _negamax
         if ( score > alpha )
         {
             alpha = score;
-            if ( !( *board ).ply )
-            {
-                best_ = moves.moves[ i ];
-            }
         }
     }
 
