@@ -12,9 +12,7 @@ A generic application launcher and subsystems manager, including lots of utility
 ### `src`
 The chess application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine* YouTube series.
 
-Right now, it does not calculate the "best move" from a list of valid chess moves; it merely validates if a given move is valid and performs a random move each turn; added functionality to have it actually evaluate before playing is coming very soon.
-
-The code to detect checkmate is going to be part of the "best move" calculation. As such, it is not yet included in this version; the game exits as soon as the first side tries a move which would result in check. Again, this will be fixed very soon.
+Right now, it is in the primitive stages of development; its algorithm for determining the best move is rudimentary at best, but improvements will be added frequently.
 
 ### `test`
 A generic unit testing subsystem. It is heavily based on tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
