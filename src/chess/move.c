@@ -83,7 +83,7 @@ move_parse
         if (   ( buf[ 4 ] == 'N' && promotion != N && promotion != n )
             || ( buf[ 4 ] == 'B' && promotion != B && promotion != b )
             || ( buf[ 4 ] == 'R' && promotion != R && promotion != r )
-            || ( buf[ 4 ] == 'Q' && ( promotion == Q || promotion == q ) )
+            || ( buf[ 4 ] == 'Q' && promotion != Q && promotion != q )
            )
         {
             continue;
