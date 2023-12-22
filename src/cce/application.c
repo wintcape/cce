@@ -48,6 +48,17 @@ typedef enum
 }
 CCE_GAME_STATE;
 
+// Defines the various endgame conditions.
+typedef enum
+{
+    CCE_GAME_END_CHECKMATE
+,   CCE_GAME_END_STALEMATE
+,   CCE_GAME_END_DRAW
+
+,   CCE_GAME_END_TAG_COUNT
+}
+CCE_GAME_END_TAG;
+
 // Type definition for render tag.
 typedef enum
 {
@@ -72,6 +83,7 @@ typedef enum
 ,   CCE_COMMAND_HELP
 ,   CCE_COMMAND_LIST_MOVES
 ,   CCE_COMMAND_CHOOSE_RANDOM_MOVE
+,   CCE_COMMAND_DRAW
 ,   CCE_COMMAND_DEBUG
 
 ,   CCE_COMMAND_COUNT
@@ -83,7 +95,8 @@ static const char* cce_command_strings[] = { [ CCE_COMMAND_QUIT ]               
                                            , [ CCE_COMMAND_HELP ]               = "H"
                                            , [ CCE_COMMAND_LIST_MOVES ]         = "L"
                                            , [ CCE_COMMAND_CHOOSE_RANDOM_MOVE ] = "R"
-                                           , [ CCE_COMMAND_DEBUG ]              = "D"
+                                           , [ CCE_COMMAND_DRAW ]               = "D"
+                                           , [ CCE_COMMAND_DEBUG ]              = "\\"
                                            };
 
 // Defines keycodes to automatically issue commands.
@@ -97,11 +110,12 @@ static const char* cce_command_strings[] = { [ CCE_COMMAND_QUIT ]               
 typedef struct
 {
     // Game state.
-    CCE_GAME_TAG    game;
-    CCE_GAME_STATE  state;
-    CCE_RENDER_TAG  render;
-    u64             update;
-    u32             ioerr;
+    CCE_GAME_TAG        game;
+    CCE_GAME_STATE      state;
+    CCE_GAME_END_TAG    end;
+    CCE_RENDER_TAG      render;
+    u64                 update;
+    u32                 ioerr;
     
     // Chess.
     attacks_t       attacks;
@@ -109,7 +123,7 @@ typedef struct
     moves_t         moves;
     move_t          move;
     u32             ply;
-    u8              fifty;
+    u32             fifty;
 
     // Benchmarking.
     clock_t         clock;
@@ -167,6 +181,9 @@ void cce_render_buffer              ( void );
 
 // Defines engine search depth.
 #define CCE_ENGINE_SEARCH_DEPTH 4
+
+// Defines engine decision to draw.
+#define CCE_ENGINE_FIFTY_MOVE_DRAW_LIMIT ( 50*2 )
 
 /**
  * @brief User input handler.
@@ -557,6 +574,8 @@ cce_execute_command
 ( void )
 {
     state_t* state = ( *cce ).internal;
+
+    ( *state ).ioerr = 0;
     
     // Evaluate command.
     switch ( ( *state ).cmd )
@@ -577,6 +596,22 @@ cce_execute_command
                 return true;
             }
 
+            case CCE_COMMAND_DRAW:
+            {
+                if ( ( *state ).fifty < 50 )
+                {
+                    ( *state ).render = CCE_RENDER_EXECUTE_COMMAND;
+                    ( *state ).state = CCE_GAME_STATE_PROMPT_COMMAND;
+                }
+                else
+                {
+                    ( *state ).end = CCE_GAME_END_DRAW;
+                    ( *state ).render = CCE_RENDER_NONE;
+                    ( *state ).state = CCE_GAME_STATE_GAME_END;
+                }
+                return true;
+            }
+
             case CCE_COMMAND_DEBUG:
             {
                 ( *state ).render = CCE_RENDER_NONE;
@@ -586,6 +621,7 @@ cce_execute_command
             
             case CCE_COMMAND_QUIT:
             {
+                ( *state ).end = CCE_GAME_END_TAG_COUNT;
                 ( *state ).render = CCE_RENDER_NONE;
                 ( *state ).state = CCE_GAME_STATE_GAME_END;
                 return true;
@@ -632,23 +668,31 @@ cce_execute_move_player
     }
     ( *state ).ply += 1;
 
-    // Test endgame condition.
-    const bool end = board_checkmate ( &( *state ).board
-                                     , &( *state ).attacks
-                                     , &( *state ).moves
-                                     )
-                  || board_stalemate ( &( *state ).board
-                                     , &( *state ).attacks
-                                     , &( *state ).moves
-                                     )
-                  || ( *state ).fifty >= 50
-                   ;
-
+    // Evaluate endgame conditions.
+    if ( board_stalemate ( &( *state ).board
+                         , &( *state ).attacks
+                         , &( *state ).moves
+                         ))
+    {
+        ( *state ).end = CCE_GAME_END_STALEMATE;
+        ( *state ).state = CCE_GAME_STATE_GAME_END;
+    }
+    else if ( board_checkmate ( &( *state ).board
+                              , &( *state ).attacks
+                              , &( *state ).moves
+                              ))
+    {
+        ( *state ).end = CCE_GAME_END_CHECKMATE;
+        ( *state ).state = CCE_GAME_STATE_GAME_END;
+    }
+    else
+    {
+        ( *state ).state = ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                : CCE_GAME_STATE_PROMPT_COMMAND
+                                                                                ;
+    }
+    
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_PLAYER;
-    ( *state ).state = ( !end ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                                       : CCE_GAME_STATE_PROMPT_COMMAND
-                                : CCE_GAME_STATE_GAME_END
-                                ;
     return true;
 }
 
@@ -713,23 +757,36 @@ cce_execute_move_engine
     }
     ( *state ).ply += 1;
 
-    // Test endgame condition.
-    const bool end = board_checkmate ( &( *state ).board
-                                     , &( *state ).attacks
-                                     , &( *state ).moves
-                                     )
-                  || board_stalemate ( &( *state ).board
-                                     , &( *state ).attacks
-                                     , &( *state ).moves
-                                     )
-                  || ( *state ).fifty >= 50
-                   ;
+    // Evaluate endgame conditions.
+    if ( board_stalemate ( &( *state ).board
+                         , &( *state ).attacks
+                         , &( *state ).moves
+                         ))
+    {
+        ( *state ).end = CCE_GAME_END_STALEMATE;
+        ( *state ).state = CCE_GAME_STATE_GAME_END;
+    }
+    else if ( board_checkmate ( &( *state ).board
+                              , &( *state ).attacks
+                              , &( *state ).moves
+                              ))
+    {
+        ( *state ).end = CCE_GAME_END_CHECKMATE;
+        ( *state ).state = CCE_GAME_STATE_GAME_END;
+    }
+    else if ( ( *state ).fifty >= CCE_ENGINE_FIFTY_MOVE_DRAW_LIMIT )
+    {
+        ( *state ).end = CCE_GAME_END_DRAW;
+        ( *state ).state = CCE_GAME_STATE_GAME_END;
+    }
+    else
+    {
+        ( *state ).state = ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                : CCE_GAME_STATE_PROMPT_COMMAND
+                                                                                ;
+    }
     
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_ENGINE;
-    ( *state ).state = ( !end ) ? ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                                       : CCE_GAME_STATE_PROMPT_COMMAND
-                                  : CCE_GAME_STATE_GAME_END
-                                  ;
     return true;
 }
 
@@ -841,10 +898,69 @@ cce_render_end
 {
     state_t* state = ( *cce ).internal;
 
+    // Render game result.
+    switch ( ( *state ).end )
+    {
+        case CCE_GAME_END_CHECKMATE:
+        {
+            RENDER_PUSH ( CCE_COLOR_ALERT "\n\t-=-=-=-=-=-=-=-= " CCE_COLOR_DEFAULT
+                          CCE_COLOR_HIGHLIGHT "    CHECKMATE    " CCE_COLOR_DEFAULT
+                          CCE_COLOR_ALERT " -=-=-=-=-=-=-=-="
+                          "\n\n\t                     %s WINS."
+                        , ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                             : "BLACK"
+                        );
+            LOG_PUSH (   "\n\t-=-=-=-=-=-=-=-=     CHECKMATE     =-=-=-=-=-=-=-=-"
+                       "\n\n\t                     %s WINS."
+                     , ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                          : "BLACK"                             
+                     );
+        }
+        break;
+
+        case CCE_GAME_END_STALEMATE:
+        {
+            RENDER_PUSH ( CCE_COLOR_ALERT "\n\t-=-=-=-=-=-=-=-= " CCE_COLOR_DEFAULT
+                          CCE_COLOR_HIGHLIGHT "    STALEMATE    " CCE_COLOR_DEFAULT
+                          CCE_COLOR_ALERT " =-=-=-=-=-=-=-=-"
+                          "\n"
+                        );
+            LOG_PUSH ( "\n\t-=-=-=-=-=-=-=-=     STALEMATE     =-=-=-=-=-=-=-=-"
+                       "\n"
+                     );
+        }
+        break;
+
+        case CCE_GAME_END_DRAW:
+        {
+            RENDER_PUSH ( CCE_COLOR_ALERT "\n\t-=-=-=-=-=-=-=-= " CCE_COLOR_DEFAULT
+                          CCE_COLOR_HIGHLIGHT "      DRAW       " CCE_COLOR_DEFAULT
+                          CCE_COLOR_ALERT " =-=-=-=-=-=-=-=-"
+                          "\n\n\t%s chose to end the game in a draw."
+                        , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                                    : "BLACK (engine)"
+                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                    : "BLACK"
+                        );
+            LOG_PUSH ( "\n\t-=-=-=-=-=-=-=-=       DRAW        =-=-=-=-=-=-=-=-"
+                       "\n\n\t%s chose to end the game in a draw."
+                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
+                                                                                                                 : "BLACK (engine)"
+                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                 : "BLACK"
+                     );
+        }
+        break;
+
+        default:
+        {}
+        break;
+    }
+
     // Render benchmarking info.
     if ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE )
     {
-        RENDER_PUSH ( CCE_COLOR_HINT "\n\tEngine calculations took a total of %f seconds.\n\n"
+        RENDER_PUSH ( CCE_COLOR_HINT "\n\n\tEngine calculations took a total of %f seconds.\n\n"
                     , ( *state ).elapsed
                     );
     }
@@ -990,7 +1106,21 @@ cce_render_execute_command
     {
             case CCE_COMMAND_HELP      : cce_render_list_commands () ;break;
             case CCE_COMMAND_LIST_MOVES: cce_render_list_moves ()    ;break;
-            default:                                                  break;
+
+            case CCE_COMMAND_DRAW:
+            {
+                if ( ( *state ).fifty < 50 )
+                {
+                    RENDER_PUSH ( CCE_COLOR_ALERT "\tYou cannot draw at this time. Fifty move: %u\n"
+                                , ( *state ).fifty
+                                );
+                }
+            }
+            break;
+
+            default:
+            {}
+            break;
     }
 
     // Render the previous move.
@@ -1010,6 +1140,8 @@ void
 cce_render_execute_move_player
 ( void )
 {
+    state_t* state = ( *cce ).internal;
+
     // Render the move.
     cce_render_move ();
     cce_log_move ();
@@ -1019,7 +1151,10 @@ cce_render_execute_move_player
     cce_log_board ();
 
     // Render the prompt.
-    cce_render_prompt_command ();
+    if ( ( *state ).state != CCE_GAME_STATE_GAME_END )
+    {
+        cce_render_prompt_command ();
+    }
 }
 
 void
@@ -1042,7 +1177,10 @@ cce_render_execute_move_engine
     cce_log_board ();
 
     // Render the (phony) prompt.
-    cce_render_prompt_command ();
+    if ( ( *state ).state != CCE_GAME_STATE_GAME_END )
+    {
+        cce_render_prompt_command ();
+    }
 }
 
 void
@@ -1092,6 +1230,7 @@ cce_render_list_commands
                   "\n\t  %s :      List available commands.               "
                   "\n\t  %s :      List available moves.                  "
                   "\n\t  %s :      Choose random valid move.              "
+                  "\n\t  %s :      End the game in a draw.                "
                   "\n                                                     "
                   "\n\t  %s :      Quit the application.                  "
                   "\n\t                                                   "
@@ -1100,6 +1239,7 @@ cce_render_list_commands
                 , cce_command_strings[ CCE_COMMAND_HELP ]
                 , cce_command_strings[ CCE_COMMAND_LIST_MOVES ]
                 , cce_command_strings[ CCE_COMMAND_CHOOSE_RANDOM_MOVE ]
+                , cce_command_strings[ CCE_COMMAND_DRAW ]
                 , cce_command_strings[ CCE_COMMAND_QUIT ]
                 );
 }
@@ -1386,6 +1526,7 @@ cce_debug
 
     LOGDEBUG ( "cce_debug: Done. Exiting." );
 
+    ( *state ).end = CCE_GAME_END_TAG_COUNT;
     ( *state ).render = CCE_RENDER_NONE;
     ( *state ).state = CCE_GAME_STATE_GAME_END;
     return true;
