@@ -23,9 +23,6 @@ typedef struct
     CASTLE      castle;
 
     PIECE       capture;
-
-    u32         history;
-    u32         ply;
 }
 board_t;
 

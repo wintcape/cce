@@ -108,6 +108,8 @@ typedef struct
     board_t         board;
     moves_t         moves;
     move_t          move;
+    u32             ply;
+    u8              fifty;
 
     // Benchmarking.
     clock_t         clock;
@@ -401,12 +403,12 @@ cce_game_start
 {
     state_t* state = ( *cce ).internal;
 
+    ( *state ).ply = 0;
+    ( *state ).fifty = 0;
     ( *state ).ioerr = 0;
     ( *state ).elapsed = 0;
 
     // Initialize chess board.
-    ( *state ).board.history = 0;
-    ( *state ).board.ply = 0;
     fen_parse ( FEN_START , &( *state ).board );
     
     // Populate move list.
@@ -434,7 +436,7 @@ cce_game_end
     cce_render_end ();
     RENDER ();
 
-    if ( ( *state ).board.ply )
+    if ( ( *state ).ply )
     {
         LOGINFO ( "A copy of the game was written to the log file: "CCE_LOG_FILEPATH"." );
     }
@@ -618,21 +620,35 @@ cce_execute_move_player
                   , &( *state ).attacks
                   );
     
-    // Test if move resulted in check for either side.
-    const bool check = board_check ( &( *state ).board
-                                   , &( *state ).attacks
-                                   , ( *state ).board.side
-                                   )    // (Congratulations!)
-                    || board_check ( &( *state ).board
-                                   , &( *state ).attacks
-                                   , !( *state ).board.side
-                                   );   // (You doofus!)
+    // Update fifty move and ply.
+    const PIECE piece = move_decode_piece ( ( *state ).move );
+    if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+    {
+        ( *state ).fifty = 0;
+    }
+    else
+    {
+        ( *state ).fifty += 1;
+    }
+    ( *state ).ply += 1;
+
+    // Test endgame condition.
+    const bool end = board_checkmate ( &( *state ).board
+                                     , &( *state ).attacks
+                                     , &( *state ).moves
+                                     )
+                  || board_stalemate ( &( *state ).board
+                                     , &( *state ).attacks
+                                     , &( *state ).moves
+                                     )
+                  || ( *state ).fifty >= 50
+                   ;
 
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_PLAYER;
-    ( *state ).state = ( !check ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                                         : CCE_GAME_STATE_PROMPT_COMMAND
-                                  : CCE_GAME_STATE_GAME_END /* Temporary. */
-                                  ;
+    ( *state ).state = ( !end ) ? ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                       : CCE_GAME_STATE_PROMPT_COMMAND
+                                : CCE_GAME_STATE_GAME_END
+                                ;
     return true;
 }
 
@@ -684,18 +700,35 @@ cce_execute_move_engine
                   , &( *state ).board
                   , &( *state ).attacks
                   );
-                  
-    // Test if move resulted in check for the opposite side.
-    // (Engine will not make moves that put itself into check.)
-    const bool check = board_check ( &( *state ).board
-                                   , &( *state ).attacks
-                                   , ( *state ).board.side
-                                   );
+    
+    // Update fifty move and ply.
+    const PIECE piece = move_decode_piece ( ( *state ).move );
+    if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+    {
+        ( *state ).fifty = 0;
+    }
+    else
+    {
+        ( *state ).fifty += 1;
+    }
+    ( *state ).ply += 1;
+
+    // Test endgame condition.
+    const bool end = board_checkmate ( &( *state ).board
+                                     , &( *state ).attacks
+                                     , &( *state ).moves
+                                     )
+                  || board_stalemate ( &( *state ).board
+                                     , &( *state ).attacks
+                                     , &( *state ).moves
+                                     )
+                  || ( *state ).fifty >= 50
+                   ;
     
     ( *state ).render = CCE_RENDER_EXECUTE_MOVE_ENGINE;
-    ( *state ).state = ( !check ) ? ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
-                                                                                         : CCE_GAME_STATE_PROMPT_COMMAND
-                                  : CCE_GAME_STATE_GAME_END /* Temporary. */
+    ( *state ).state = ( !end ) ? ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? CCE_GAME_STATE_EXECUTE_MOVE_ENGINE
+                                                                                       : CCE_GAME_STATE_PROMPT_COMMAND
+                                  : CCE_GAME_STATE_GAME_END
                                   ;
     return true;
 }
@@ -902,7 +935,7 @@ cce_render_prompt_command
         }
 
         // Render the previous move.
-        if ( ( *state ).board.ply )
+        if ( ( *state ).ply )
         {
             cce_render_move ();
         }
@@ -961,7 +994,7 @@ cce_render_execute_command
     }
 
     // Render the previous move.
-    if ( ( *state ).board.ply )
+    if ( ( *state ).ply )
     {
         cce_render_move ();
     }

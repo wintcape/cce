@@ -14,7 +14,7 @@ typedef struct
 {
     board_t             board;
     move_t              move;
-    u32                 root;
+    u32                 ply;
     u32                 leaf_count;
     u32                 move_count;
     const attacks_t*    attacks;
@@ -72,7 +72,7 @@ negamax
 {
     negamax_t args;
     memory_copy ( &args.board , board , sizeof ( board_t ) );
-    args.root = 0;
+    args.ply = 0;
     args.leaf_count = 0;
     args.move_count = 0;
     args.attacks = attacks;
@@ -113,7 +113,7 @@ _negamax
         // Preserve board state.
         board_t board_prev;
         memory_copy ( &board_prev , &( *args ).board , sizeof ( board_t ) );
-        ( *args ).root += 1;
+        ( *args ).ply += 1;
         
         // Perform next move.
         board_move ( &( *args ).board
@@ -129,7 +129,7 @@ _negamax
         {
             // Restore board state.
             memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
-            ( *args ).root -= 1;
+            ( *args ).ply -= 1;
             continue;
         }
         ( *args ).move_count += 1;
@@ -139,7 +139,7 @@ _negamax
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
-        ( *args ).root -= 1;
+        ( *args ).ply -= 1;
 
         // Beta cutoff - no move found.
         if ( score >= beta )
@@ -151,7 +151,7 @@ _negamax
         if ( score > alpha )
         {
             alpha = score;
-            if ( !( ( *args ).root ) )
+            if ( !( ( *args ).ply ) )
             {
                 best = moves.moves[ i ];
             }
@@ -163,7 +163,7 @@ _negamax
     {
         if ( check ) // Checkmate.
         {       
-            return -49000 + ( *args ).root;
+            return -49000 + ( *args ).ply;
         }
         return 0;    // Stalemate.
     }
@@ -215,7 +215,7 @@ negamax_quiescence
         // Preserve board state.
         board_t board_prev;
         memory_copy ( &board_prev , &( *args ).board , sizeof ( board_t ) );
-        ( *args ).root += 1;
+        ( *args ).ply += 1;
         
         // Perform next capture.
         board_move ( &( *args ).board
@@ -231,7 +231,7 @@ negamax_quiescence
         {
             // Restore board state.
             memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
-            ( *args ).root -= 1;
+            ( *args ).ply -= 1;
             continue;
         }
         ( *args ).move_count += 1;
@@ -241,7 +241,7 @@ negamax_quiescence
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
-        ( *args ).root -= 1;
+        ( *args ).ply -= 1;
 
         // Beta cutoff - no move found.
         if ( score >= beta )

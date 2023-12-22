@@ -69,7 +69,7 @@ move_parse
                                   );
 
     // Check move validity.
-    for ( u8 i = 0; i < ( *moves ).count; ++i )
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
     {
         const move_t move_ = ( *moves ).moves[ i ];
         if (   src != move_decode_src ( move_ )
@@ -665,7 +665,7 @@ moves_filter
     ( *filtered ).count = 0;
 
     // Filter.
-    for ( u8 i = 0; i < ( *moves ).count; ++i )
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
     {
         const move_t move = ( *moves ).moves[ i ];
         const PIECE piece = move_decode_piece ( move );

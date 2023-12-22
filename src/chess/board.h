@@ -64,6 +64,40 @@ board_check
 }
 
 /**
+ * @brief Checkmate predicate. Requires a pregenerated attack tables and a list
+ * of valid moves.
+ * @param board A chess board state.
+ * @param attacks The pregenerated attack tables.
+ * @param moves The pregenerated list of valid moves.
+  * @return true if checkmate, false otherwise.
+ */
+bool
+board_checkmate
+(   const board_t*      board_
+,   const attacks_t*    attacks
+,   const moves_t*      moves
+);
+
+/**
+ * @brief Stalemate predicate. Requires a pregenerated attack tables and a list
+ * of valid moves.
+ * @param board A chess board state.
+ * @param attacks The pregenerated attack tables.
+ * @param moves The pregenerated list of valid moves.
+  * @return true if stalemate, false otherwise.
+ */
+INLINE
+bool
+board_stalemate
+(   const board_t*      board
+,   const attacks_t*    attacks
+,   const moves_t*      moves
+)
+{
+    return !board_check ( board , attacks, ( *board ).side ) && !( *moves ).count;
+}
+
+/**
  * @brief Updates the provided board state by performing a move. Requires
  * pregenerated attack tables.
  * @param board The board state to mutate.

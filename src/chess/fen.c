@@ -216,10 +216,6 @@ fen_parse
                            | board.occupancies[ BLACK ]
                            ;
 
-    // Preserve board history.
-    board.history = ( *board_ ).history;
-    board.ply = ( *board_ ).ply;
-
     // Write the board to the output buffer.
     memory_copy ( board_ , &board , sizeof ( board_t ) );
 

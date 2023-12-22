@@ -9,6 +9,31 @@
 #include "chess/castle.h"
 #include "chess/negamax.h"
 
+bool
+board_checkmate
+(   const board_t*      board_
+,   const attacks_t*    attacks
+,   const moves_t*      moves
+)
+{
+    if ( !board_check ( board_ , attacks , ( *board_ ).side ) )
+    {
+        return false;
+    }
+
+    board_t board;
+    memory_copy ( &board , board_ , sizeof ( board_t ) );
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
+    {
+        board_move ( &board , ( *moves ).moves[ i ] , attacks );
+        if ( !board_check ( &board , attacks , ( *board_ ).side ) )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void
 board_move
 (   board_t*            board_
@@ -144,10 +169,6 @@ board_move
 
     // Toggle side.
     board.side = !board.side;
-    
-    // Update history.
-    board.ply += 1;
-    board.history += 1;
 
     // Overwrite the output buffer with the updated board.
     memory_copy ( board_ , &board , sizeof ( board_t ) );
