@@ -48,8 +48,8 @@
 
 #define ANSI_CC_BG_BLACK        "40"
 #define ANSI_CC_BG_WHITE        "107"
-#define ANSI_CC_BG_OFF_BLACK    "100"
-#define ANSI_CC_BG_OFF_WHITE    "47"
+#define ANSI_CC_BG_DARK_GRAY    "100"
+#define ANSI_CC_BG_GRAY         "47"
 #define ANSI_CC_BG_RED          "101"
 #define ANSI_CC_BG_GREEN        "102"
 #define ANSI_CC_BG_YELLOW       "103"
