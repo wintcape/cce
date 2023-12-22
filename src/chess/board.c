@@ -36,7 +36,7 @@ board_checkmate
 
 void
 board_move
-(   board_t*            board_
+(   board_t*            board
 ,   const move_t        move
 ,   const attacks_t*    attacks
 )
@@ -50,15 +50,11 @@ board_move
     const bool enpassant = move_decode_enpassant ( move );
     const bool castle = move_decode_castle ( move );
 
-    // Initialize a working copy of the board.
-    board_t board;
-    memory_copy ( &board , board_ , sizeof ( board_t ) );
-    
-    const bool white = board.side == WHITE;
+    const bool white = ( *board ).side == WHITE;
     
     // Move the piece.
-    BITCLR ( board.pieces[ piece ] , src );
-    BITSET ( board.pieces[ piece ] , dst );
+    BITCLR ( ( *board ).pieces[ piece ] , src );
+    BITSET ( ( *board ).pieces[ piece ] , dst );
 
     // Parse capture.
     if ( capture )
@@ -67,10 +63,10 @@ board_move
         const PIECE to = ( white ) ? k : K;
         for ( PIECE i = from; i <= to; ++i )
         {
-            if ( bit ( board.pieces[ i ] , dst ) )
+            if ( bit ( ( *board ).pieces[ i ] , dst ) )
             {
-                board.capture = i;
-                BITCLR ( board.pieces[ i ] , dst );
+                ( *board ).capture = i;
+                BITCLR ( ( *board ).pieces[ i ] , dst );
                 break;
             }
         }
@@ -80,10 +76,10 @@ board_move
     if ( promotion )
     {
         // Clear pawn.
-        BITCLR ( board.pieces[ ( white ) ? P : p ] , dst );
+        BITCLR ( ( *board ).pieces[ ( white ) ? P : p ] , dst );
 
         // Set promotion.
-        BITSET ( board.pieces[ promotion ] , dst );
+        BITSET ( ( *board ).pieces[ promotion ] , dst );
     }
 
     // Parse en passant capture.
@@ -91,23 +87,23 @@ board_move
     {
         if ( white )
         {
-            board.capture = p;
-            BITCLR ( board.pieces[ p ] , dst + 8 );
+            ( *board ).capture = p;
+            BITCLR ( ( *board ).pieces[ p ] , dst + 8 );
         }
         else
         {
-            board.capture = P;
-            BITCLR ( board.pieces[ P ] , dst - 8 );
+            ( *board ).capture = P;
+            BITCLR ( ( *board ).pieces[ P ] , dst - 8 );
         }
     }
 
     // Reset en passant square.
-    board.enpassant = NO_SQ;
+    ( *board ).enpassant = NO_SQ;
 
     // Parse double push.
     if ( double_push )
     {
-        board.enpassant = ( white ) ? dst + 8 : dst - 8;
+        ( *board ).enpassant = ( white ) ? dst + 8 : dst - 8;
     }
 
     // Parse castling.
@@ -117,29 +113,29 @@ board_move
         {
             case C1:
             {
-                BITCLR ( board.pieces[ R ] , A1 );
-                BITSET ( board.pieces[ R ] , D1 );
+                BITCLR ( ( *board ).pieces[ R ] , A1 );
+                BITSET ( ( *board ).pieces[ R ] , D1 );
             }
             break;
 
             case G1:
             {
-                BITCLR ( board.pieces[ R ] , H1 );
-                BITSET ( board.pieces[ R ] , F1 );
+                BITCLR ( ( *board ).pieces[ R ] , H1 );
+                BITSET ( ( *board ).pieces[ R ] , F1 );
             }
             break;
 
             case C8:
             {
-                BITCLR ( board.pieces[ r ] , A8 );
-                BITSET ( board.pieces[ r ] , D8 );
+                BITCLR ( ( *board ).pieces[ r ] , A8 );
+                BITSET ( ( *board ).pieces[ r ] , D8 );
             }
             break;
 
             case G8:
             {
-                BITCLR ( board.pieces[ r ] , H8 );
-                BITSET ( board.pieces[ r ] , F8 );
+                BITCLR ( ( *board ).pieces[ r ] , H8 );
+                BITSET ( ( *board ).pieces[ r ] , F8 );
             }
             break;
 
@@ -150,28 +146,25 @@ board_move
     }
 
     // Update castling rights.
-    board.castle &= castling_rights[ src ];
-    board.castle &= castling_rights[ dst ];
+    ( *board ).castle &= castling_rights[ src ];
+    ( *board ).castle &= castling_rights[ dst ];
 
     // Update occupancy maps.
-    memory_clear ( board.occupancies , sizeof ( board.occupancies ) );
+    memory_clear ( ( *board ).occupancies , sizeof ( ( *board ).occupancies ) );
     for ( PIECE piece = P; piece <= K; ++piece )
     {
-        board.occupancies[ WHITE ] |= board.pieces[ piece ];
+        ( *board ).occupancies[ WHITE ] |= ( *board ).pieces[ piece ];
     }
     for ( PIECE piece = p; piece <= k; ++piece )
     {
-        board.occupancies[ BLACK ] |= board.pieces[ piece ];
+        ( *board ).occupancies[ BLACK ] |= ( *board ).pieces[ piece ];
     }
-    board.occupancies[ 2 ] = board.occupancies[ WHITE ]
-                           | board.occupancies[ BLACK ]
-                           ;
+    ( *board ).occupancies[ 2 ] = ( *board ).occupancies[ WHITE ]
+                                | ( *board ).occupancies[ BLACK ]
+                                ;
 
     // Toggle side.
-    board.side = !board.side;
-
-    // Overwrite the output buffer with the updated board.
-    memory_copy ( board_ , &board , sizeof ( board_t ) );
+    ( *board ).side = !( *board ).side;
 }
 
 move_t
