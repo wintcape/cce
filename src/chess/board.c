@@ -22,9 +22,9 @@ board_checkmate
     }
 
     board_t board;
-    memory_copy ( &board , board_ , sizeof ( board_t ) );
     for ( u32 i = 0; i < ( *moves ).count; ++i )
     {
+        memory_copy ( &board , board_ , sizeof ( board_t ) );
         board_move ( &board , ( *moves ).moves[ i ] , attacks );
         if ( !board_check ( &board , attacks , ( *board_ ).side ) )
         {
