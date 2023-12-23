@@ -657,38 +657,41 @@ cce_execute_move_player
                   );
 
     // Filter moves from the list which would put the player's own side into check.
-    board_t board;
-    u32 count = 0;
-    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
+    if ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_PLAYER )
     {
-        // Preserve board state.
-        memory_copy ( &board , &( *state ).board , sizeof ( board_t ) );
-
-        // Perform move.
-        board_move ( &board
-                   , ( *state ).moves.moves[ i ]
-                   , &( *state ).attacks
-                   );
-
-        // Check? Y/N
-        if ( board_check ( &board
-                         , &( *state ).attacks
-                         , ( *state ).board.side
-                         ))
+        board_t board;
+        u32 count = 0;
+        for ( u32 i = 0; i < ( *state ).moves.count; ++i )
         {
-            continue;
-        }
+            // Preserve board state.
+            memory_copy ( &board , &( *state ).board , sizeof ( board_t ) );
 
-        // In-place filter.
-        if ( i != count )
-        {
-            ( *state ).moves.moves[ count ] = ( *state ).moves.moves[ i ];
+            // Perform move.
+            board_move ( &board
+                       , ( *state ).moves.moves[ i ]
+                       , &( *state ).attacks
+                       );
+
+            // Check? Y/N
+            if ( board_check ( &board
+                             , &( *state ).attacks
+                             , ( *state ).board.side
+                             ))
+            {
+                continue;
+            }
+
+            // In-place filter.
+            if ( i != count )
+            {
+                ( *state ).moves.moves[ count ] = ( *state ).moves.moves[ i ];
+            }
+            count += 1;
         }
-        count += 1;
+ 
+        // Adjust move list count to account for filter.
+        ( *state ).moves.count = count;
     }
-
-    // Adjust move list count to account for filter.
-    ( *state ).moves.count = count;
     
     // Update fifty move and ply.
     const PIECE piece = move_decode_piece ( ( *state ).move );
@@ -778,6 +781,43 @@ cce_execute_move_engine
                   , &( *state ).board
                   , &( *state ).attacks
                   );
+
+    // Filter moves from the list which would put the player's own side into check.
+    if ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE )
+    {
+        board_t board;
+        u32 count = 0;
+        for ( u32 i = 0; i < ( *state ).moves.count; ++i )
+        {
+            // Preserve board state.
+            memory_copy ( &board , &( *state ).board , sizeof ( board_t ) );
+
+            // Perform move.
+            board_move ( &board
+                       , ( *state ).moves.moves[ i ]
+                       , &( *state ).attacks
+                       );
+
+            // Check? Y/N
+            if ( board_check ( &board
+                             , &( *state ).attacks
+                             , ( *state ).board.side
+                             ))
+            {
+                continue;
+            }
+
+            // In-place filter.
+            if ( i != count )
+            {
+                ( *state ).moves.moves[ count ] = ( *state ).moves.moves[ i ];
+            }
+            count += 1;
+        }
+ 
+        // Adjust move list count to account for filter.
+        ( *state ).moves.count = count;
+    }
     
     // Update fifty move and ply.
     const PIECE piece = move_decode_piece ( ( *state ).move );

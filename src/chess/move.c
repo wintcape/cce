@@ -684,7 +684,7 @@ moves_filter
             case MOVE_FILTER_ONLY_DOUBLE_PUSH: filter = move_decode_double_push ( move ) ;break;
             case MOVE_FILTER_ONLY_ENPASSANT  : filter = move_decode_enpassant ( move )   ;break;
             case MOVE_FILTER_ONLY_CASTLE     : filter = move_decode_castle ( move )      ;break;
-            default                          : filter = false                            ;break;
+            default                          : return filtered                           ;
         }
         if ( filter )
         {
