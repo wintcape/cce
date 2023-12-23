@@ -14,7 +14,6 @@
 #include "core/string.h"
 
 #include "memory/linear_allocator.h"
-#include "logger.h"
 
 // Defaults.
 #define SUBSYSTEM_ALLOCATOR_CAP_DEFAULT ( MEBIBYTES ( 1 ) )
