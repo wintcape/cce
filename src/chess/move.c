@@ -20,9 +20,10 @@ move_parse
 ,   move_t*             move
 )
 {
-    const u8 len = string_length_clamp ( s , MOVE_STRING_LENGTH + 1 );
+    u8 len;
 
     // Validate input string length.
+    len = string_length_clamp ( s , MOVE_STRING_LENGTH + 1 );
     if ( len > MOVE_STRING_LENGTH )
     {
         return false;
@@ -34,7 +35,7 @@ move_parse
     buf[ len ] = 0; // Append terminator.
 
     // Sanitize.
-    string_trim ( buf );
+    len = string_length ( string_trim ( buf ) );
     for ( u8 i = 0; i < len; ++ i )
     {
         buf[ i ] = to_uppercase ( buf[ i ] );

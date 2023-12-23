@@ -118,29 +118,29 @@ typedef struct
     u32                 ioerr;
     
     // Chess.
-    attacks_t       attacks;
-    board_t         board;
-    moves_t         moves;
-    move_t          move;
-    u32             ply;
-    u32             fifty;
+    attacks_t           attacks;
+    board_t             board;
+    moves_t             moves;
+    move_t              move;
+    u32                 ply;
+    u32                 fifty;
 
     // Benchmarking.
-    clock_t         clock;
-    f64             elapsed;
+    clock_t             clock;
+    f64                 elapsed;
 
     // Command.
-    CCE_COMMAND     cmd;
-    char            in[ CCE_INPUT_TEXTBUFFER_LENGTH ];
+    CCE_COMMAND         cmd;
+    char                in[ CCE_INPUT_TEXTBUFFER_LENGTH ];
 
     // Render textbuffer.
-    u64             textbuffer_offs;
-    char            textbuffer[ CCE_RENDER_TEXTBUFFER_LENGTH ];
+    u64                 textbuffer_offs;
+    char                textbuffer[ CCE_RENDER_TEXTBUFFER_LENGTH ];
 
     // Logger.
-    file_handle_t   log;
-    u64             logbuffer_offs;
-    char            logbuffer[ CCE_RENDER_TEXTBUFFER_LENGTH ];
+    file_handle_t       log;
+    u64                 logbuffer_offs;
+    char                logbuffer[ CCE_RENDER_TEXTBUFFER_LENGTH ];
 }
 state_t;
 
@@ -655,6 +655,40 @@ cce_execute_move_player
                   , &( *state ).board
                   , &( *state ).attacks
                   );
+
+    // Filter moves from the list which would put the player's own side into check.
+    board_t board;
+    u32 count = 0;
+    for ( u32 i = 0; i < ( *state ).moves.count; ++i )
+    {
+        // Preserve board state.
+        memory_copy ( &board , &( *state ).board , sizeof ( board_t ) );
+
+        // Perform move.
+        board_move ( &board
+                   , ( *state ).moves.moves[ i ]
+                   , &( *state ).attacks
+                   );
+
+        // Check? Y/N
+        if ( board_check ( &board
+                         , &( *state ).attacks
+                         , ( *state ).board.side
+                         ))
+        {
+            continue;
+        }
+
+        // In-place filter.
+        if ( i != count )
+        {
+            ( *state ).moves.moves[ count ] = ( *state ).moves.moves[ i ];
+        }
+        count += 1;
+    }
+
+    // Adjust move list count to account for filter.
+    ( *state ).moves.count = count;
     
     // Update fifty move and ply.
     const PIECE piece = move_decode_piece ( ( *state ).move );
@@ -1223,23 +1257,45 @@ cce_render_list_commands
 ( void )
 {
     state_t* state = ( *cce ).internal;
+    const bool fifty = ( *state ).fifty >= 50;
     RENDER_PUSH ( CCE_COLOR_HINT
                   "\n\t                                                   "
                   "\n\t         =-=-=- AVAILABLE COMMANDS -=-=-=          "
                   "\n\t                                                   "
                   "\n\t  %s :      List available commands.               "
+                  "\n                                                     "
                   "\n\t  %s :      List available moves.                  "
                   "\n\t  %s :      Choose random valid move.              "
-                  "\n\t  %s :      End the game in a draw.                "
                   "\n                                                     "
-                  "\n\t  %s :      Quit the application.                  "
-                  "\n\t                                                   "
-                  "\n\t         =-=-=-                    -=-=-=          "
-                  "\n"
+                  "\n\t  %s :      End the game in a draw.                "
+                  "\n\t            Eligibility: %s"
                 , cce_command_strings[ CCE_COMMAND_HELP ]
                 , cce_command_strings[ CCE_COMMAND_LIST_MOVES ]
                 , cce_command_strings[ CCE_COMMAND_CHOOSE_RANDOM_MOVE ]
                 , cce_command_strings[ CCE_COMMAND_DRAW ]
+                , ( fifty ) ? CCE_COLOR_PLUS "ELIGIBLE" CCE_COLOR_HINT
+                            : CCE_COLOR_ALERT "NOT ELIGIBLE" CCE_COLOR_HINT
+                );
+    if ( !fifty )
+    {
+        RENDER_PUSH ( CCE_COLOR_HINT "\n\t            Eligible in "
+                      CCE_COLOR_PLUS "%i" CCE_COLOR_HINT " moves."
+                      "\n                                                     "
+                    , 50 - ( *state ).fifty
+                    );
+    }
+    else
+    {
+        RENDER_PUSH ( CCE_COLOR_HINT
+                      "\n                                                     "
+                      "\n                                                     "
+                    );
+    }
+
+    RENDER_PUSH ( "\n\t  %s :      Quit the application.                  "
+                  "\n\t                                                   "
+                  "\n\t         =-=-=-                    -=-=-=          "
+                  "\n"
                 , cce_command_strings[ CCE_COMMAND_QUIT ]
                 );
 }

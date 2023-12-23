@@ -15,7 +15,7 @@
 #define random()  ( _random () )
 
 /**
- * Generates a random integer.
+ * @brief Generates a random integer.
  * @return A random integer.
  */
 i32
@@ -23,7 +23,7 @@ _random
 ( void );
 
 /**
- * Generates a random integer in the specified range.
+ * @brief Generates a random integer in the specified range.
  * @param l lower bound (inclusive)
  * @param u upper bound (inclusive)
  * @return A random integer in the range [ l , u ].
@@ -35,7 +35,7 @@ random2
 );
 
 /**
- * Generates a random 64-bit integer.
+ * @brief Generates a random 64-bit integer.
  * @param l lower bound (inclusive)
  * @param u upper bound (inclusive)
  * @return A random 64-bit integer.
@@ -45,7 +45,7 @@ random64
 ( void );
 
 /**
- * Generates a random floating point number.
+ * @brief Generates a random floating point number.
  * @return A random floating point number.
  */
 f32
@@ -53,7 +53,7 @@ randomf
 ( void );
 
 /**
- * Generates a random floating point number in the specified range.
+ * @brief Generates a random floating point number in the specified range.
  * @param l lower bound (inclusive)
  * @param u upper bound (inclusive)
  * @return A random floating point number in the range [ l , u ].

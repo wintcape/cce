@@ -8,11 +8,11 @@
 
 #include "core/memory.h"
 
+#include "math/math.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "core/logger.h"
 
 u64
 string_length
@@ -66,7 +66,7 @@ string_format
 )
 {
     __builtin_va_list args;
-    va_start ( args, fmt );
+    va_start ( args , fmt );
     const i32 result = string_format_v ( dst , fmt , args );
     va_end ( args );
     return result;
@@ -130,8 +130,9 @@ string_trim
     const char* to = s + i;
 
     // Copy memory range in-place.
-    memory_move ( s , from , to - from );
-    s[ to - from ] = 0; // Append terminator.
+    const u64 size = max ( 0 , to - from );
+    memory_move ( s , from , size );
+    s[ size ] = 0; // Append terminator.
     
     return s;
 }

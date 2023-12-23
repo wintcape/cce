@@ -15,7 +15,7 @@
 #define U64_1       ( ( u64 ) 1 )
 #define BIT(x,n)    ( ( ( ( u64 )(x) ) >> (n) ) & U64_1 )
 #define BITSET(x,n) ( (x) |= ( U64_1 << (n) ) )
-#define BITCLR(x,n) ( (x) &= ~( U64_1 << (n) ))
+#define BITCLR(x,n) ( (x) &= ~( U64_1 << (n) ) )
 #define BITSWP(x,n) ( (x) ^= ( U64_1 << (n) ) )
 
 /**
