@@ -102,7 +102,9 @@ to_digit
 (   const unsigned char c
 )
 {
-    return c - ( ( unsigned char ) '0' );
+    return digit ( c ) ? c - ( ( unsigned char ) '0' )
+                       : c
+                       ;
 }
 
 INLINE
