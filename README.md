@@ -10,7 +10,7 @@ The application consists of three separate libraries:
 A generic application launcher and subsystems manager, including lots of utility headers for robust C programming (string, memory, platform abstraction, etc.). It is heavily based on early boilerplate tutorials from Travis Vroman's *Kohi Game Engine* YouTube series.
 
 ### `src`
-The chess application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine* YouTube series.
+A command-line chess game application, including the chess engine subsystem. Chess engine is heavily based on tutorials from Code_Monkey_King's *Bitboard Chess Engine* YouTube series.
 
 Right now, it is in the primitive stages of development; its algorithm for determining the best move is rudimentary at best, but improvements will be added frequently.
 
