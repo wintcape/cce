@@ -7,7 +7,96 @@
 #include "chess/negamax.h"
 
 #include "chess/board.h"
-#include "chess/score.h"
+
+// Defines a material score for each piece.
+static const i32 material_scores[] = { [ P ] = 100
+                                     , [ N ] = 300
+                                     , [ B ] = 350
+                                     , [ R ] = 500
+                                     , [ Q ] = 1000
+                                     , [ K ] = 10000
+                                     , [ p ] = -100
+                                     , [ n ] = -300
+                                     , [ b ] = -350
+                                     , [ r ] = -500
+                                     , [ q ] = -1000
+                                     , [ k ] = -10000
+                                     };
+
+// Defines a positional score table for each piece.
+static const i32 pawn_positional_scores[] = { 90 ,  90 ,  90 ,  90 ,  90 ,  90 ,  90 ,  90
+                                            , 30 ,  30 ,  30 ,  40 ,  40 ,  30 ,  30 ,  30
+                                            , 20 ,  20 ,  20 ,  30 ,  30 ,  30 ,  20 ,  20
+                                            , 10 ,  10 ,  10 ,  20 ,  20 ,  10 ,  10 ,  10
+                                            ,  5 ,   5 ,  10 ,  20 ,  20 ,   5 ,   5 ,   5
+                                            ,  0 ,   0 ,   0 ,   5 ,   5 ,   0 ,   0 ,   0
+                                            ,  0 ,   0 ,   0 , -10 , -10 ,   0 ,   0 ,   0
+                                            ,  0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0
+                                            };
+static const i32 knight_positional_scores[] = { -5 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,  -5
+                                              , -5 ,   0 ,   0 ,  10 ,  10 ,   0 ,   0 ,  -5
+                                              , -5 ,   5 ,  20 ,  20 ,  20 ,  20 ,   5 ,  -5
+                                              , -5 ,  10 ,  20 ,  30 ,  30 ,  20 ,  10 ,  -5
+                                              , -5 ,  10 ,  20 ,  30 ,  30 ,  20 ,  10 ,  -5
+                                              , -5 ,   5 ,  20 ,  10 ,  10 ,  20 ,   5 ,  -5
+                                              , -5 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,  -5
+                                              , -5 , -10 ,   0 ,   0 ,   0 ,   0 , -10 ,  -5
+                                              };
+static const i32 bishop_positional_scores[] = {  0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0
+                                              ,  0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0
+                                              ,  0 ,   0 ,   0 ,  10 ,  10 ,   0 ,   0 ,   0
+                                              ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                              ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                              ,  0 ,  10 ,   0 ,   0 ,   0 ,   0 ,  10 ,   0
+                                              ,  0 ,  30 ,   0 ,   0 ,   0 ,   0 ,  30 ,   0
+                                              ,  0 ,   0 , -10 ,   0 ,   0 , -10 ,   0 ,   0
+                                              };
+static const i32 rook_positional_scores[] = { 50 ,  50 ,  50 ,  50 ,  50 ,  50 ,  50 ,  50
+                                            , 50 ,  50 ,  50 ,  50 ,  50 ,  50 ,  50 ,  50
+                                            ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                            ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                            ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                            ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                            ,  0 ,   0 ,  10 ,  20 ,  20 ,  10 ,   0 ,   0
+                                            ,  0 ,   0 ,   0 ,  20 ,  20 ,   0 ,   0 ,   0
+                                            };
+static const i32 king_positional_scores[] = {  0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0
+                                            ,  0 ,   0 ,   5 ,   5 ,   5 ,   5 ,   0 ,   0
+                                            ,  0 ,   5 ,   5 ,  10 ,  10 ,   5 ,   5 ,   0
+                                            ,  0 ,   5 ,  10 ,  20 ,  20 ,  10 ,   5 ,   0
+                                            ,  0 ,   5 ,  10 ,  20 ,  20 ,  10 ,   5 ,   0
+                                            ,  0 ,   0 ,   5 ,  10 ,  10 ,   5 ,   0 ,   0
+                                            ,  0 ,   5 ,   5 ,  -5 ,  -5 ,   0 ,   5 ,   0
+                                            ,  0 ,   0 ,   5 ,   0 , -15 ,   0 ,  10 ,   0
+                                            };
+
+// Defines the mirror score table indices for calculating the opposite side's
+// score.
+static const SQUARE mirror_position[ 128 ] = { A1 , B1 , C1 , D1 , E1 , F1 , G1 , H1
+	                                         , A2 , B2 , C2 , D2 , E2 , F2 , G2 , H2
+	   	                                     , A3 , B3 , C3 , D3 , E3 , F3 , G3 , H3
+	                                         , A4 , B4 , C4 , D4 , E4 , F4 , G4 , H4
+	                                         , A5 , B5 , C5 , D5 , E5 , F5 , G5 , H5
+	                                         , A6 , B6 , C6 , D6 , E6 , F6 , G6 , H6
+	                                         , A7 , B7 , C7 , D7 , E7 , F7 , G7 , H7
+	                                         , A8 , B8 , C8 , D8 , E8 , F8 , G8 , H8
+	                                         };
+
+// Defines most-valuable victim versus least-valuable attacker table.
+const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
+	                            , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
+	                            , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
+	                            , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
+	                            , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
+	                            , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
+
+	                            , { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
+	                            , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
+	                            , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
+	                            , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
+	                            , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
+	                            , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
+                                };
 
 // Type definition for a container to hold negamax function parameters.
 typedef struct
@@ -41,8 +130,32 @@ negamax_quiescence
  * @return A negamax score corresponding to the board state.
  */
 i32
-negamax_score
+negamax_score_board
 (   const board_t* board
+);
+
+/**
+ * @brief Negamax move evaluation function.
+ * @param move A move.
+ * @param board The chess board state.
+ * @return A negamax score corresponding to the move.
+ */
+i32
+negamax_score_move
+(   const move_t    move
+,   const board_t*  board
+);
+
+/**
+ * @brief Negamax sort move list function.
+ * @param moves A pregenerated list of valid moves.
+ * @param board A chess board state.
+ * @return .
+ */
+i32
+negamax_sort_moves
+(   moves_t*        moves
+,   const board_t*  board
 );
 
 /**
@@ -185,8 +298,10 @@ negamax_quiescence
 )
 {
     i32 score;
+
+    ( *args ).leaf_count += 1;
     
-    score = negamax_score ( &( *args ).board );
+    score = negamax_score_board ( &( *args ).board );
 
     // Beta cutoff - no move found.
     if ( score >= beta )
@@ -260,7 +375,7 @@ negamax_quiescence
 }
 
 i32
-negamax_score
+negamax_score_board
 (   const board_t* board
 )
 {
@@ -300,4 +415,59 @@ negamax_score
     }
 
     return ( ( *board ).side == WHITE ) ? score : -score;
+}
+
+i32
+negamax_score_move
+(   const move_t    move
+,   const board_t*  board
+)
+{
+    if ( !move_decode_capture ( move ) )
+    {
+        return 0;   // TODO: Implement scoring for quiet moves.
+    }
+    
+    PIECE target = P;
+    const PIECE start = ( ( *board ).side == WHITE ) ? p : P;
+    const PIECE end = ( ( *board ).side == WHITE ) ? k : K;
+    for ( PIECE piece = start; piece <= end; ++piece )
+    {
+        if ( bit ( ( *board ).pieces[ piece ] , target ) )
+        {
+            target = piece;
+            break;
+        }
+    }
+    return mvv_lva[ move_decode_piece ( move ) ][ target ];
+}
+
+i32
+negamax_sort_moves
+(   moves_t*        moves
+,   const board_t*  board
+)
+{
+    i32 scores[ MOVES_BUFFER_LENGTH ];
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
+    {
+        scores[ i ] = negamax_score_move ( ( *moves ).moves[ i ] , board );
+    }
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
+    {
+        for ( u32 j = i + 1; j < ( *moves ).count; ++j )
+        {
+            if ( scores[ i ] < scores[ j ] )
+            {
+                const i32 score = scores[ i ];
+                const move_t move = ( *moves ).moves[ i ];
+                scores[ i ] = scores[ j ];
+                scores[ j ] = score;
+                ( *moves ).moves[ i ] = ( *moves ).moves[ j ];
+                ( *moves ).moves[ j ] = move;
+            }
+        }
+    }
+
+    return 0;
 }

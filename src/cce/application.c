@@ -1585,6 +1585,7 @@ cce_log_move
     }
 }
 
+#include "chess/negamax.h"
 bool
 cce_debug
 ( void )
@@ -1600,7 +1601,7 @@ cce_debug
 
     board_t board;
     memory_clear ( &board , sizeof ( board_t ) );
-    fen_parse ( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    fen_parse ( FEN_CMK
               , &board
               );
 
@@ -1610,15 +1611,6 @@ cce_debug
                                            , &board
                                            , &( *state ).attacks
                                            )));
-
-    u32 depth = 4;
-    move_t move = board_best_move ( &board
-                                  , &( *state ).attacks
-                                  , depth
-                                  );
-    LOGINFO ( "negamax depth %u search finished. Best move:\t%s"
-            , depth , string_move ( ( *state ).textbuffer , move )
-            );
 
     LOGDEBUG ( "cce_debug: Done. Exiting." );
 
