@@ -182,9 +182,6 @@ void cce_render_buffer              ( void );
 // Defines engine search depth.
 #define CCE_ENGINE_SEARCH_DEPTH 4
 
-// Defines engine decision to draw.
-#define CCE_ENGINE_FIFTY_MOVE_DRAW_LIMIT ( 50*2 )
-
 /**
  * @brief User input handler.
  * @param char_count Number of characters to prompt for.
@@ -848,7 +845,9 @@ cce_execute_move_engine
         ( *state ).end = CCE_GAME_END_CHECKMATE;
         ( *state ).state = CCE_GAME_STATE_GAME_END;
     }
-    else if ( ( *state ).fifty >= CCE_ENGINE_FIFTY_MOVE_DRAW_LIMIT )
+    else if (   ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE
+             && ( *state ).fifty >= 50
+            )
     {
         ( *state ).end = CCE_GAME_END_DRAW;
         ( *state ).state = CCE_GAME_STATE_GAME_END;
@@ -1452,11 +1451,12 @@ cce_render_move
     // Capture.
     if ( move_decode_capture ( ( *state ).move ) )
     {
-        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s CAPTURED %s ON %s."
+        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s (%u): %s ON %s CAPTURED %s ON %s."
                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                                 : "BLACK (engine)"
                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                                 : "BLACK"
+                    , ( *state ).ply / 2 + 1
                     , piecewchr ( move_decode_piece ( ( *state ).move ) )
                     , string_square ( move_decode_src ( ( *state ).move ) )
                     , piecewchr ( ( *state ).board.capture )
@@ -1467,11 +1467,12 @@ cce_render_move
     // Quiet.
     else
     {
-        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s: %s ON %s TO %s."
+        RENDER_PUSH ( CCE_COLOR_PLUS "\n\n\t%s (%u): %s ON %s TO %s."
                     , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                                 : "BLACK (engine)"
                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                                 : "BLACK"
+                    , ( *state ).ply / 2 + 1
                     , piecewchr ( move_decode_piece ( ( *state ).move ) )
                     , string_square ( move_decode_src ( ( *state ).move ) )
                     , string_square ( move_decode_dst ( ( *state ).move ) )
@@ -1541,11 +1542,12 @@ cce_log_move
     // Capture.
     if ( move_decode_capture ( ( *state ).move ) )
     {
-        LOG_PUSH ( "\n\n\t%s: %s ON %s CAPTURED %s ON %s."
+        LOG_PUSH ( "\n\n\t%s (%u): %s ON %s CAPTURED %s ON %s."
                  , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                              : "BLACK (engine)"
                                                                         : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                              : "BLACK"
+                 , ( *state ).ply / 2 + 1
                  , piecewchr ( move_decode_piece ( ( *state ).move ) )
                  , string_square ( move_decode_src ( ( *state ).move ) )
                  , piecewchr ( ( *state ).board.capture )
@@ -1556,11 +1558,12 @@ cce_log_move
     // Quiet.
     else
     {
-        LOG_PUSH ( "\n\n\t%s: %s ON %s TO %s."
+        LOG_PUSH ( "\n\n\t%s (%u): %s ON %s TO %s."
                  , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                              : "BLACK (engine)"
                                                                         : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                              : "BLACK"
+                 , ( *state ).ply / 2 + 1
                  , piecewchr ( move_decode_piece ( ( *state ).move ) )
                  , string_square ( move_decode_src ( ( *state ).move ) )
                  , string_square ( move_decode_dst ( ( *state ).move ) )
