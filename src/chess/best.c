@@ -1,10 +1,10 @@
 /**
- * @file negamax.c
+ * @file best.c
  * @author Matthew Weissel (null@mattweissel.info)
- * @brief Implementation of the negamax header.
- * (see negamax.h for additional details)
+ * @brief Implementation of the best header.
+ * (see best.h for additional details)
  */
-#include "chess/negamax.h"
+#include "chess/best.h"
 
 #include "chess/board.h"
 
@@ -98,7 +98,7 @@ const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 
 	                            , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
                                 };
 
-// Type definition for a container to hold negamax function parameters.
+// Type definition for a container to hold search function parameters.
 typedef struct
 {
     board_t             board;
@@ -108,54 +108,20 @@ typedef struct
     u32                 move_count;
     const attacks_t*    attacks;
 }
-negamax_t;
+best_t;
 
 /**
  * @brief Quiescence search.
- * @param alpha Alpha negamax cutoff.
- * @param beta Beta negamax cutoff.
+ * @param alpha Alpha quiescence cutoff.
+ * @param beta Beta quiescence cutoff.
  * @param args Static function arguments.
- * @return Current negamax score.
+ * @return Current quiescence score.
  */
 i32
-negamax_quiescence
-(   i32         alpha
-,   i32         beta
-,   negamax_t*  args
-);
-
-/**
- * @brief Negamax board evaluation function.
- * @param board A chess board state.
- * @return A negamax score corresponding to the board state.
- */
-i32
-negamax_score_board
-(   const board_t* board
-);
-
-/**
- * @brief Negamax move evaluation function.
- * @param move A move.
- * @param board The chess board state.
- * @return A negamax score corresponding to the move.
- */
-i32
-negamax_score_move
-(   const move_t    move
-,   const board_t*  board
-);
-
-/**
- * @brief Negamax sort move list function.
- * @param moves A pregenerated list of valid moves.
- * @param board A chess board state.
- * @return .
- */
-i32
-negamax_sort_moves
-(   moves_t*        moves
-,   const board_t*  board
+quiescence
+(   i32     alpha
+,   i32     beta
+,   best_t* args
 );
 
 /**
@@ -168,11 +134,111 @@ negamax_sort_moves
  */
 i32
 _negamax
-(   i32         alpha
-,   i32         beta
-,   u32         depth
-,   negamax_t*  args
+(   i32     alpha
+,   i32     beta
+,   u32     depth
+,   best_t* args
 );
+
+i32
+score_board
+(   const board_t* board
+)
+{
+    i32 score = 0;
+
+    bitboard_t bitboard;
+    PIECE piece;
+    SQUARE square;
+    for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
+    {
+        bitboard = ( *board ).pieces[ piece_ ];
+        while ( bitboard )
+        {
+            piece = piece_;
+            square = bitboard_lsb ( bitboard );
+
+            score += material_scores[ piece ];
+            switch ( piece )
+            {
+                case P: score += pawn_positional_scores[ square ]   ;break;
+                case N: score += knight_positional_scores[ square ] ;break;
+                case B: score += bishop_positional_scores[ square ] ;break;
+                case R: score += rook_positional_scores[ square ]   ;break;
+                case K: score += king_positional_scores[ square ]   ;break;
+
+                case p: score -= pawn_positional_scores[ mirror_position[ square ] ]   ;break;
+                case n: score -= knight_positional_scores[ mirror_position[ square ] ] ;break;
+                case b: score -= bishop_positional_scores[ mirror_position[ square ] ] ;break;
+                case r: score -= rook_positional_scores[ mirror_position[ square ] ]   ;break;
+                case k: score -= king_positional_scores[ mirror_position[ square ] ]   ;break;
+
+                default: break;
+            }
+
+            BITCLR ( bitboard , square );
+        }
+    }
+
+    return ( ( *board ).side == WHITE ) ? score : -score;
+}
+
+i32
+score_move
+(   const move_t    move
+,   const board_t*  board
+)
+{
+    if ( !move_decode_capture ( move ) )
+    {
+        return 0;   // TODO: Implement scoring for quiet moves.
+    }
+    
+    PIECE target = P;
+    const PIECE start = ( ( *board ).side == WHITE ) ? p : P;
+    const PIECE end = ( ( *board ).side == WHITE ) ? k : K;
+    for ( PIECE piece = start; piece <= end; ++piece )
+    {
+        if ( bit ( ( *board ).pieces[ piece ]
+                 , move_decode_dst ( move )
+                 ))
+        {
+            target = piece;
+            break;
+        }
+    }
+    return mvv_lva[ move_decode_piece ( move ) ][ target ];
+}
+
+moves_t*
+moves_sort_by_score
+(   moves_t*        moves
+,   const board_t*  board
+)
+{
+    u32 i;
+    u32 j;
+    i32 tmp;
+
+    i = 0;
+    while ( i < ( *moves ).count )
+    {
+        tmp = ( *moves ).moves[ i ];
+        j = i;
+        while ( j && score_move ( ( *moves ).moves[ j - 1 ] , board ) < score_move ( tmp , board ) )
+        {
+            ( *moves ).moves[ j ] = ( *moves ).moves[ j - 1 ];
+            j -= 1;
+        }
+        ( *moves ).moves[ j ] = tmp;
+        i += 1;
+    }
+
+    return moves;
+}
+
+//#include "chess/string.h"   // Temporary.
+//char s[32000];              // Temporary.
 
 move_t
 negamax
@@ -183,28 +249,29 @@ negamax
 ,   const attacks_t*    attacks
 )
 {
-    negamax_t args;
+    best_t args;
     memory_copy ( &args.board , board , sizeof ( board_t ) );
     args.ply = 0;
     args.leaf_count = 0;
     args.move_count = 0;
     args.attacks = attacks;
     _negamax ( alpha , beta , depth , &args );
+    //LOGINFO ( "BEST MOVE: %s, NODE COUNT: %u" , string_move ( s , args.move ) , args.leaf_count );
     return args.move;
 }
 
 i32
 _negamax
-(   i32         alpha
-,   i32         beta
-,   u32         depth
-,   negamax_t*  args
+(   i32     alpha
+,   i32     beta
+,   u32     depth
+,   best_t* args
 )
 {
     // Base case.
     if ( !depth )
     {
-        return negamax_quiescence ( alpha , beta , args );
+        return quiescence ( alpha , beta , args );
     }
 
     ( *args ).leaf_count += 1;
@@ -214,10 +281,19 @@ _negamax
                                    , ( *args ).attacks
                                    , ( *args ).board.side
                                    );
+    if ( check )
+    {
+        depth += 1;
+    }
 
     // Generate move options.
     moves_t moves;
-    moves_compute ( &moves , &( *args ).board , ( *args ).attacks );
+    moves_sort_by_score ( moves_compute ( &moves
+                                        , &( *args ).board
+                                        , ( *args ).attacks
+                                        )
+                        , &( *args ).board
+                        );
     
     move_t best = moves.moves[ 0 ]; // Default.
     i32 alpha_ = alpha;
@@ -291,17 +367,17 @@ _negamax
 }
 
 i32
-negamax_quiescence
-(   i32         alpha
-,   i32         beta
-,   negamax_t*  args
+quiescence
+(   i32     alpha
+,   i32     beta
+,   best_t* args
 )
 {
     i32 score;
 
     ( *args ).leaf_count += 1;
     
-    score = negamax_score_board ( &( *args ).board );
+    score = score_board ( &( *args ).board );
 
     // Beta cutoff - no move found.
     if ( score >= beta )
@@ -315,18 +391,23 @@ negamax_quiescence
         alpha = score;
     }
 
-    // Generate capture options.
+    // Generate move options.
     moves_t moves;
-    moves_filter ( moves_compute ( &moves
-                                 , &( *args ).board
-                                 , ( *args ).attacks
-                                 )
-                 , MOVE_FILTER_ONLY_CAPTURE
-                 , &moves
-                 );
+    moves_sort_by_score ( moves_compute ( &moves
+                                        , &( *args ).board
+                                        , ( *args ).attacks
+                                        )
+                        , &( *args ).board
+                        );
     
     for ( u8 i = 0; i < moves.count; ++i )
     {
+        // Filter quiet moves.
+        if ( !move_decode_capture ( moves.moves[ i ] ) )
+        {
+            continue;
+        }
+
         // Preserve board state.
         board_t board_prev;
         memory_copy ( &board_prev , &( *args ).board , sizeof ( board_t ) );
@@ -352,7 +433,7 @@ negamax_quiescence
         ( *args ).move_count += 1;
 
         // Score the capture.
-        score = -negamax_quiescence ( -beta , -alpha , args );
+        score = -quiescence ( -beta , -alpha , args );
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
@@ -372,102 +453,4 @@ negamax_quiescence
     }// END for.
 
     return alpha;
-}
-
-i32
-negamax_score_board
-(   const board_t* board
-)
-{
-    i32 score = 0;
-
-    bitboard_t bitboard;
-    PIECE piece;
-    SQUARE square;
-    for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
-    {
-        bitboard = ( *board ).pieces[ piece_ ];
-        while ( bitboard )
-        {
-            piece = piece_;
-            square = bitboard_lsb ( bitboard );
-
-            score += material_scores[ piece ];
-            switch ( piece )
-            {
-                case P: score += pawn_positional_scores[ square ]   ;break;
-                case N: score += knight_positional_scores[ square ] ;break;
-                case B: score += bishop_positional_scores[ square ] ;break;
-                case R: score += rook_positional_scores[ square ]   ;break;
-                case K: score += king_positional_scores[ square ]   ;break;
-
-                case p: score -= pawn_positional_scores[ mirror_position[ square ] ]   ;break;
-                case n: score -= knight_positional_scores[ mirror_position[ square ] ] ;break;
-                case b: score -= bishop_positional_scores[ mirror_position[ square ] ] ;break;
-                case r: score -= rook_positional_scores[ mirror_position[ square ] ]   ;break;
-                case k: score -= king_positional_scores[ mirror_position[ square ] ]   ;break;
-
-                default: break;
-            }
-
-            BITCLR ( bitboard , square );
-        }
-    }
-
-    return ( ( *board ).side == WHITE ) ? score : -score;
-}
-
-i32
-negamax_score_move
-(   const move_t    move
-,   const board_t*  board
-)
-{
-    if ( !move_decode_capture ( move ) )
-    {
-        return 0;   // TODO: Implement scoring for quiet moves.
-    }
-    
-    PIECE target = P;
-    const PIECE start = ( ( *board ).side == WHITE ) ? p : P;
-    const PIECE end = ( ( *board ).side == WHITE ) ? k : K;
-    for ( PIECE piece = start; piece <= end; ++piece )
-    {
-        if ( bit ( ( *board ).pieces[ piece ] , target ) )
-        {
-            target = piece;
-            break;
-        }
-    }
-    return mvv_lva[ move_decode_piece ( move ) ][ target ];
-}
-
-i32
-negamax_sort_moves
-(   moves_t*        moves
-,   const board_t*  board
-)
-{
-    i32 scores[ MOVES_BUFFER_LENGTH ];
-    for ( u32 i = 0; i < ( *moves ).count; ++i )
-    {
-        scores[ i ] = negamax_score_move ( ( *moves ).moves[ i ] , board );
-    }
-    for ( u32 i = 0; i < ( *moves ).count; ++i )
-    {
-        for ( u32 j = i + 1; j < ( *moves ).count; ++j )
-        {
-            if ( scores[ i ] < scores[ j ] )
-            {
-                const i32 score = scores[ i ];
-                const move_t move = ( *moves ).moves[ i ];
-                scores[ i ] = scores[ j ];
-                scores[ j ] = score;
-                ( *moves ).moves[ i ] = ( *moves ).moves[ j ];
-                ( *moves ).moves[ j ] = move;
-            }
-        }
-    }
-
-    return 0;
 }

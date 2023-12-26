@@ -692,13 +692,16 @@ cce_execute_move_player
     
     // Update fifty move and ply.
     const PIECE piece = move_decode_piece ( ( *state ).move );
-    if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+    if ( even ( ( *state ).ply ) )
     {
-        ( *state ).fifty = 0;
-    }
-    else
-    {
-        ( *state ).fifty += 1;
+        if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+        {
+            ( *state ).fifty = 0;
+        }
+        else
+        {
+            ( *state ).fifty += 1;
+        }
     }
     ( *state ).ply += 1;
 
@@ -818,13 +821,16 @@ cce_execute_move_engine
     
     // Update fifty move and ply.
     const PIECE piece = move_decode_piece ( ( *state ).move );
-    if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+    if ( even ( ( *state ).ply ) )
     {
-        ( *state ).fifty = 0;
-    }
-    else
-    {
-        ( *state ).fifty += 1;
+        if ( move_decode_capture ( ( *state ).move ) || piece == P || piece == p )
+        {
+            ( *state ).fifty = 0;
+        }
+        else
+        {
+            ( *state ).fifty += 1;
+        }
     }
     ( *state ).ply += 1;
 
@@ -1012,15 +1018,19 @@ cce_render_end
                           "\n\n\t%s chose to end the game in a draw."
                         , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                                     : "BLACK (engine)"
-                                                                               : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                    : "BLACK"
+                                                                               : ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? ( ( *state ).board.side == WHITE ) ? "WHITE"
+                                                                                                                                                                           : "BLACK"
+                                                                                                                                      : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                                                                           : "BLACK"
                         );
             LOG_PUSH ( "\n\t-=-=-=-=-=-=-=-=       DRAW        =-=-=-=-=-=-=-=-"
                        "\n\n\t%s chose to end the game in a draw."
                      , ( ( *state ).game == CCE_GAME_PLAYER_VERSUS_ENGINE ) ? ( ( *state ).board.side != WHITE ) ? "WHITE (player)"
                                                                                                                  : "BLACK (engine)"
-                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
-                                                                                                                 : "BLACK"
+                                                                            : ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE ) ? ( ( *state ).board.side == WHITE ) ? "WHITE"
+                                                                                                                                                                        : "BLACK"
+                                                                                                                                   : ( ( *state ).board.side != WHITE ) ? "WHITE"
+                                                                                                                                                                        : "BLACK"
                      );
         }
         break;
@@ -1456,7 +1466,7 @@ cce_render_move
                                                                                                                 : "BLACK (engine)"
                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                                 : "BLACK"
-                    , ( *state ).ply / 2 + 1
+                    , ( ( *state ).ply - 1 ) / 2 + 1
                     , piecewchr ( move_decode_piece ( ( *state ).move ) )
                     , string_square ( move_decode_src ( ( *state ).move ) )
                     , piecewchr ( ( *state ).board.capture )
@@ -1472,7 +1482,7 @@ cce_render_move
                                                                                                                 : "BLACK (engine)"
                                                                            : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                                 : "BLACK"
-                    , ( *state ).ply / 2 + 1
+                    , ( ( *state ).ply - 1 ) / 2 + 1
                     , piecewchr ( move_decode_piece ( ( *state ).move ) )
                     , string_square ( move_decode_src ( ( *state ).move ) )
                     , string_square ( move_decode_dst ( ( *state ).move ) )
@@ -1547,7 +1557,7 @@ cce_log_move
                                                                                                              : "BLACK (engine)"
                                                                         : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                              : "BLACK"
-                 , ( *state ).ply / 2 + 1
+                 , ( ( *state ).ply - 1 ) / 2 + 1
                  , piecewchr ( move_decode_piece ( ( *state ).move ) )
                  , string_square ( move_decode_src ( ( *state ).move ) )
                  , piecewchr ( ( *state ).board.capture )
@@ -1563,7 +1573,7 @@ cce_log_move
                                                                                                              : "BLACK (engine)"
                                                                         : ( ( *state ).board.side != WHITE ) ? "WHITE"
                                                                                                              : "BLACK"
-                 , ( *state ).ply / 2 + 1
+                 , ( ( *state ).ply - 1 ) / 2 + 1
                  , piecewchr ( move_decode_piece ( ( *state ).move ) )
                  , string_square ( move_decode_src ( ( *state ).move ) )
                  , string_square ( move_decode_dst ( ( *state ).move ) )
@@ -1588,7 +1598,6 @@ cce_log_move
     }
 }
 
-#include "chess/negamax.h"
 bool
 cce_debug
 ( void )
@@ -1608,12 +1617,7 @@ cce_debug
               , &board
               );
 
-    moves_t moves;
-    LOGINFO ( string_moves ( ( *state ).textbuffer
-                           , moves_compute ( &moves
-                                           , &board
-                                           , &( *state ).attacks
-                                           )));
+    board_best_move ( &board , &( *state ).attacks , 3 );
 
     LOGDEBUG ( "cce_debug: Done. Exiting." );
 

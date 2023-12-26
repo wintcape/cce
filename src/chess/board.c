@@ -6,8 +6,8 @@
  */
 #include "chess/board.h"
 
+#include "chess/best.h"
 #include "chess/castle.h"
-#include "chess/negamax.h"
 
 bool
 board_checkmate

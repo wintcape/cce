@@ -10,7 +10,7 @@ DEPS := m X11 X11-xcb xcb
 INCLUDE := src engine/src test/src
 
 ENGINE_OBJFILES := memory.o logger.o engine.o clock.o array.o string.o event.o input.o math.o test.o memory_linear_allocator.o memory_dynamic_allocator.o freelist.o platform.o filesystem.o
-TARGET_OBJFILES := main.o application.o chess_bitboard.o chess_attack.o chess_board.o chess_fen.o chess_move.o chess_string.o chess_perft.o chess_negamax.o
+TARGET_OBJFILES := main.o application.o chess_bitboard.o chess_attack.o chess_board.o chess_fen.o chess_move.o chess_string.o chess_perft.o chess_best.o
 TEST_OBJFILES := test_main.o test_memory_linear_allocator.o  test_memory_dynamic_allocator.o
 
 ################################################################################
@@ -50,7 +50,7 @@ obj/chess_fen.o:						src/chess/fen.c
 obj/chess_move.o:						src/chess/move.c
 obj/chess_string.o:						src/chess/string.c
 obj/chess_perft.o:						src/chess/test/perft.c
-obj/chess_negamax.o:					src/chess/negamax.c
+obj/chess_best.o:						src/chess/best.c
 
 # Test objects.
 obj/test_main.o:						test/src/main.c

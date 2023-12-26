@@ -42,14 +42,14 @@ string_moves
     }
 
     u64 offs = string_format ( dst
-                             , " MOVES:    move      piece    capture?  double?   enpassant?  castle?\n\n\t"
+                             , " MOVES:    move      piece    capture?  double?   enpassant?  castle?\n\n"
                              );
 
     for ( u32 i = 0; i < ( *moves ).count; ++i )
     {
         const move_t move = ( *moves ).moves[ i ];
         offs += string_format ( dst + offs
-                              ,  "           %s      %s        %u         %u         %u           %u\n\t"
+                              ,  "           %s      %s        %u         %u         %u           %u\n"
                               , string_move ( dst + offs , move )
                               , piecewchr ( move_decode_piece ( move ) )
                               , move_decode_capture ( move )
