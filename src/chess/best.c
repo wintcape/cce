@@ -83,32 +83,54 @@ static const SQUARE mirror_position[ 128 ] = { A1 , B1 , C1 , D1 , E1 , F1 , G1 
 	                                         };
 
 // Defines most-valuable victim versus least-valuable attacker table.
-const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
-	                            , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
-	                            , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
-	                            , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
-	                            , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
-	                            , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
+static const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
+	                                   , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
+	                                   , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
+	                                   , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
+	                                   , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
+	                                   , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
 
-	                            , { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
-	                            , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
-	                            , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
-	                            , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
-	                            , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
-	                            , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
-                                };
+	                                   , { 105 , 205 , 305 , 405 , 505 , 605 ,   105 , 205 , 305 , 405 , 505 , 605 }
+	                                   , { 104 , 204 , 304 , 404 , 504 , 604 ,   104 , 204 , 304 , 404 , 504 , 604 }
+	                                   , { 103 , 203 , 303 , 403 , 503 , 603 ,   103 , 203 , 303 , 403 , 503 , 603 }
+	                                   , { 102 , 202 , 302 , 402 , 502 , 602 ,   102 , 202 , 302 , 402 , 502 , 602 }
+	                                   , { 101 , 201 , 301 , 401 , 501 , 601 ,   101 , 201 , 301 , 401 , 501 , 601 }
+	                                   , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
+	                                   };
 
 // Type definition for a container to hold search function parameters.
 typedef struct
 {
-    board_t             board;
     move_t              move;
+
     u32                 ply;
     u32                 leaf_count;
     u32                 move_count;
+
     const attacks_t*    attacks;
+
+    board_t             board;
+
+    move_t              killer_moves[ 2 ][ 64 ];
+    move_t              history_moves[ 12 ][ 64 ];
 }
 best_t;
+
+/**
+ * @brief Negamax search.
+ * @param alpha Alpha negamax cutoff.
+ * @param beta Beta negamax cutoff.
+ * @param depth Current recursion depth.
+ * @param args Static function arguments.
+ * @return Current negamax score.
+ */
+i32
+negamax
+(   i32     alpha
+,   i32     beta
+,   u32     depth
+,   best_t* args
+);
 
 /**
  * @brief Quiescence search.
@@ -125,143 +147,69 @@ quiescence
 );
 
 /**
- * @brief Primary implementation of negamax (see negamax).
- * @param alpha Alpha negamax cutoff.
- * @param beta Beta negamax cutoff.
- * @param depth Current recursion depth.
- * @param args Static function arguments.
- * @return Current negamax score.
+ * @brief Board state evaluation function.
+ * @param board A chess board state.
+ * @return A score corresponding to the board state.
  */
-i32
-_negamax
-(   i32     alpha
-,   i32     beta
-,   u32     depth
-,   best_t* args
-);
-
 i32
 score_board
 (   const board_t* board
-)
-{
-    i32 score = 0;
+);
 
-    bitboard_t bitboard;
-    PIECE piece;
-    SQUARE square;
-    for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
-    {
-        bitboard = ( *board ).pieces[ piece_ ];
-        while ( bitboard )
-        {
-            piece = piece_;
-            square = bitboard_lsb ( bitboard );
-
-            score += material_scores[ piece ];
-            switch ( piece )
-            {
-                case P: score += pawn_positional_scores[ square ]   ;break;
-                case N: score += knight_positional_scores[ square ] ;break;
-                case B: score += bishop_positional_scores[ square ] ;break;
-                case R: score += rook_positional_scores[ square ]   ;break;
-                case K: score += king_positional_scores[ square ]   ;break;
-
-                case p: score -= pawn_positional_scores[ mirror_position[ square ] ]   ;break;
-                case n: score -= knight_positional_scores[ mirror_position[ square ] ] ;break;
-                case b: score -= bishop_positional_scores[ mirror_position[ square ] ] ;break;
-                case r: score -= rook_positional_scores[ mirror_position[ square ] ]   ;break;
-                case k: score -= king_positional_scores[ mirror_position[ square ] ]   ;break;
-
-                default: break;
-            }
-
-            BITCLR ( bitboard , square );
-        }
-    }
-
-    return ( ( *board ).side == WHITE ) ? score : -score;
-}
-
+/**
+ * @brief Move evaluation function.
+ * @param move A move.
+ * @param board A chess board state.
+ * @param args Static function arguments.
+ * @return A score corresponding to the move.
+ */
 i32
 score_move
 (   const move_t    move
-,   const board_t*  board
-)
-{
-    if ( !move_decode_capture ( move ) )
-    {
-        return 0;   // TODO: Implement scoring for quiet moves.
-    }
-    
-    PIECE target = P;
-    const PIECE start = ( ( *board ).side == WHITE ) ? p : P;
-    const PIECE end = ( ( *board ).side == WHITE ) ? k : K;
-    for ( PIECE piece = start; piece <= end; ++piece )
-    {
-        if ( bit ( ( *board ).pieces[ piece ]
-                 , move_decode_dst ( move )
-                 ))
-        {
-            target = piece;
-            break;
-        }
-    }
-    return mvv_lva[ move_decode_piece ( move ) ][ target ];
-}
+,   best_t*         args
+);
 
+/**
+ * @brief Sorts a move list by move score.
+ * @param moves A pregenerated list of valid moves.
+ * @param args Static function arguments.
+ * @return moves.
+ */
 moves_t*
 moves_sort_by_score
 (   moves_t*        moves
-,   const board_t*  board
-)
-{
-    u32 i;
-    u32 j;
-    i32 tmp;
-
-    i = 0;
-    while ( i < ( *moves ).count )
-    {
-        tmp = ( *moves ).moves[ i ];
-        j = i;
-        while ( j && score_move ( ( *moves ).moves[ j - 1 ] , board ) < score_move ( tmp , board ) )
-        {
-            ( *moves ).moves[ j ] = ( *moves ).moves[ j - 1 ];
-            j -= 1;
-        }
-        ( *moves ).moves[ j ] = tmp;
-        i += 1;
-    }
-
-    return moves;
-}
+,   best_t*         args
+);
 
 //#include "chess/string.h"   // Temporary.
-//char s[32000];              // Temporary.
+//char s[1024];               // Temporary.
 
 move_t
-negamax
+board_best_move
 (   const board_t*      board
-,   const i32           alpha
-,   const i32           beta
-,   const u32           depth
 ,   const attacks_t*    attacks
+,   const u32           depth
 )
 {
     best_t args;
     memory_copy ( &args.board , board , sizeof ( board_t ) );
+    memory_clear ( &args.killer_moves , sizeof ( args.killer_moves ) );
+    memory_clear ( &args.history_moves , sizeof ( args.history_moves ) );
+    args.attacks = attacks;
     args.ply = 0;
     args.leaf_count = 0;
     args.move_count = 0;
-    args.attacks = attacks;
-    _negamax ( alpha , beta , depth , &args );
-    //LOGINFO ( "BEST MOVE: %s, NODE COUNT: %u" , string_move ( s , args.move ) , args.leaf_count );
+    negamax ( -50000 , 50000 , depth , &args );
+    //LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
+    //         , depth
+    //         , string_move ( s , args.move )
+    //         , args.leaf_count
+    //         );
     return args.move;
 }
 
 i32
-_negamax
+negamax
 (   i32     alpha
 ,   i32     beta
 ,   u32     depth
@@ -292,7 +240,7 @@ _negamax
                                         , &( *args ).board
                                         , ( *args ).attacks
                                         )
-                        , &( *args ).board
+                        , args
                         );
     
     move_t best = moves.moves[ 0 ]; // Default.
@@ -324,7 +272,7 @@ _negamax
         ( *args ).move_count += 1;
 
         // Score the move.
-        const i32 score = -_negamax ( -beta , -alpha , depth - 1 , args );
+        const i32 score = -negamax ( -beta , -alpha , depth - 1 , args );
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
@@ -333,12 +281,18 @@ _negamax
         // Beta cutoff - no move found.
         if ( score >= beta )
         {
+            // Update killer move table.
+            ( *args ).killer_moves[ 1 ][ ( *args ).ply ] = ( *args ).killer_moves[ 0 ][ ( *args ).ply ];
+            ( *args ).killer_moves[ 0 ][ ( *args ).ply ] = moves.moves[ i ];
             return beta;
         }
 
         // Alpha cutoff - new best move.
         if ( score > alpha )
         {
+            // Update history move table.
+            ( *args ).history_moves[ move_decode_piece ( moves.moves[ i ] ) ][ move_decode_dst ( moves.moves[ i ] ) ] += depth;
+
             alpha = score;
             if ( !( ( *args ).ply ) )
             {
@@ -397,7 +351,7 @@ quiescence
                                         , &( *args ).board
                                         , ( *args ).attacks
                                         )
-                        , &( *args ).board
+                        , args
                         );
     
     for ( u8 i = 0; i < moves.count; ++i )
@@ -453,4 +407,111 @@ quiescence
     }// END for.
 
     return alpha;
+}
+
+i32
+score_board
+(   const board_t* board
+)
+{
+    i32 score = 0;
+
+    bitboard_t bitboard;
+    PIECE piece;
+    SQUARE square;
+    for ( PIECE piece_ = P; piece_ <= k; ++piece_ )
+    {
+        bitboard = ( *board ).pieces[ piece_ ];
+        while ( bitboard )
+        {
+            piece = piece_;
+            square = bitboard_lsb ( bitboard );
+
+            score += material_scores[ piece ];
+            switch ( piece )
+            {
+                case P: score += pawn_positional_scores[ square ]   ;break;
+                case N: score += knight_positional_scores[ square ] ;break;
+                case B: score += bishop_positional_scores[ square ] ;break;
+                case R: score += rook_positional_scores[ square ]   ;break;
+                case K: score += king_positional_scores[ square ]   ;break;
+
+                case p: score -= pawn_positional_scores[ mirror_position[ square ] ]   ;break;
+                case n: score -= knight_positional_scores[ mirror_position[ square ] ] ;break;
+                case b: score -= bishop_positional_scores[ mirror_position[ square ] ] ;break;
+                case r: score -= rook_positional_scores[ mirror_position[ square ] ]   ;break;
+                case k: score -= king_positional_scores[ mirror_position[ square ] ]   ;break;
+
+                default: break;
+            }
+
+            BITCLR ( bitboard , square );
+        }
+    }
+
+    return ( ( *board ).side == WHITE ) ? score : -score;
+}
+
+i32
+score_move
+(   const move_t    move
+,   best_t*         args
+)
+{
+    // Quiet.
+    if ( !move_decode_capture ( move ) )
+    {
+        if ( ( *args ).killer_moves[ 0 ][ ( *args ).ply ] == move )
+        {
+            return 9000;
+        }
+        if ( ( *args ).killer_moves[ 1 ][ ( *args ).ply ] == move )
+        {
+            return 8000;
+        }
+        return ( *args ).history_moves[ move_decode_piece ( move ) ][ move_decode_dst ( move ) ];
+    }
+    
+    // Capture.
+    PIECE target = P;
+    const PIECE start = ( ( *args ).board.side == WHITE ) ? p : P;
+    const PIECE end = ( ( *args ).board.side == WHITE ) ? k : K;
+    for ( PIECE piece = start; piece <= end; ++piece )
+    {
+        if ( bit ( ( *args ).board.pieces[ piece ]
+                 , move_decode_dst ( move )
+                 ))
+        {
+            target = piece;
+            break;
+        }
+    }
+    return 10000 + mvv_lva[ move_decode_piece ( move ) ][ target ];
+}
+
+moves_t*
+moves_sort_by_score
+(   moves_t*        moves
+,   best_t*         args
+)
+{
+    u32 i;
+    u32 j;
+    i32 tmp;
+
+    i = 0;
+    while ( i < ( *moves ).count )
+    {
+        tmp = ( *moves ).moves[ i ];
+        j = i;
+        while ( j && score_move ( ( *moves ).moves[ j - 1 ], args ) < score_move ( tmp , args ) )
+        {
+            ( *moves ).moves[ j ] = ( *moves ).moves[ j - 1 ];
+            j -= 1;
+        }
+        ( *moves ).moves[ j ] = tmp;
+        i += 1;
+    }
+
+    return moves;
 }

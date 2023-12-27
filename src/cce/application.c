@@ -1611,13 +1611,14 @@ cce_debug
 
     LOGDEBUG ( "cce_debug: Running debug routine. . ." );
 
+    const u32 depth = 5;
     board_t board;
     memory_clear ( &board , sizeof ( board_t ) );
-    fen_parse ( FEN_CMK
+    fen_parse ( FEN_TRICKY
               , &board
               );
-
-    board_best_move ( &board , &( *state ).attacks , 3 );
+    LOGDEBUG ( string_board ( ( *state ).textbuffer , &board ) );
+    board_best_move ( &board , &( *state ).attacks , depth );
 
     LOGDEBUG ( "cce_debug: Done. Exiting." );
 

@@ -166,13 +166,3 @@ board_move
     // Toggle side.
     ( *board ).side = !( *board ).side;
 }
-
-move_t
-board_best_move
-(   const board_t*      board
-,   const attacks_t*    attacks
-,   const u32           depth
-)
-{
-    return negamax ( board , -50000 , 50000 , depth , attacks );
-}

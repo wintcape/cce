@@ -9,6 +9,7 @@
 #include "chess/common.h"
 
 #include "chess/attack.h"
+#include "chess/best.h"
 #include "chess/board.h"
 #include "chess/fen.h"
 #include "chess/move.h"
