@@ -30,7 +30,7 @@ typedef struct
     move_t              killer_moves[ 2 ][ MOVE_SEARCH_MAX_PLY ];
     move_t              history_moves[ 12 ][ 64 ];
 
-    // Move tables: principal variation.
+    // Move tables: triangular principal variation.
     move_t              pv[ MOVE_SEARCH_MAX_PLY ][ MOVE_SEARCH_MAX_PLY ];
     u32                 pv_len[ MOVE_SEARCH_MAX_PLY ];
     bool                pv_follow;

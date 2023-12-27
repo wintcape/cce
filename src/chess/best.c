@@ -174,8 +174,8 @@ moves_enable_pv_scoring
 ,   move_search_t*  args
 );
 
-// #include "chess/string.h"   // Temporary.
-// char s[1024];               // Temporary.
+#include "chess/string.h"   // Temporary.
+char s[1024];               // Temporary.
 
 move_t
 board_best_move
@@ -201,14 +201,13 @@ board_best_move
     // Perform search with iterative deepening.
     for ( u32 i = 1; i <= depth; ++i )
     {
-        ( *args ).leaf_count = 0;
         ( *args ).pv_follow = true;
         negamax ( -50000 , 50000 , i , args );
-        // LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
-        //          , i
-        //          , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
-        //          , ( *args ).leaf_count
-        //          );
+        LOGDEBUG ( "BEST MOVE (%u): %s, CURRENT NODE COUNT: %u"
+                 , i
+                 , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
+                 , ( *args ).leaf_count
+                 );
     }
 
     // Best move.
@@ -224,6 +223,7 @@ negamax
 )
 {
     // Initialize PV table.
+    bool pv_found = false;
     ( *args ).pv_len[ ( *args ).ply ] = ( *args ).ply;
 
     // Base case.
@@ -293,7 +293,19 @@ negamax
         ( *args ).move_count += 1;
 
         // Score the move.
-        const i32 score = -negamax ( -beta , -alpha , depth - 1 , args );
+        i32 score;
+        if ( pv_found )
+        {
+            score = -negamax ( -alpha - 1 , -alpha , depth - 1 , args );
+            if ( ( score > alpha ) && ( score < beta ) )
+            {
+                score = -negamax ( -beta , -alpha , depth - 1 , args );
+            }
+        }
+        else
+        {
+            score = -negamax ( -beta , -alpha , depth - 1 , args );
+        }
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
@@ -324,6 +336,7 @@ negamax
             alpha = score;
 
             // Update PV table.
+            pv_found = true;
             ( *args ).pv[ ( *args ).ply ][ ( *args ).ply ] = moves.moves[ i ];
             for ( u32 j = ( *args ).ply + 1; j < ( *args ).pv_len[ ( *args ).ply + 1 ]; ++j )
             {
