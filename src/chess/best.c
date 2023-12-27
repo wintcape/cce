@@ -162,8 +162,20 @@ moves_sort_by_score
 ,   move_search_t*  args
 );
 
-//#include "chess/string.h"   // Temporary.
-//char s[1024];               // Temporary.
+/**
+ * @brief Enables scoring of the principal variation moves.
+ * @param moves A pregenerated list of valid moves.
+ * @param args Static function arguments.
+ * @return moves.
+ */
+moves_t*
+moves_enable_pv_scoring
+(   moves_t*        moves
+,   move_search_t*  args
+);
+
+// #include "chess/string.h"   // Temporary.
+// char s[1024];               // Temporary.
 
 move_t
 board_best_move
@@ -173,21 +185,33 @@ board_best_move
 ,   move_search_t*      args
 )
 {
+    // Initialize search arguments.
     memory_copy ( &( *args ).board , board , sizeof ( board_t ) );
     memory_clear ( &( *args ).killer_moves , sizeof ( ( *args ).killer_moves ) );
     memory_clear ( &( *args ).history_moves , sizeof ( ( *args ).history_moves ) );
     memory_clear ( &( *args ).pv , sizeof ( ( *args ).pv ) );
     memory_clear ( &( *args ).pv_len , sizeof ( ( *args ).pv_len ) );
+    ( *args ).pv_follow = false;
+    ( *args ).pv_score = false;
     ( *args ).attacks = attacks;
     ( *args ).ply = 0;
     ( *args ).leaf_count = 0;
     ( *args ).move_count = 0;
-    negamax ( -50000 , 50000 , depth , args );
-    // LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
-    //         , depth
-    //         , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
-    //         , ( *args ).leaf_count
-    //         );
+
+    // Perform search with iterative deepening.
+    for ( u32 i = 1; i <= depth; ++i )
+    {
+        ( *args ).leaf_count = 0;
+        ( *args ).pv_follow = true;
+        negamax ( -50000 , 50000 , i , args );
+        // LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
+        //          , i
+        //          , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
+        //          , ( *args ).leaf_count
+        //          );
+    }
+
+    // Best move.
     return ( *args ).pv[ 0 ][ 0 ];
 }
 
@@ -208,6 +232,13 @@ negamax
         return quiescence ( alpha , beta , args );
     }
 
+    // If search has gone too deep, stop recursing to prevent overflowing the
+    // move tables.
+    if ( ( *args ).ply >= MOVE_SEARCH_MAX_PLY )
+    {
+        return score_board ( &( *args ).board );
+    }
+
     ( *args ).leaf_count += 1;
 
     // Check? Y/N
@@ -222,10 +253,15 @@ negamax
 
     // Generate move options.
     moves_t moves;
-    moves_sort_by_score ( moves_compute ( &moves
-                                        , &( *args ).board
-                                        , ( *args ).attacks
-                                        )
+    moves_compute ( &moves
+                  , &( *args ).board
+                  , ( *args ).attacks
+                  );
+    if ( ( *args ).pv_follow )
+    {
+        moves_enable_pv_scoring ( &moves , args );
+    }
+    moves_sort_by_score ( &moves
                         , args
                         );
     
@@ -448,6 +484,16 @@ score_move
 ,   move_search_t*  args
 )
 {
+    // PV scoring enabled? Y/N
+    if ( ( *args ).pv_score )
+    {
+        if ( ( *args ).pv[ 0 ][ ( *args ).ply ] == move )
+        {
+            ( *args ).pv_score = false;
+            return 20000;
+        }
+    }
+
     // Quiet.
     if ( !move_decode_capture ( move ) )
     {
@@ -487,20 +533,39 @@ moves_sort_by_score
 {
     u32 i;
     u32 j;
-    i32 tmp;
+    move_t key;
 
     i = 0;
     while ( i < ( *moves ).count )
     {
-        tmp = ( *moves ).moves[ i ];
+        key = ( *moves ).moves[ i ];
         j = i;
-        while ( j && score_move ( ( *moves ).moves[ j - 1 ], args ) < score_move ( tmp , args ) )
+        while ( j && score_move ( ( *moves ).moves[ j - 1 ], args ) < score_move ( key , args ) )
         {
             ( *moves ).moves[ j ] = ( *moves ).moves[ j - 1 ];
             j -= 1;
         }
-        ( *moves ).moves[ j ] = tmp;
+        ( *moves ).moves[ j ] = key;
         i += 1;
+    }
+    return moves;
+}
+
+moves_t*
+moves_enable_pv_scoring
+(   moves_t*        moves
+,   move_search_t*  args
+)
+{
+    ( *args ).pv_follow = false;
+    for ( u32 i = 0; i < ( *moves ).count; ++i )
+    {
+        if ( ( *args ).pv[ 0 ][ ( *args ).ply ] != ( *moves ).moves[ i ] )
+        {
+            continue;
+        }
+        ( *args ).pv_follow = true;
+        ( *args ).pv_score = true;
     }
     return moves;
 }

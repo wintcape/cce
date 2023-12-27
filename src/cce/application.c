@@ -742,13 +742,13 @@ cce_execute_move_engine
     
     // Render simulated input.
     RENDER_CLEAR ();
-    RENDER_PUSH ( CCE_COLOR_HINT "Calculating best move. . .  " );
+    RENDER_PUSH ( CCE_COLOR_HINT "Computing best move. . .  " );
     RENDER ();
 
     // Start clock.
     clock_start ( &( *state ).clock );
     
-    // Calculate best move.
+    // Compute best move.
     ( *state ).move = board_best_move ( &( *state ).board
                                       , &( *state ).attacks
                                       , CCE_ENGINE_SEARCH_DEPTH
@@ -1043,9 +1043,9 @@ cce_render_end
     }
 
     // Render benchmarking info.
-    if ( ( *state ).game == CCE_GAME_ENGINE_VERSUS_ENGINE )
+    if ( ( *state ).game != CCE_GAME_PLAYER_VERSUS_PLAYER )
     {
-        RENDER_PUSH ( CCE_COLOR_HINT "\n\n\tEngine calculations took a total of %f seconds.\n\n"
+        RENDER_PUSH ( CCE_COLOR_HINT "\n\n\tEngine computations took a total of %f seconds.\n\n"
                     , ( *state ).elapsed
                     );
     }
@@ -1613,7 +1613,7 @@ cce_debug
 
     LOGDEBUG ( "cce_debug: Running debug routine. . ." );
 
-    const u32 depth = 5;
+    const u32 depth = 6;
     board_t board;
     memory_clear ( &board , sizeof ( board_t ) );
     fen_parse ( FEN_TRICKY

@@ -8,7 +8,10 @@
 
 #include "chess/common.h"
 
-// Type definition for a container to hold move internal search function
+// Defines max ply depth for a move search.
+#define MOVE_SEARCH_MAX_PLY 64
+
+// Type definition for a container to hold internal move search function
 // parameters.
 typedef struct
 {
@@ -24,12 +27,14 @@ typedef struct
     board_t             board;
 
     // Move tables: killer, history.
-    move_t              killer_moves[ 2 ][ 64 ];
+    move_t              killer_moves[ 2 ][ MOVE_SEARCH_MAX_PLY ];
     move_t              history_moves[ 12 ][ 64 ];
 
     // Move tables: principal variation.
-    move_t              pv[ 64 ][ 64 ];
-    u32                 pv_len[ 64 ];
+    move_t              pv[ MOVE_SEARCH_MAX_PLY ][ MOVE_SEARCH_MAX_PLY ];
+    u32                 pv_len[ MOVE_SEARCH_MAX_PLY ];
+    bool                pv_follow;
+    bool                pv_score;
 }
 move_search_t;
 
