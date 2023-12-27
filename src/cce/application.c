@@ -118,6 +118,7 @@ typedef struct
     u32                 ioerr;
     
     // Chess.
+    move_search_t       move_search_args;
     attacks_t           attacks;
     board_t             board;
     moves_t             moves;
@@ -751,6 +752,7 @@ cce_execute_move_engine
     ( *state ).move = board_best_move ( &( *state ).board
                                       , &( *state ).attacks
                                       , CCE_ENGINE_SEARCH_DEPTH
+                                      , &( *state ).move_search_args
                                       );
 
     // Stop clock.
@@ -1618,7 +1620,11 @@ cce_debug
               , &board
               );
     LOGDEBUG ( string_board ( ( *state ).textbuffer , &board ) );
-    board_best_move ( &board , &( *state ).attacks , depth );
+    board_best_move ( &board
+                    , &( *state ).attacks
+                    , depth
+                    , &( *state ).move_search_args
+                    );
 
     LOGDEBUG ( "cce_debug: Done. Exiting." );
 

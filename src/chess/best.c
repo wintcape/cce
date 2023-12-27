@@ -98,24 +98,6 @@ static const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,  
 	                                   , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
 	                                   };
 
-// Type definition for a container to hold search function parameters.
-typedef struct
-{
-    move_t              move;
-
-    u32                 ply;
-    u32                 leaf_count;
-    u32                 move_count;
-
-    const attacks_t*    attacks;
-
-    board_t             board;
-
-    move_t              killer_moves[ 2 ][ 64 ];
-    move_t              history_moves[ 12 ][ 64 ];
-}
-best_t;
-
 /**
  * @brief Negamax search.
  * @param alpha Alpha negamax cutoff.
@@ -126,10 +108,10 @@ best_t;
  */
 i32
 negamax
-(   i32     alpha
-,   i32     beta
-,   u32     depth
-,   best_t* args
+(   i32             alpha
+,   i32             beta
+,   u32             depth
+,   move_search_t*  args
 );
 
 /**
@@ -141,9 +123,9 @@ negamax
  */
 i32
 quiescence
-(   i32     alpha
-,   i32     beta
-,   best_t* args
+(   i32             alpha
+,   i32             beta
+,   move_search_t*  args
 );
 
 /**
@@ -159,14 +141,13 @@ score_board
 /**
  * @brief Move evaluation function.
  * @param move A move.
- * @param board A chess board state.
  * @param args Static function arguments.
  * @return A score corresponding to the move.
  */
 i32
 score_move
 (   const move_t    move
-,   best_t*         args
+,   move_search_t*  args
 );
 
 /**
@@ -178,7 +159,7 @@ score_move
 moves_t*
 moves_sort_by_score
 (   moves_t*        moves
-,   best_t*         args
+,   move_search_t*  args
 );
 
 //#include "chess/string.h"   // Temporary.
@@ -189,33 +170,38 @@ board_best_move
 (   const board_t*      board
 ,   const attacks_t*    attacks
 ,   const u32           depth
+,   move_search_t*      args
 )
 {
-    best_t args;
-    memory_copy ( &args.board , board , sizeof ( board_t ) );
-    memory_clear ( &args.killer_moves , sizeof ( args.killer_moves ) );
-    memory_clear ( &args.history_moves , sizeof ( args.history_moves ) );
-    args.attacks = attacks;
-    args.ply = 0;
-    args.leaf_count = 0;
-    args.move_count = 0;
-    negamax ( -50000 , 50000 , depth , &args );
-    //LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
+    memory_copy ( &( *args ).board , board , sizeof ( board_t ) );
+    memory_clear ( &( *args ).killer_moves , sizeof ( ( *args ).killer_moves ) );
+    memory_clear ( &( *args ).history_moves , sizeof ( ( *args ).history_moves ) );
+    memory_clear ( &( *args ).pv , sizeof ( ( *args ).pv ) );
+    memory_clear ( &( *args ).pv_len , sizeof ( ( *args ).pv_len ) );
+    ( *args ).attacks = attacks;
+    ( *args ).ply = 0;
+    ( *args ).leaf_count = 0;
+    ( *args ).move_count = 0;
+    negamax ( -50000 , 50000 , depth , args );
+    // LOGDEBUG ( "BEST MOVE (%u): %s, NODE COUNT: %u"
     //         , depth
-    //         , string_move ( s , args.move )
-    //         , args.leaf_count
+    //         , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
+    //         , ( *args ).leaf_count
     //         );
-    return args.move;
+    return ( *args ).pv[ 0 ][ 0 ];
 }
 
 i32
 negamax
-(   i32     alpha
-,   i32     beta
-,   u32     depth
-,   best_t* args
+(   i32             alpha
+,   i32             beta
+,   u32             depth
+,   move_search_t*  args
 )
 {
+    // Initialize PV table.
+    ( *args ).pv_len[ ( *args ).ply ] = ( *args ).ply;
+
     // Base case.
     if ( !depth )
     {
@@ -243,8 +229,7 @@ negamax
                         , args
                         );
     
-    move_t best = moves.moves[ 0 ]; // Default.
-    i32 alpha_ = alpha;
+    // Iterate over move options.
     for ( u8 i = 0; i < moves.count; ++i )
     {
         // Preserve board state.
@@ -281,23 +266,34 @@ negamax
         // Beta cutoff - no move found.
         if ( score >= beta )
         {
-            // Update killer move table.
-            ( *args ).killer_moves[ 1 ][ ( *args ).ply ] = ( *args ).killer_moves[ 0 ][ ( *args ).ply ];
-            ( *args ).killer_moves[ 0 ][ ( *args ).ply ] = moves.moves[ i ];
+            // If move is quiet, update killer move table.
+            if ( !move_decode_capture ( moves.moves[ i ] ) )
+            {
+                ( *args ).killer_moves[ 1 ][ ( *args ).ply ] = ( *args ).killer_moves[ 0 ][ ( *args ).ply ];
+                ( *args ).killer_moves[ 0 ][ ( *args ).ply ] = moves.moves[ i ];
+            }
+            
             return beta;
         }
 
         // Alpha cutoff - new best move.
         if ( score > alpha )
         {
-            // Update history move table.
-            ( *args ).history_moves[ move_decode_piece ( moves.moves[ i ] ) ][ move_decode_dst ( moves.moves[ i ] ) ] += depth;
+            // If move is quiet, update history move table.
+            if ( !move_decode_capture ( moves.moves[ i ] ) )
+            {
+                ( *args ).history_moves[ move_decode_piece ( moves.moves[ i ] ) ][ move_decode_dst ( moves.moves[ i ] ) ] += depth;
+            }
 
             alpha = score;
-            if ( !( ( *args ).ply ) )
+
+            // Update PV table.
+            ( *args ).pv[ ( *args ).ply ][ ( *args ).ply ] = moves.moves[ i ];
+            for ( u32 j = ( *args ).ply + 1; j < ( *args ).pv_len[ ( *args ).ply + 1 ]; ++j )
             {
-                best = moves.moves[ i ];
+                ( *args ).pv[ ( *args ).ply ][ j ] = ( *args ).pv[ ( *args ).ply + 1 ][ j ];
             }
+            ( *args ).pv_len[ ( *args ).ply ] = ( *args ).pv_len[ ( *args ).ply + 1 ];
         }
     }// END for.
 
@@ -311,20 +307,14 @@ negamax
         return 0;    // Stalemate.
     }
 
-    // Write new best move to output buffer.
-    if ( alpha != alpha_ )
-    {
-        ( *args ).move = best;
-    }
-
     return alpha;
 }
 
 i32
 quiescence
-(   i32     alpha
-,   i32     beta
-,   best_t* args
+(   i32             alpha
+,   i32             beta
+,   move_search_t*  args
 )
 {
     i32 score;
@@ -455,7 +445,7 @@ score_board
 i32
 score_move
 (   const move_t    move
-,   best_t*         args
+,   move_search_t*  args
 )
 {
     // Quiet.
@@ -492,7 +482,7 @@ score_move
 moves_t*
 moves_sort_by_score
 (   moves_t*        moves
-,   best_t*         args
+,   move_search_t*  args
 )
 {
     u32 i;
@@ -512,6 +502,5 @@ moves_sort_by_score
         ( *moves ).moves[ j ] = tmp;
         i += 1;
     }
-
     return moves;
 }
