@@ -188,7 +188,7 @@ test_dynamic_allocator_multi_allocation_all_space
     return true;
 }
 
-u8
+
 test_dynamic_allocator_multi_allocation_over_allocate
 ( void )
 {

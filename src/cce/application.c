@@ -181,7 +181,7 @@ void cce_render_move                ( void );
 void cce_render_buffer              ( void );
 
 // Defines engine search depth.
-#define CCE_ENGINE_SEARCH_DEPTH 4
+#define CCE_ENGINE_SEARCH_DEPTH 8
 
 /**
  * @brief User input handler.
@@ -1613,7 +1613,7 @@ cce_debug
 
     LOGDEBUG ( "cce_debug: Running debug routine. . ." );
 
-    const u32 depth = 6;
+    const u32 depth = 7;
     board_t board;
     memory_clear ( &board , sizeof ( board_t ) );
     fen_parse ( FEN_TRICKY

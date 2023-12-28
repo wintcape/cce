@@ -98,6 +98,10 @@ static const i32 mvv_lva[ 12 ][ 12 ] = { { 105 , 205 , 305 , 405 , 505 , 605 ,  
 	                                   , { 100 , 200 , 300 , 400 , 500 , 600 ,   100 , 200 , 300 , 400 , 500 , 600 }
 	                                   };
 
+// Late move reduction parameters. 
+static const u32 lmr_full_depth_moves = 4;
+static const u32 lmr_reduction_limit = 3;
+
 /**
  * @brief Negamax search.
  * @param alpha Alpha negamax cutoff.
@@ -174,8 +178,8 @@ moves_enable_pv_scoring
 ,   move_search_t*  args
 );
 
-#include "chess/string.h"   // Temporary.
-char s[1024];               // Temporary.
+// #include "chess/string.h"   // Temporary.
+// char s[1024];               // Temporary.
 
 move_t
 board_best_move
@@ -203,11 +207,11 @@ board_best_move
     {
         ( *args ).pv_follow = true;
         negamax ( -50000 , 50000 , i , args );
-        LOGDEBUG ( "BEST MOVE (%u): %s, CURRENT NODE COUNT: %u"
-                 , i
-                 , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
-                 , ( *args ).leaf_count
-                 );
+        // LOGDEBUG ( "BEST MOVE (%u): %s, CURRENT NODE COUNT: %u"
+        //          , i
+        //          , string_move ( s , ( *args ).pv[ 0 ][ 0 ] )
+        //          , ( *args ).leaf_count
+        //          );
     }
 
     // Best move.
@@ -266,7 +270,8 @@ negamax
                         );
     
     // Iterate over move options.
-    for ( u8 i = 0; i < moves.count; ++i )
+    u32 moves_searched = 0;
+    for ( u32 i = 0; i < moves.count; ++i )
     {
         // Preserve board state.
         board_t board_prev;
@@ -296,20 +301,55 @@ negamax
         i32 score;
         if ( pv_found )
         {
+            // Principal variation search.
             score = -negamax ( -alpha - 1 , -alpha , depth - 1 , args );
-            if ( ( score > alpha ) && ( score < beta ) )
+            if ( ( score > alpha ) && ( score < beta ) ) // Rescore needed? Y/N
             {
+                // Regular search.
                 score = -negamax ( -beta , -alpha , depth - 1 , args );
             }
         }
         else
         {
-            score = -negamax ( -beta , -alpha , depth - 1 , args );
+            if ( !moves_searched )
+            {   
+                // Regular search.
+                score = -negamax ( -beta , -alpha , depth - 1 , args );
+            }
+            else 
+            {
+                // Apply late move reduction.
+                if (    moves_searched >= lmr_full_depth_moves
+                     && depth >= lmr_reduction_limit
+                     && !check
+                     && !move_decode_capture ( moves.moves[ i ] )
+                     && !move_decode_promotion ( moves.moves[ i ] )
+                   )
+                {
+                    score = -negamax ( -alpha - 1 , -alpha , depth - 2 , args );
+                }
+                else
+                {
+                    score = alpha + 1;
+                }
+
+                // LMR found a better move? Y/N
+                if ( score > alpha )
+                {
+                    score = -negamax ( -alpha - 1 , -alpha , depth - 1 , args );
+                    if ( ( score > alpha ) && ( score < beta ) ) // Rescore needed? Y/N
+                    {
+                        score = -negamax ( -beta , -alpha , depth - 1 , args );
+                    }
+                }
+            }
         }
 
         // Restore board state.
         memory_copy ( &( *args ).board , &board_prev , sizeof ( board_t ) );
         ( *args ).ply -= 1;
+
+        moves_searched += 1;
 
         // Beta cutoff - no move found.
         if ( score >= beta )
@@ -355,7 +395,7 @@ negamax
         }
         return 0;    // Stalemate.
     }
-
+    
     return alpha;
 }
 
@@ -393,7 +433,7 @@ quiescence
                         , args
                         );
     
-    for ( u8 i = 0; i < moves.count; ++i )
+    for ( u32 i = 0; i < moves.count; ++i )
     {
         // Filter quiet moves.
         if ( !move_decode_capture ( moves.moves[ i ] ) )
